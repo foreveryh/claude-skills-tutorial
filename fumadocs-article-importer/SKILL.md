@@ -15,9 +15,69 @@ Automate importing external articles into a Fumadocs project with multi-language
 
 Before using this skill, verify:
 - Fumadocs project is initialized in the current directory
-- Jina API access or Jina MCP is configured
+- Jina API access or Jina MCP is configured for article fetching
+- **Translator MCP Server** is configured (highly recommended for best translation quality)
+  - Repository: https://github.com/foreveryh/translator-mcp-server
+  - Provides professional three-stage translation workflow
+  - See "MCP Configuration" section below for setup
 - `curl` is installed for image downloads
 - Write access to `content/docs/` and `public/images/` directories
+
+## MCP Configuration (Translation)
+
+**Recommended Setup** for optimal translation quality and speed:
+
+### Option 1: Use Public MCP Server (Easiest)
+
+Add to your Claude configuration:
+```json
+{
+  "mcpServers": {
+    "translator": {
+      "url": "https://airylark-mcp.vcorp.ai/sse"
+    }
+  }
+}
+```
+
+### Option 2: Self-Hosted MCP Server
+
+1. **Clone and install**:
+   ```bash
+   git clone https://github.com/foreveryh/translator-mcp-server
+   cd translator-mcp-server/mcp-server
+   npm install
+   ```
+
+2. **Configure environment** (create `.env` file):
+   ```bash
+   TRANSLATION_API_KEY=your_api_key
+   TRANSLATION_MODEL=your_model  # e.g., gpt-4, claude-3-sonnet
+   TRANSLATION_BASE_URL=your_api_url
+   PORT=3031  # Optional, default 3031
+   ```
+
+3. **Start the server**:
+   ```bash
+   npm start
+   # Or with Docker:
+   docker run -p 3031:3031 wizdy/airylark-mcp-server
+   ```
+
+4. **Configure Claude to use it**:
+   ```json
+   {
+     "mcpServers": {
+       "translator": {
+         "url": "http://localhost:3031/sse"
+       }
+     }
+   }
+   ```
+
+### Fallback
+
+If Translator MCP is not configured, the skill will fall back to using Claude directly with translation prompts from `references/translation-prompts.md`. This works but is slower (~20-40s per language vs ~5-10s with MCP).
 
 ## Workflow
 
@@ -110,24 +170,64 @@ Load `references/classification-rules.md` and analyze the article to determine:
 
 ### Step 6: Translate Content
 
+**Using Translator MCP Server** (Recommended for best quality and speed):
+
 For each target language (en, zh, fr, ko):
 
-1. Load the appropriate translation prompt from `references/translation-prompts.md`
+1. **Prepare content for translation**:
+   - Combine title, description, and main content
+   - Keep code blocks as-is with markers
+   - Preserve image references
 
-2. Translate the following:
-   - Article title
-   - Article description (first 1-2 sentences)
-   - Main content body
+2. **Use MCP translate_text tool**:
+   ```
+   Tool: translate_text
+   Parameters:
+     - text: {article_content}
+     - target_language: {language_code}  # 'zh', 'fr', 'ko'
+     - source_language: 'en' (optional)
+     - high_quality: true  # Enable three-stage translation workflow
+   ```
 
-3. **Important Translation Rules**:
-   - Preserve all Markdown syntax exactly
-   - Keep code blocks unchanged
-   - Preserve image references (paths stay the same)
-   - Maintain heading hierarchy
-   - Keep technical terms in English where appropriate
-   - Adapt examples to be culturally relevant if needed
+3. **Translation happens automatically with**:
+   - Stage 1: Analysis and planning (domain recognition, terminology extraction)
+   - Stage 2: Segmented translation (paragraph-by-paragraph with context)
+   - Stage 3: Full-text review (consistency check, style alignment)
 
-4. Save original English version first, then translations
+4. **Quality validation** (optional but recommended):
+   ```
+   Tool: evaluate_translation
+   Parameters:
+     - original_text: {english_content}
+     - translated_text: {translated_content}
+     - detailed_feedback: true
+   ```
+
+   This evaluates:
+   - Accuracy: Semantic fidelity to original
+   - Fluency: Natural language flow
+   - Terminology: Technical term consistency
+   - Style: Preservation of tone and format
+
+5. **Important Translation Rules** (handled by MCP):
+   - ✅ Preserves all Markdown syntax exactly
+   - ✅ Keeps code blocks unchanged
+   - ✅ Preserves image references (paths stay the same)
+   - ✅ Maintains heading hierarchy
+   - ✅ Keeps technical terms appropriate for target language
+   - ✅ Adapts examples to be culturally relevant
+
+6. **Fallback**: If MCP server is not available, use Claude directly:
+   - Load translation guidelines from `references/translation-prompts.md`
+   - Translate using Claude with explicit rules
+   - Manual quality check
+
+7. Save original English version first, then translations
+
+**Performance**:
+- With MCP: ~5-10 seconds per language (very fast!)
+- With Claude fallback: ~20-40 seconds per language
+- Quality: MCP provides professional-grade translation with terminology consistency
 
 ### Step 7: Generate MDX Files
 

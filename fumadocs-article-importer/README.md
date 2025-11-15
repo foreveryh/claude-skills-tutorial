@@ -123,8 +123,22 @@ archive/{YYYY-MM}/{slug}/
 - `curl` installed (for image downloads)
 
 ### API/MCP Access
+
+**For Article Fetching:**
 - Jina API access OR
 - Jina MCP configured
+
+**For Translation (Highly Recommended):**
+- **Translator MCP Server**: https://github.com/foreveryh/translator-mcp-server
+  - Provides professional three-stage translation workflow
+  - 3-5x faster than direct Claude translation
+  - Better terminology consistency
+  - **Quick Setup**:
+    - Public server: `https://airylark-mcp.vcorp.ai/sse` (easiest)
+    - Self-hosted: Clone repo, `npm install`, configure `.env`, run server
+  - See SKILL.md "MCP Configuration" section for detailed setup
+
+**Fallback:** If MCP is not available, skill uses Claude directly (slower but works)
 
 ### Directory Permissions
 - Write access to `content/docs/`
