@@ -64,9 +64,12 @@
   - **自定义**: category, difficulty, tags, source_url, published_date, author
 - [x] 是否需要 SEO 相关字段？→ description 足够
 
-### Q11: MDX 特殊语法 ⏳
-- [x] Fumadocs 是否有特定的组件需要使用？→ 已知：Cards, Card，待用户确认是否还有其他
-- [ ] 是否需要自动导入某些组件？→ 待确认
+### Q11: MDX 特殊语法 ✅
+- [x] Fumadocs 是否有特定的组件需要使用？→ 是，15+ 个内置组件
+- [x] 完整组件清单已整理 → 详见 `fumadocs-components.md`
+- [x] 核心组件：Cards, Callout, Tabs, Steps, Files, Accordion, ImageZoom 等
+- [x] 是否需要自动导入某些组件？→ 部分通过 defaultMdxComponents 自动可用
+- ⚠️ **关键规则**：永远不要自己实现组件，先检查 Fumadocs 是否已提供
 
 ### Q12: 语法验证
 - [ ] 如何验证 MDX 语法正确性？是否有 linter 或构建命令可以检查？
