@@ -39,17 +39,19 @@
 
 ## 📁 文章归类和目录结构
 
-### Q8: 分类标准 ⏳
-- [x] 教程分类的标准是什么？→ 已研究社区主流分类，提供 3 种方案（6/8/10 大类）
-- [ ] 难易度如何判断？→ 建议：beginner/intermediate/advanced，待确认是否自动判断
-- [x] 有哪些预定义的 category？→ 已提供详细分类方案，待用户选择
-- [ ] **待确认**: 选择方案 A/B/C 或自定义
-- 详见：`category-research.md`
+### Q8: 分类标准 ✅
+- [x] 教程分类的标准是什么？→ 方案 B - 8大类标准分类
+- [x] 难易度如何判断？→ beginner/intermediate/advanced，AI 自动判断
+- [x] 有哪些预定义的 category？→ 8 个：development, data, ai-ml, design, content, business, devops, security
+- [x] 分类方式？→ AI 完全自动分类
+- [x] 标签体系？→ 启用，使用技术栈标签（如 react, python, docker）
+- [x] 教程规模？→ 50-200 篇（中型）
+- 详见：`categories-final.md`
 
-### Q9: Fumadocs 的目录结构
-- [ ] 能否提供当前项目的完整目录结构示例？
-- [ ] 文章应该放在哪个目录下？
-- [ ] 是否需要更新 `meta.json` 或其他配置文件？
+### Q9: Fumadocs 的目录结构 ✅
+- [x] 能否提供当前项目的完整目录结构示例？→ 已定义，详见 `categories-final.md`
+- [x] 文章应该放在哪个目录下？→ `content/docs/{lang}/{category}/`
+- [x] 是否需要更新 `meta.json`？→ 是，每个 category 目录需要 meta.json
 
 ---
 
@@ -129,10 +131,11 @@
 ## 📊 问题优先级
 
 ### 🔴 高优先级（必须回答）
-- ~~Q1, Q2~~ ✅, Q8 ⏳, Q9, ~~Q10~~ ✅, Q11 ⏳, Q13
+- ~~Q1, Q2, Q8, Q9, Q10~~ ✅ 已全部完成
+- Q11 ⏳ (部分完成), Q13 (待定)
 
 ### 🟡 中优先级（重要）
-- Q3, Q4, Q5, Q7, Q12, Q15, Q17
+- ~~Q3, Q4, Q5, Q7~~ ✅, Q12, Q15, Q17
 
 ### 🟢 低优先级（可选）
 - Q6, Q14, Q16, Q18, Q19, Q20, Q21, Q22
