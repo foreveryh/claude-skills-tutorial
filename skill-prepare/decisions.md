@@ -251,6 +251,33 @@
 
 ---
 
+## [D014] MDX 组件使用规范
+- **日期**: 2025-11-15
+- **状态**: ✅ 已决策
+- **背景**: 需要确定 Skill 生成的 MDX 文件中可以使用哪些组件
+- **决策**: 使用 Fumadocs 内置组件，禁止自定义实现
+- **可用组件清单**:
+  - **内容组织**: Cards, Callout, Tabs, Steps, Accordion
+  - **代码展示**: Code Block (默认), Dynamic Code Block
+  - **文件结构**: Files (File Tree)
+  - **媒体增强**: ImageZoom
+  - **其他**: Banner, Type Table, Auto Type Table, Inline TOC, GitHub Info
+- **核心规则**:
+  1. ❌ 永远不要自己实现组件
+  2. ✅ 优先使用默认组件（Cards, Callout, Code Block）
+  3. ✅ 复杂内容使用 Tabs, Steps, Files
+  4. ✅ 所有图片使用 ImageZoom（替换默认 img）
+- **理由**:
+  - Fumadocs 提供 15+ 个专业组件
+  - 避免重复造轮子和样式不一致
+  - 组件经过优化，性能和可访问性有保证
+- **影响**:
+  - Skill 需要了解所有可用组件
+  - 转换原文时智能选择合适组件
+  - 详见: `fumadocs-components.md`
+
+---
+
 ## 决策待办清单
 
 - [ ] D001: 文章下载方案选择
@@ -266,3 +293,4 @@
 - [x] D011: Categories 定义 ✅
 - [x] D012: 难度等级定义 ✅
 - [x] D013: 标签体系 ✅
+- [x] D014: MDX 组件使用规范 ✅
