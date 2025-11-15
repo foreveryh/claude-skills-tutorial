@@ -88,16 +88,60 @@
 
 ## [D005] 归档目录结构
 - **日期**: 2025-11-15
-- **状态**: 待定
-- **背景**: 需要归档原始文章和图片
+- **状态**: ✅ 已决策
+- **背景**: 需要确定原文和图片的归档组织方式
 - **选项**:
   - 选项A: 按日期组织 `/archive/2025-11-15/`
   - 选项B: 按分类组织 `/archive/category-name/`
   - 选项C: 按域名组织 `/archive/example.com/`
-  - 选项D: 扁平结构 `/archive/article-slug/`
-- **决策**: 待定
-- **理由**: 待讨论
-- **影响**: 影响归档文件的查找和管理
+  - 选项D: 按月份/slug 组织 `/archive/2025-11/article-slug/`
+- **决策**: 选项D - 按月份/slug 组织
+- **目录结构**:
+  ```
+  archive/
+  └── 2025-11/
+      └── article-slug/
+          ├── original.md          # 原始 Markdown
+          ├── metadata.json        # 元数据
+          └── images/              # 原始图片
+              ├── image1.png
+              └── image2.jpg
+  ```
+- **metadata.json 格式**:
+  ```json
+  {
+    "source_url": "https://example.com/article",
+    "download_date": "2025-11-15T10:30:00Z",
+    "title": "Article Title",
+    "author": "Author Name",
+    "languages": ["en", "zh", "fr", "ko"],
+    "category": "development",
+    "difficulty": "intermediate",
+    "tags": ["react", "typescript"],
+    "published_files": {
+      "en": "content/docs/en/development/article-slug.mdx",
+      "zh": "content/docs/zh/development/article-slug.mdx",
+      "fr": "content/docs/fr/development/article-slug.mdx",
+      "ko": "content/docs/ko/development/article-slug.mdx"
+    },
+    "images": [
+      {
+        "original_url": "https://example.com/img1.png",
+        "local_path": "public/images/docs/article-slug/component-tree-1.png",
+        "archived_path": "archive/2025-11/article-slug/images/image1.png"
+      }
+    ]
+  }
+  ```
+- **理由**:
+  - 按月份归档方便管理和清理
+  - Slug 唯一标识文章，便于查找
+  - 同月文章聚合，易于浏览
+  - 元数据 JSON 记录完整追溯信息
+- **影响**:
+  - Skill 需要获取当前年月（YYYY-MM 格式）
+  - 创建归档目录时需要确保月份目录存在
+  - 元数据需要记录完整的文件路径映射
 
 ---
 
