@@ -15,7 +15,11 @@ Automate importing external articles into a Fumadocs project with multi-language
 
 Before using this skill, verify:
 - Fumadocs project is initialized in the current directory
-- Jina API access or Jina MCP is configured for article fetching
+- **Jina MCP** is configured for article fetching (highly recommended)
+  - Repository: https://github.com/jina-ai/MCP
+  - Provides 15 tools for content extraction, search, and processing
+  - See "MCP Configuration" section below for setup
+  - Alternative: Jina API access (via curl)
 - **Translator MCP Server** is configured (highly recommended for best translation quality)
   - Repository: https://github.com/foreveryh/translator-mcp-server
   - Provides professional three-stage translation workflow
@@ -23,7 +27,45 @@ Before using this skill, verify:
 - `curl` is installed for image downloads
 - Write access to `content/docs/` and `public/images/` directories
 
-## MCP Configuration (Translation)
+## MCP Configuration
+
+This skill works best with two MCP servers configured:
+1. **Jina MCP** - For article fetching and content extraction
+2. **Translator MCP** - For professional translation
+
+### Jina MCP Setup (Article Fetching)
+
+**Public Jina MCP Server** (Recommended):
+
+Add to your Claude configuration:
+```json
+{
+  "mcpServers": {
+    "jina": {
+      "url": "https://mcp.jina.ai/sse",
+      "headers": {
+        "Authorization": "Bearer ${JINA_API_KEY}"  // Optional, for higher rate limits
+      }
+    }
+  }
+}
+```
+
+**Note**: Works without API key but has rate limits. For production use, get a free API key at https://jina.ai
+
+**Self-Hosted Jina MCP** (Optional):
+```bash
+git clone https://github.com/jina-ai/MCP.git
+cd MCP && npm install && npm run start
+```
+
+**Available Tools**:
+- `read_url` - Convert webpage to markdown ✨ (primary tool)
+- `guess_datetime_url` - Get publication date
+- `search_web`, `search_arxiv`, `search_images` - Search capabilities
+- `sort_by_relevance`, `deduplicate_strings` - Content processing
+
+### Translator MCP Setup (Translation)
 
 **Recommended Setup** for optimal translation quality and speed:
 
@@ -90,22 +132,49 @@ Ask the user for the following information:
 
 ### Step 2: Download Article Content
 
-Use Jina API or Jina MCP to fetch the article:
+**Using Jina MCP** (Recommended - best integration with Claude):
 
-**Using Jina API**:
+1. **Fetch article content**:
+   ```
+   Tool: read_url
+   Parameters:
+     - url: {article_url}
+
+   Returns: Markdown-formatted article content
+   ```
+
+2. **Get publication date** (optional but recommended):
+   ```
+   Tool: guess_datetime_url
+   Parameters:
+     - url: {article_url}
+
+   Returns: Detected publication and update dates
+   ```
+
+3. **Extract metadata from the fetched content**:
+   - Title (from markdown H1 or metadata)
+   - Author (if available in content)
+   - Publication date (from guess_datetime_url or content)
+   - Main content (body text)
+   - All image URLs (extract from markdown image syntax)
+
+**Alternative: Using Jina API directly** (if MCP not available):
+
 ```bash
+# Fetch article as markdown
 curl "https://r.jina.ai/{article_url}"
+
+# With custom options
+curl "https://r.jina.ai/{article_url}" \
+  -H "X-Return-Format: markdown" \
+  -H "X-With-Generated-Alt: true"
 ```
 
-**Using Jina MCP**:
-Use the MCP tool to fetch the article content.
-
-Extract the following from the fetched content:
-- Title
-- Author (if available)
-- Publication date (if available)
-- Main content (body text)
-- All image URLs
+**Fallback**: If neither Jina MCP nor API is available:
+- Ask user to provide article content directly
+- Or use web scraping with Claude's web browsing capability
+- Manual copy-paste of article content
 
 ### Step 3: Generate Article Slug
 
