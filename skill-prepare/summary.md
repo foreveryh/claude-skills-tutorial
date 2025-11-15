@@ -206,21 +206,29 @@ author: "Author Name"                # 原作者（可选）
 
 ---
 
-## 📚 文档索引（12个文档）
+## 📚 文档索引（14个文档）
 
+### 核心文档
 1. [README.md](./README.md) - 项目概述
 2. [requirements.md](./requirements.md) - 详细需求
-3. [questions.md](./questions.md) - 问题列表 **✨ 86% 已完成**
-4. [decisions.md](./decisions.md) - 决策记录 **✨ 13/14 已决策**
-5. [workflow.md](./workflow.md) - 工作流程设计
-6. [i18n-implementation.md](./i18n-implementation.md) - 国际化实现方案
-7. [fumadocs-structure.md](./fumadocs-structure.md) - 项目结构分析
-8. [fumadocs-conventions.md](./fumadocs-conventions.md) - 页面约定详解
-9. [fumadocs-components.md](./fumadocs-components.md) - 组件完整清单
-10. [category-research.md](./category-research.md) - 分类标准研究
-11. [categories-final.md](./categories-final.md) - 最终分类标准
-12. [technical-notes.md](./technical-notes.md) - 技术参考
-13. [summary.md](./summary.md) - 本文档
+3. [summary.md](./summary.md) - 本文档（阶段性总结）
+
+### 决策与问题
+4. [questions.md](./questions.md) - 问题列表 **✨ 86% 已完成**
+5. [decisions.md](./decisions.md) - 决策记录 **✨ 13/14 已决策**
+
+### 技术设计
+6. [workflow.md](./workflow.md) - 工作流程设计
+7. [i18n-implementation.md](./i18n-implementation.md) - 国际化实现方案
+8. [fumadocs-structure.md](./fumadocs-structure.md) - 项目结构分析
+9. [fumadocs-conventions.md](./fumadocs-conventions.md) - 页面约定详解
+10. [fumadocs-components.md](./fumadocs-components.md) - 组件完整清单
+11. [category-research.md](./category-research.md) - 分类标准研究
+12. [categories-final.md](./categories-final.md) - 最终分类标准
+13. [technical-notes.md](./technical-notes.md) - 技术参考
+
+### Skill 创建指南 🆕
+14. [skill-writing-guide.md](./skill-writing-guide.md) - **✨ Skill 编写最佳实践**
 
 ---
 
@@ -243,15 +251,20 @@ author: "Author Name"                # 原作者（可选）
 ### 下一步：编写 Skill
 
 **建议顺序**：
-1. 创建 Skill 目录结构
-2. 编写 `SKILL.md`（主要指令文件）
-3. 添加翻译 prompts
-4. 添加分类识别规则
+1. 创建 Skill 目录结构（fumadocs-article-importer/）
+2. 编写 `SKILL.md`（主要指令文件，<5k 词）
+3. 创建 `references/` 目录
+   - translation-prompts.md
+   - classification-rules.md
+   - fumadocs-components.md
+4. 创建 `assets/` 目录
+   - frontmatter-template.yaml
 5. 测试验证
 
 **参考文档**：
-- Skill 创建指南: [Anthropic Skills](https://github.com/anthropics/skills)
-- 本项目准备文档: `skill-prepare/` 目录下所有文档
+- **✨ Skill 编写最佳实践**: [skill-writing-guide.md](./skill-writing-guide.md) - 基于官方 skill-creator
+- Anthropic Skills 官方仓库: [github.com/anthropics/skills](https://github.com/anthropics/skills)
+- 本项目准备文档: `skill-prepare/` 目录下所有 14 个文档
 
 ---
 
@@ -266,6 +279,7 @@ author: "Author Name"                # 原作者（可选）
 - [x] ✅ 归档策略已确定（月份/slug + metadata.json）
 - [x] ✅ Frontmatter schema 已完整定义
 - [x] ✅ 工作流程 7 步已明确
+- [x] ✅ Skill 编写最佳实践已学习（基于官方 skill-creator）
 - [ ] ⏳ 开始编写 Skill
 
 **状态**: 🟢 准备完成，可以开始开发！

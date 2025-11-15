@@ -1,0 +1,236 @@
+# Fumadocs Article Frontmatter Template
+#
+# This template defines the structure for article frontmatter in Fumadocs MDX files.
+# Use this as a reference when generating MDX files for imported articles.
+
+# REQUIRED FIELDS
+# ---------------
+
+title: "{article_title}"
+# The article title - REQUIRED
+# - Should be clear and descriptive
+# - Translated for each language
+# - Keep under 60 characters for best display
+# Example: "Building REST APIs with FastAPI"
+
+# RECOMMENDED FIELDS
+# ------------------
+
+description: "{article_description}"
+# Brief article summary (1-2 sentences) - RECOMMENDED
+# - Provides context for search and navigation
+# - Translated for each language
+# - Keep under 160 characters for SEO
+# Example: "Learn how to build production-ready REST APIs using FastAPI with automatic documentation and validation."
+
+# LANGUAGE-SPECIFIC FIELDS
+# -------------------------
+
+lang: en
+# Language code for this version - RECOMMENDED
+# - en: English
+# - zh: Chinese (Simplified)
+# - fr: French
+# - ko: Korean
+# Helps with proper text rendering and search indexing
+
+# CLASSIFICATION FIELDS
+# ---------------------
+
+category: development
+# Article category (one of 8) - CUSTOM FIELD
+# Options:
+#   - development: Development & Code
+#   - data: Data & Analytics
+#   - ai-ml: AI & Machine Learning
+#   - design: Design & Creative
+#   - content: Content & Writing
+#   - business: Business & Marketing
+#   - devops: DevOps & Infrastructure
+#   - security: Security & Testing
+
+difficulty: intermediate
+# Article difficulty level - CUSTOM FIELD
+# Options:
+#   - beginner: Introductory content, basic concepts
+#   - intermediate: Requires some background knowledge
+#   - advanced: Expert-level content, complex topics
+
+tags:
+  - react
+  - typescript
+  - api
+  - web
+# Technology and topic tags - CUSTOM FIELD
+# - Minimum: 3 tags
+# - Maximum: 7 tags
+# - Format: lowercase with hyphens
+# - Include: tech stack, tools, concepts
+# Example tags:
+#   Technology: react, python, docker, kubernetes
+#   Tools: git, vscode, webpack, npm
+#   Concepts: api, authentication, testing, microservices
+
+# SOURCE ATTRIBUTION FIELDS
+# --------------------------
+
+source_url: "https://example.com/original-article"
+# URL of the original article - CUSTOM FIELD
+# - Full URL including https://
+# - Preserved for attribution and reference
+# - Required for traceability
+
+published_date: "2025-11-15"
+# Publication date - CUSTOM FIELD
+# - Format: YYYY-MM-DD (ISO 8601)
+# - Use original article publish date if available
+# - Use import date if original date unknown
+
+author: "Author Name"
+# Original article author - OPTIONAL
+# - Include if available from source
+# - Omit if unknown or not applicable
+# - Helps with attribution
+
+# OPTIONAL FUMADOCS FIELDS
+# -------------------------
+
+# icon: HomeIcon
+# Custom icon for the page (optional)
+# - Must be a valid icon component
+# - Example: HomeIcon, BookIcon, CodeIcon
+# - Uncomment if you want a custom icon
+
+# full: false
+# Whether to use full-width layout (optional)
+# - true: Full-width layout
+# - false: Standard layout with sidebar (default)
+# - Uncomment if you need full-width
+
+# ---
+# EXAMPLE COMPLETE FRONTMATTER
+# ---
+
+# Example 1: Development Article (English)
+# ---
+# title: "Building REST APIs with FastAPI"
+# description: "Learn how to build production-ready REST APIs using FastAPI with automatic documentation and validation."
+# lang: en
+# category: development
+# difficulty: intermediate
+# tags:
+#   - python
+#   - fastapi
+#   - api
+#   - backend
+#   - rest
+# source_url: "https://example.com/fastapi-guide"
+# published_date: "2025-11-15"
+# author: "John Doe"
+# ---
+
+# Example 2: Data Science Article (Chinese)
+# ---
+# title: "使用 Pandas 进行数据分析"
+# description: "学习如何使用 Pandas 库进行高效的数据处理和分析。"
+# lang: zh
+# category: data
+# difficulty: beginner
+# tags:
+#   - python
+#   - pandas
+#   - data-analysis
+#   - tutorial
+# source_url: "https://example.com/pandas-tutorial"
+# published_date: "2025-11-14"
+# author: "Jane Smith"
+# ---
+
+# Example 3: AI/ML Article (French)
+# ---
+# title: "Introduction aux Réseaux de Neurones"
+# description: "Découvrez les concepts fondamentaux des réseaux de neurones et comment les implémenter avec PyTorch."
+# lang: fr
+# category: ai-ml
+# difficulty: advanced
+# tags:
+#   - ai
+#   - machine-learning
+#   - neural-networks
+#   - pytorch
+#   - deep-learning
+# source_url: "https://example.com/neural-networks-intro"
+# published_date: "2025-11-10"
+# author: "Marie Dupont"
+# ---
+
+# Example 4: DevOps Article (Korean)
+# ---
+# title: "Docker와 Kubernetes 시작하기"
+# description: "Docker 컨테이너와 Kubernetes 오케스트레이션의 기본 개념과 실습 가이드."
+# lang: ko
+# category: devops
+# difficulty: intermediate
+# tags:
+#   - docker
+#   - kubernetes
+#   - devops
+#   - containerization
+# source_url: "https://example.com/docker-k8s-guide"
+# published_date: "2025-11-12"
+# author: "김철수"
+# ---
+
+# FIELD VALIDATION NOTES
+# ----------------------
+
+# Required fields that will cause errors if missing:
+# - title: Must be present and non-empty
+
+# Fields that should be validated:
+# - lang: Must be one of: en, zh, fr, ko
+# - category: Must be one of the 8 defined categories
+# - difficulty: Must be one of: beginner, intermediate, advanced
+# - tags: Must be array of 3-7 strings
+# - published_date: Should match YYYY-MM-DD format
+# - source_url: Should be valid URL format
+
+# FUMADOCS SCHEMA EXTENSION
+# --------------------------
+
+# To enable custom fields (category, difficulty, tags, etc.) in Fumadocs,
+# you need to extend the frontmatter schema in your source.config.ts:
+#
+# import { z } from 'zod';
+# import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
+#
+# export default defineConfig({
+#   mdxOptions: {
+#     // ... other options
+#   },
+#   // Extend the frontmatter schema
+#   schema: {
+#     frontmatter: z.object({
+#       title: z.string(),
+#       description: z.string().optional(),
+#       lang: z.enum(['en', 'zh', 'fr', 'ko']).optional(),
+#       category: z.enum([
+#         'development',
+#         'data',
+#         'ai-ml',
+#         'design',
+#         'content',
+#         'business',
+#         'devops',
+#         'security'
+#       ]).optional(),
+#       difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+#       tags: z.array(z.string()).optional(),
+#       source_url: z.string().url().optional(),
+#       published_date: z.string().optional(),
+#       author: z.string().optional(),
+#     }),
+#   },
+# });
+
+# Last Updated: 2025-11-15
