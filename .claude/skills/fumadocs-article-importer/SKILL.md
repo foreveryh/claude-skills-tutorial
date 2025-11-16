@@ -293,7 +293,113 @@ If user confirms (default=yes):
 - ✅ Skip decorative images automatically
 - ✅ Faster downloads, less storage waste
 
-### Step 5: Classify Article
+### Step 5: Process YouTube Videos
+
+**Detect and embed YouTube videos from article content**:
+
+**Detection Patterns**:
+```typescript
+// Match YouTube URLs in content
+const patterns = [
+  // iframe embeds
+  /<iframe[^>]*src="https?:\/\/(www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)"[^>]*>/g,
+  // youtu.be short URLs
+  /https?:\/\/youtu\.be\/([a-zA-Z0-9_-]+)/g,
+  // youtube.com/watch URLs
+  /https?:\/\/(www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/g,
+];
+
+function extractYouTubeVideos(content: string): YouTubeVideo[] {
+  const videos = [];
+  for (const pattern of patterns) {
+    const matches = content.matchAll(pattern);
+    for (const match of matches) {
+      const videoId = match[2] || match[3];
+      videos.push({
+        id: videoId,
+        embedUrl: `https://www.youtube.com/embed/${videoId}`,
+        watchUrl: `https://www.youtube.com/watch?v=${videoId}`,
+        startTime: extractTimeParam(match[0]) // Handle &t=123s
+      });
+    }
+  }
+  return videos;
+}
+```
+
+**In MDX: Use Fumadocs Video Component**
+
+Option 1: Keep iframe (simplest, works everywhere):
+```mdx
+<iframe
+  width="100%"
+  height="500"
+  src="https://www.youtube.com/embed/VIDEO_ID"
+  title="Video title"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen>
+</iframe>
+```
+
+Option 2: Use Fumadocs `<Video>` component (if available):
+```mdx
+import { Video } from 'fumadocs-ui/components/video';
+
+<Video
+  src="https://www.youtube.com/watch?v=VIDEO_ID"
+  title="Introduction to MCP"
+/>
+```
+
+**Auto-Processing Flow**:
+```typescript
+const videos = extractYouTubeVideos(content);
+
+if (videos.length > 0) {
+  console.log(`📺 Found ${videos.length} YouTube video(s)`);
+
+  // Auto-embed: Replace YouTube URLs with iframes
+  content = content.replace(youtubeRegex, (match) => {
+    const videoId = extractVideoId(match);
+    return generateEmbedCode(videoId);
+  });
+}
+```
+
+**No thumbnail download needed** (per user preference):
+- iframe loads video from YouTube directly
+- ✅ Saves local storage
+- ✅ Always up-to-date
+- ✅ Supports captions, quality selection, fullscreen
+- ✅ Handles mobile responsive automatically
+
+**Example Output**:
+In generated MDX, video section becomes:
+```mdx
+## Video Introduction
+
+<p className="video-wrapper">
+  <iframe
+    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+    width="100%"
+    height="500"
+    title="MCP Protocol Overview"
+  />
+</p>
+
+Continue reading...
+```
+
+**Summary Report** (auto-processed, no user interruption):
+```
+📺 Videos: 2 YouTube videos detected and embedded
+   - Video 1: Introduction to MCP (6:23)
+   - Video 2: Advanced MCP features (12:45)
+   ✅ Embedded using iframe for compatibility
+```
+
+### Step 6: Classify Article
 
 Load `references/classification-rules.md` and analyze the article to determine:
 
