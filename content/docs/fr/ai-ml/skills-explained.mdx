@@ -1,0 +1,353 @@
+---
+title: "Compétences expliquées : Comparaison des Compétences avec les invites, Projets, MCP et sous-agents"
+description: "Comprendre comment les différents composants de l'écosystème d'agents de Claude fonctionnent ensemble - Compétences, invites, Projets, MCP et sous-agents."
+lang: fr
+category: ai-ml
+difficulty: intermédiaire
+tags:
+  - ai
+  - agents
+  - workflows
+  - skills
+  - claude
+  - automation
+source_url: "https://claude.com/blog/skills-explained"
+published_date: "2025-11-13"
+author: "Claude Team"
+---
+
+Depuis l'introduction des Compétences, il y a eu un intérêt à comprendre comment les différents composants de l'écosystème d'agents de Claude fonctionnent ensemble.
+
+Que vous construisiez des workflows sophistiqués dans Claude Code, créiez des solutions d'entreprise avec l'API, ou maximisiez votre productivité sur Claude.ai, savoir quel outil utiliser et quand peut transformer votre façon de travailler avec Claude.
+
+Ce guide décompose chaque bloc de construction, explique quand utiliser quoi, et vous montre comment les combiner pour des workflows d'agents puissants.
+
+## Comprendre vos blocs de construction d'agents
+
+### **Que sont les Compétences ?**
+
+Les Compétences sont des dossiers contenant des instructions, des scripts et des ressources que Claude découvre et charge dynamiquement lorsqu'elles sont pertinentes pour une tâche. Pensez-y comme des manuels de formation spécialisés qui donnent à Claude une expertise dans des domaines spécifiques - du travail avec des feuilles de calcul Excel au respect des directives de marque de votre organisation.
+
+**Comment fonctionnent les Compétences :** Lorsque Claude rencontre une tâche, il scanne les Compétences disponibles pour trouver des correspondances pertinentes. Les Compétences utilisent la divulgation progressive : les métadonnées se chargent d'abord (~100 tokens), fournissant juste assez d'informations pour que Claude sache quand une Compétence est pertinente. Les instructions complètes se chargent lorsque nécessaire (&lt;5k tokens), et les fichiers groupés ou scripts se chargent uniquement selon les besoins.
+
+**Quand utiliser les Compétences :** Choisissez les Compétences lorsque vous avez besoin que Claude effectue des tâches spécialisées de manière cohérente et efficace. Elles sont idéales pour :
+
+- **Workflows organisationnels :** Directives de marque, procédures de conformité, modèles de documents
+- **Expertise de domaine :** Formules Excel, manipulation PDF, analyse de données
+- **Préférences personnelles :** Systèmes de prise de notes, modèles de codage, méthodes de recherche
+
+**Exemple :** Créez une Compétence de directives de marque qui inclut la palette de couleurs de votre entreprise, les règles de typographie et les spécifications de mise en page. Lorsque Claude crée des présentations ou des documents, il applique automatiquement ces normes sans que vous ayez besoin de les expliquer à chaque fois.
+
+En savoir plus sur les Compétences et consultez notre bibliothèque croissante de Compétences.
+
+### **Que sont les invites ?**
+
+Les invites sont les instructions que vous fournissez à Claude en langage naturel pendant une conversation. Elles sont éphémères, conversationnelles et réactives - vous fournissez du contexte et de la direction dans l'instant.
+
+**Quand utiliser les invites :** Utilisez les invites pour :
+
+- Demandes ponctuelles : "Résumez cet article"
+- Raffinement conversationnel : "Rendez ce ton plus professionnel"
+- Contexte immédiat : "Analysez ces données et identifiez les tendances"
+- Instructions ad hoc : "Formatez ceci comme une liste à puces"
+
+**Exemple :**
+
+> Veuillez effectuer une examen de sécurité complet de ce code. Je recherche :
+>
+> 1. Vulnérabilités courantes incluant :
+>    - Failles d'injection (SQL, commande, XSS, etc.)
+>    - Problèmes d'authentification et d'autorisation
+>    - Exposition de données sensibles
+>    - Mauvaises configurations de sécurité
+>    - Contrôle d'accès défectueux
+>    - Échecs cryptographiques
+>    - Problèmes de validation d'entrée
+>    - Problèmes de gestion des erreurs et de journalisation
+>
+> 2. Pour chaque problème que vous trouvez, veuillez fournir :
+>    - Niveau de sévérité (Critique/Élevé/Moyen/Faible)
+>    - Emplacement dans le code (numéros de ligne ou noms de fonction)
+>    - Explication de pourquoi c'est un risque de sécurité et comment il pourrait être exploité
+>    - Recommandation de correction spécifique avec exemples de code lorsque possible
+>    - Orientation des meilleures pratiques pour prévenir des problèmes similaires
+>
+> 3. Contexte du code : [Décrivez ce que fait le code, le langage/framework, et l'environnement dans lequel il s'exécute - par exemple, "Ceci est une API REST Node.js qui gère l'authentification des utilisateurs et traite les données de paiement"]
+>
+> 4. Considérations supplémentaires :
+>    - Y a-t-il des vulnérabilités OWASP Top 10 présentes ?
+>    - Le code suit-il les meilleures pratiques de sécurité pour [langage/framework spécifique] ?
+>    - Y a-t-il des dépendances avec des vulnérabilités connues ?
+>
+> Veuillez prioriser les résultats par sévérité et impact potentiel.
+
+**Astuce de pro :** Les invites sont votre moyen principal d'interagir avec Claude, mais elles ne persistent pas entre les conversations. Pour des workflows répétés ou des connaissances spécialisées, envisagez de capturer les invites comme Compétences ou instructions de projet.
+
+**Quand utiliser une Compétence à la place :** Si vous vous trouvez à taper la même invite à plusieurs reprises sur plusieurs conversations, il est temps de créer une Compétence. Transformez les instructions récurrentes comme "examinez ce code pour les vulnérabilités de sécurité en utilisant les normes OWASP" ou "formatez cette analyse avec résumé exécutif, découvertes clés et recommandations" en Compétences. Cela vous évite de réexpliquer les procédures à chaque fois et assure une exécution cohérente.
+
+Consultez notre bibliothèque d'invites, les meilleures pratiques d'invites, ou notre créateur d'invites intelligent pour commencer.
+
+### **Que sont les Projets ?**
+
+Disponibles sur tous les plans payants Claude, les Projets sont des espaces de travail autonomes avec leurs propres historiques de chat et bases de connaissances. Chaque projet inclut une fenêtre de contexte de 200K où vous pouvez télécharger des documents, fournir du contexte et définir des instructions personnalisées qui s'appliquent à toutes les conversations dans ce projet.
+
+**Comment fonctionnent les Projets :** Tout ce que vous téléchargez dans la base de connaissances d'un projet devient disponible dans tous les chats au sein de ce projet. Claude utilise automatiquement ce contexte pour fournir des réponses plus informées et pertinentes. Lorsque vos connaissances de projet approchent les limites de contexte, Claude active de manière transparente le mode de Génération Augmentée par Récupération (RAG) pour étendre la capacité jusqu'à 10x.
+
+**Quand utiliser les Projets :** Choisissez les Projets lorsque vous avez besoin :
+
+- **Contexte persistant :** Connaissances de base qui doivent informer chaque conversation
+- **Organisation de l'espace de travail :** Contextes séparés pour différentes initiatives
+- **Collaboration d'équipe :** Connaissances partagées et historique de conversation (sur les plans Team et Enterprise)
+- **Instructions personnalisées :** Ton, perspective ou approche spécifique au projet
+
+**Exemple :** Créez un projet "Lancement de Produit Q4" contenant des études de marché, des analyses de concurrents et des spécifications de produit. Chaque chat dans ce projet a accès à ces connaissances sans que vous ayez besoin de retélécharger ou réexpliquer le contexte.
+
+**Quand utiliser une Compétence à la place :** Si plusieurs agents ou conversations ont besoin de la même expertise - comme les procédures d'examen de sécurité ou les méthodes d'analyse de données - créez une Compétence plutôt que de construire cette connaissance dans des sous-agents individuels. Les Compétences sont portables et réutilisables, tandis que les sous-agents sont conçus sur mesure pour des workflows spécifiques. Utilisez les Compétences pour enseigner une expertise que n'importe quel agent peut appliquer ; utilisez les sous-agents lorsque vous avez besoin d'une exécution de tâches indépendante avec des permissions d'outils spécifiques et une isolation de contexte.
+
+En savoir plus sur les Projets.
+
+### **Que sont les sous-agents ?**
+
+Les sous-agents sont des assistants IA spécialisés avec leurs propres fenêtres de contexte, invites système personnalisées et permissions d'outils spécifiques. Disponibles dans Claude Code et le Claude Agent SDK, les sous-agents gèrent des tâches discrètes indépendamment et retournent les résultats à l'agent principal.
+
+**Comment fonctionnent les sous-agents :** Chaque sous-agent opère avec sa propre configuration - vous définissez ce qu'il fait, comment il approche les problèmes et quels outils il peut accéder. Claude délègue automatiquement les tâches aux sous-agents appropriés en fonction de leurs descriptions, ou vous pouvez explicitement demander un sous-agent spécifique.
+
+**Quand utiliser les sous-agents :** Utilisez les sous-agents pour :
+
+- **Spécialisation des tâches :** Examen de code, génération de tests, audits de sécurité
+- **Gestion du contexte :** Garder la conversation principale focalisée tout en déchargeant un travail spécialisé
+- **Traitement parallèle :** Plusieurs sous-agents peuvent travailler sur différents aspects simultanément
+- **Restriction d'outils :** Limiter les sous-agents spécifiques à des opérations sécurisées (par exemple, accès en lecture seule)
+
+**Exemple :**
+
+> Créez un sous-agent examinateur de code avec accès aux outils Read, Grep et Glob mais pas Write ou Edit. Lorsque vous modifiez du code, Claude délègue automatiquement à ce sous-agent pour examen de qualité et de sécurité sans risquer de changements de code involontaires.
+
+**Quand utiliser une Compétence à la place :** Si plusieurs agents ou conversations ont besoin de la même expertise - comme les procédures d'examen de sécurité ou les méthodes d'analyse de données - créez une Compétence plutôt que de construire cette connaissance dans des sous-agents individuels. Les Compétences sont portables et réutilisables, tandis que les sous-agents sont conçus sur mesure pour des workflows spécifiques. Utilisez les Compétences pour enseigner une expertise que n'importe quel agent peut appliquer ; utilisez les sous-agents lorsque vous avez besoin d'une exécution de tâches indépendante avec des permissions d'outils spécifiques et une isolation de contexte.
+
+En savoir plus sur les sous-agents.
+
+### **Qu'est-ce que MCP ?**
+
+MCP crée une couche de connexion universelle entre les applications IA et vos outils et sources de données existants.
+
+Le Model Context Protocol (MCP) est une norme ouverte pour connecter les assistants IA aux systèmes externes où résident les données - dépôts de contenu, outils métier, bases de données et environnements de développement.
+
+**Comment MCP fonctionne :** MCP fournit une manière standardisée de connecter Claude à vos outils et sources de données. Au lieu de construire des intégrations personnalisées pour chaque source de données, vous construisez contre un seul protocole. Les serveurs MCP exposent des données et des capacités ; les clients MCP (comme Claude) se connectent à ces serveurs.
+
+**Quand utiliser MCP :** Choisissez MCP lorsque vous avez besoin que Claude :
+
+- Accède à des données externes : Google Drive, Slack, GitHub, bases de données
+- Utilise des outils métier : Systèmes CRM, plateformes de gestion de projet
+- Se connecte à des environnements de développement : Fichiers locaux, IDE, contrôle de version
+- S'intègre à des systèmes personnalisés : Vos outils et sources de données propriétaires
+
+**Exemple :** Connectez Claude au Google Drive de votre entreprise via MCP. Maintenant Claude peut rechercher des documents, lire des fichiers et référencer des connaissances internes sans téléchargements manuels - la connexion persiste et se met à jour automatiquement.
+
+**Quand utiliser une Compétence à la place :** MCP connecte Claude aux données ; les Compétences enseignent à Claude quoi faire avec ces données. Si vous expliquez comment utiliser un outil ou suivre des procédures - comme "lors de l'interrogation de notre base de données, filtrez toujours d'abord par plage de dates" ou "formatez les rapports Excel avec ces formules spécifiques" - c'est une Compétence. Si vous avez besoin que Claude accède à la base de données ou aux fichiers Excel en premier lieu, c'est MCP. Utilisez les deux ensemble : MCP pour la connectivité, les Compétences pour les connaissances procédurales.
+
+En savoir plus sur MCP et consultez la documentation sur la façon de construire un serveur MCP.
+
+## Comment ils fonctionnent ensemble
+
+La vraie puissance émerge lorsque vous combinez ces blocs de construction. Chacun sert un but distinct, et ensemble ils créent des workflows d'agents sophistiqués.
+
+### **Comparaison : choisir le bon outil**
+
+| Fonctionnalité | Compétences | Invites | Projets | Sous-agents | MCP |
+| --- | --- | --- | --- | --- | --- |
+| **Ce qu'il fournit** | Connaissances procédurales | Instructions moment par moment | Connaissances de base | Délégation de tâches | Connectivité d'outils |
+| **Persistance** | À travers les conversations | Conversation unique | Dans le projet | À travers les sessions | Connexion continue |
+| **Contient** | Instructions + code + actifs | Langage naturel | Documents + contexte | Logique d'agent complète | Définitions d'outils |
+| **Quand il se charge** | Dynamiquement, selon les besoins | Chaque tour | Toujours dans le projet | Lorsqu'invoqué | Toujours disponible |
+| **Peut inclure du code** | Oui | Non | Non | Oui | Oui |
+| **Idéal pour** | Expertise spécialisée | Demandes rapides | Contexte centralisé | Tâches spécialisées | Accès aux données |
+
+### **Exemple de workflow d'agent : agent de recherche**
+
+Construisons un agent de recherche complet qui combine plusieurs blocs de construction. Cet exemple montre comment assembler et activer un agent pour l'analyse concurrentielle.
+
+**Étape 1 : Configurez votre Projet**
+
+Créez un projet "Renseignement Concurrentiel" et téléchargez :
+
+- Rapports sectoriels et analyses de marché
+- Documentation de produits concurrents
+- Commentaires clients de votre CRM
+- Résumés de recherches précédentes
+
+Ajoutez des instructions de projet :
+
+> Analysez les concurrents à travers le prisme de notre stratégie produit. Concentrez-vous sur les opportunités de différenciation et les tendances émergentes du marché. Présentez les découvertes avec des preuves spécifiques et des recommandations actionnables.
+
+**Étape 2 : Connectez les sources de données via MCP**
+
+Activez les serveurs MCP pour :
+
+- Google Drive (pour accéder aux documents de recherche partagés)
+- GitHub (pour examiner les dépôts open source des concurrents)
+- Recherche web (pour informations de marché en temps réel)
+
+**Étape 3 : Créez des Compétences spécialisées**
+
+Créez une Compétence "analyse-concurrentielle" :
+
+```
+# Compétence de Navigation GDrive de Mon Entreprise
+
+## Aperçu
+
+Stratégie de recherche et de récupération optimisée pour la structure Google Drive de Meridian Tech. Utilisez cette compétence pour localiser efficacement des documents internes, des recherches et des matériaux stratégiques.
+
+## Organisation Drive
+
+**Structure de premier niveau :**
+
+- `/Strategy & Planning/` - OKR, plans trimestriels, présentations au conseil
+- `/Product/` - PRD, feuilles de route, spécifications techniques
+- `/Research/` - Études de marché, renseignement concurrentiel, études utilisateurs
+- `/Sales & Marketing/` - Études de cas, présentations commerciales, matériaux de campagne
+- `/Customer Success/` - Guides d'implémentation, métriques de succès
+- `/Company Ops/` - Politiques, organigrammes, annuaires d'équipe
+
+**Conventions de nommage :**
+
+- Format : `YYYY-MM-DD_NomDocument_vX`
+- Versions finales marquées avec `_FINAL`
+- Brouillons incluent `_DRAFT` ou `_WIP`
+
+## Meilleures Pratiques de Recherche
+
+1. **Commencez large, puis filtrez** - Utilisez le contexte de dossier + mots-clés
+2. **Ciblez les propriétaires de documents** - Matériels de vente depuis Sales/, pas la racine
+3. **Vérifiez la pertinence temporelle** - Priorisez les documents des 6 derniers mois pour la stratégie actuelle
+4. **Cherchez la "source de vérité"** - Fichiers avec `_FINAL`, `_APPROVED`, ou dans `/Archives/Official/`
+
+## Workflow d'Agent de Recherche
+
+1. Identifiez la catégorie de sujet (produit, marché, client)
+2. Recherchez le dossier pertinent avec des mots-clés ciblés
+3. Récupérez 3-5 documents les plus récents/pertinents
+4. Référencez croisé avec `/Strategy & Planning/` pour le contexte
+5. Citez les sources avec noms de fichiers et dates
+```
+
+**Étape 4 : Configurez les sous-agents (Claude Code/SDK uniquement)**
+
+Créez des sous-agents spécialisés :
+
+Sous-agent `market-researcher` :
+
+```
+name: market-researcher
+description: Recherchez les tendances du marché, rapports sectoriels et données du paysage concurrentiel. Utilisez proactivement pour l'analyse concurrentielle.
+tools: Read, Grep, Web-search
+
+---
+
+Vous êtes un analyste de recherche de marché spécialisé dans le renseignement concurrentiel.
+
+Lors de la recherche :
+
+1. Identifiez les sources faisant autorité (Gartner, Forrester, rapports sectoriels)
+2. Rassemblez des données quantitatives (part de marché, taux de croissance, financement)
+3. Analysez les aperçus qualitatifs (opinions d'analystes, avis clients)
+4. Synthétisez les tendances et modèles
+
+Présentez les découvertes avec citations et niveaux de confiance.
+```
+
+Sous-agent `technical-analyst` :
+
+```
+name: technical-analyst
+description: Analysez l'architecture technique, approches d'implémentation et décisions d'ingénierie. Utilisez pour l'analyse technique concurrentielle.
+tools: Read, Bash, Grep
+
+---
+
+Vous êtes un architecte technique analysant les choix technologiques des concurrents.
+
+Lors de l'analyse :
+
+1. Examinez les dépôts publics et la documentation technique
+2. Évaluez les modèles d'architecture et la pile technologique
+3. Évaluez les approches de scalabilité et de performance
+4. Identifiez les forces et limitations techniques
+
+Concentrez-vous sur des aperçus techniques actionnables qui informent nos décisions produit.
+```
+
+**Étape 5 : Activez votre agent de recherche**
+
+Maintenant lorsque vous demandez à Claude : "Analysez comment nos trois principaux concurrents positionnent leurs nouvelles fonctionnalités IA et identifiez les lacunes que nous pouvons exploiter"
+
+Voici ce qui se passe :
+
+1. **Le contexte du projet se charge :** Claude accède à vos documents de recherche téléchargés et suit les instructions du projet
+2. **Les connexions MCP s'activent :** Claude recherche votre Google Drive pour des briefs concurrentiels récents et extrait les données GitHub
+3. **Les Compétences s'engagent :** La Compétence analyse-concurrentielle fournit le cadre analytique
+4. **Les sous-agents exécutent** (dans Claude Code) : Le market-researcher rassemble les données du secteur tandis que le technical-analyst examine les implémentations techniques
+5. **Les invites affinent :** Vous fournissez une guidance conversationnelle : "Concentrez-vous particulièrement sur les clients du secteur de la santé"
+
+**Le résultat :** Une analyse concurrentielle complète qui s'inspire de plusieurs sources de données, suit votre cadre analytique, exploite une expertise spécialisée et maintient le contexte tout au long de votre projet de recherche.
+
+## Questions fréquentes
+
+### **Comment fonctionnent les Compétences ?**
+
+Les Compétences utilisent la divulgation progressive pour garder Claude efficace. Lors du traitement des tâches, Claude scanne d'abord les métadonnées des Compétences (descriptions et résumés) pour identifier les correspondances pertinentes. Si une Compétence correspond, Claude charge les instructions complètes. Enfin, si la Compétence inclut du code exécutable ou des fichiers de référence, ceux-ci se chargent uniquement lorsque nécessaire.
+
+Cette architecture signifie que vous pouvez avoir beaucoup de Compétences disponibles sans submerger la fenêtre de contexte de Claude. Claude accède exactement à ce dont il a besoin, quand il en a besoin.
+
+### **Compétences vs sous-agents : quand utiliser quoi**
+
+**Utilisez les Compétences quand :** Vous voulez des capacités que n'importe quelle instance Claude peut charger et utiliser. Les Compétences sont comme des matériaux de formation - elles rendent Claude meilleur à des tâches spécifiques dans toutes les conversations.
+
+**Utilisez les sous-agents quand :** Vous avez besoin d'agents complets et autonomes conçus pour des buts spécifiques qui gèrent des workflows indépendamment. Les sous-agents sont comme des employés spécialisés avec leur propre contexte et permissions d'outils.
+
+**Utilisez-les ensemble quand :** Vous voulez des sous-agents avec une expertise spécialisée. Par exemple, un sous-agent examinateur de code peut utiliser des Compétences pour les meilleures pratiques spécifiques à un langage, combinant l'indépendance d'un sous-agent avec l'expertise portable des Compétences.
+
+### **Compétences vs invites : quand utiliser quoi**
+
+**Utilisez les invites quand :** Vous donnez des instructions ponctuelles, fournissez un contexte immédiat ou avez un échange conversationnel. Les invites sont réactives et éphémères.
+
+**Utilisez les Compétences quand :** Vous avez des procédures ou une expertise dont vous aurez besoin à plusieurs reprises. Les Compétences sont proactives - Claude sait quand les appliquer - et persistantes à travers les conversations.
+
+**Utilisez-les ensemble :** Les invites et les Compétences se complètent naturellement. Utilisez les Compétences pour fournir une expertise fondamentale, puis utilisez les invites pour fournir un contexte spécifique et un raffinement pour chaque tâche.
+
+### **Compétences vs Projets : quand utiliser quoi**
+
+**Utilisez les Projets quand :** Vous avez besoin de connaissances de base et d'un contexte qui doivent informer toutes les conversations sur une initiative spécifique. Les Projets fournissent du matériel de référence statique qui est toujours chargé.
+
+**Utilisez les Compétences quand :** Vous avez besoin de connaissances procédurales et de code exécutable qui s'active uniquement lorsqu'il est pertinent. Les Compétences fournissent une expertise dynamique qui se charge à la demande, économisant votre fenêtre de contexte.
+
+**Utilisez-les ensemble quand :** Vous voulez à la fois un contexte persistant et des capacités spécialisées. Par exemple, un projet "Développement Produit" contenant des spécifications de produit et des recherches utilisateurs, combiné avec des Compétences pour créer de la documentation technique et analyser les données de commentaires utilisateurs.
+
+**Différence clé :** Les Projets disent "voici ce que vous devez savoir". Les Compétences disent "voici comment faire les choses". Les Projets fournissent une base de connaissances dans laquelle vous travaillez. Les Compétences fournissent des capacités qui fonctionnent partout - n'importe quelle conversation, n'importe quel projet.
+
+### **Les sous-agents peuvent-ils utiliser des Compétences ?**
+
+Oui. Dans Claude Code et l'Agent SDK, les sous-agents peuvent accéder et utiliser des Compétences tout comme l'agent principal. Cela crée des combinaisons puissantes où les sous-agents spécialisés exploitent une expertise portable.
+
+Par exemple, votre sous-agent python-developer peut utiliser la Compétence pandas-analysis pour effectuer des transformations de données suivant les conventions de votre équipe, tandis que votre sous-agent documentation-writer utilise la compétence technical-writing pour formater la documentation API de manière cohérente.
+
+## Pour commencer
+
+Prêt à construire avec des Compétences ? Voici comment commencer :
+
+**Utilisateurs Claude.ai :**
+
+- Activez les Compétences dans Paramètres → Fonctionnalités
+- Créez votre premier projet sur claude.ai/projects
+- Essayez de combiner les connaissances de projet avec des Compétences pour votre prochaine tâche d'analyse
+
+**Développeurs API :**
+
+- Explorez le point de terminaison des Compétences dans la documentation
+- Consultez notre livre de recettes de compétences
+
+**Utilisateurs Claude Code :**
+
+- Installez les Compétences via les places de marché de plugins
+- Consultez notre livre de recettes de compétences
