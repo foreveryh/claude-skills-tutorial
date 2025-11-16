@@ -1,6 +1,21 @@
 # Translator MCP Server Integration Guide
 
-This document provides detailed instructions for integrating the Translator MCP Server with the Fumadocs Article Importer Skill.
+> **⚠️ DEPRECATED - This guide is kept for reference only**
+>
+> **The Fumadocs Article Importer now uses the built-in `translator` skill instead of Translator MCP Server.**
+>
+> **Benefits of the new approach:**
+> - ✅ No external dependencies or configuration required
+> - ✅ Uses Claude's native translation capabilities
+> - ✅ Simpler setup and maintenance
+> - ✅ Automatic activation when translation is needed
+> - ✅ Better integration with Claude Code's skill system
+>
+> **Migration:** Simply remove `translator-mcp` from your MCP configuration. The translator skill is already available at `.claude/skills/translator/` and will be automatically used by the fumadocs-article-importer skill.
+>
+> ---
+
+This document provides detailed instructions for integrating the Translator MCP Server with the Fumadocs Article Importer Skill. **Note: This is now deprecated in favor of the translator skill.**
 
 ## Overview
 

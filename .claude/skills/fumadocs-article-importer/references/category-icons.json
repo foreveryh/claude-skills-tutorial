@@ -1,0 +1,34 @@
+{
+  "ai-ml": {
+    "icon": "Brain",
+    "alternative_icons": ["Cpu", "Zap", "Sparkles"]
+  },
+  "development": {
+    "icon": "Code",
+    "alternative_icons": ["Terminal", "Braces", "FileCode"]
+  },
+  "data": {
+    "icon": "Database",
+    "alternative_icons": ["BarChart", "PieChart", "TrendingUp"]
+  },
+  "design": {
+    "icon": "Palette",
+    "alternative_icons": ["Paintbrush", "Layers", "Layout"]
+  },
+  "content": {
+    "icon": "FileText",
+    "alternative_icons": ["BookOpen", "Book", "FileEdit"]
+  },
+  "business": {
+    "icon": "Briefcase",
+    "alternative_icons": ["TrendingUp", "DollarSign", "Users"]
+  },
+  "devops": {
+    "icon": "Server",
+    "alternative_icons": ["Cloud", "Container", "GitBranch"]
+  },
+  "security": {
+    "icon": "Shield",
+    "alternative_icons": ["Lock", "ShieldCheck", "Key"]
+  }
+}

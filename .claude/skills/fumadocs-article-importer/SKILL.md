@@ -20,18 +20,19 @@ Before using this skill, verify:
   - Provides 15 tools for content extraction, search, and processing
   - See "MCP Configuration" section below for setup
   - Alternative: Jina API access (via curl)
-- **Translator MCP Server** is configured (highly recommended for best translation quality)
-  - Repository: https://github.com/foreveryh/translator-mcp-server
-  - Provides professional three-stage translation workflow
-  - See "MCP Configuration" section below for setup
+- **Translator Skill** is available for professional translation
+  - Located in `.claude/skills/translator/`
+  - Provides professional translation using Claude's native capabilities
+  - Automatically activated when translation is needed
+  - No external dependencies or configuration required
 - `curl` is installed for image downloads
 - Write access to `content/docs/` and `public/images/` directories
 
 ## MCP Configuration
 
-This skill works best with two MCP servers configured:
+This skill works best with:
 1. **Jina MCP** - For article fetching and content extraction
-2. **Translator MCP** - For professional translation
+2. **Translator Skill** - For professional translation (built-in, no configuration needed)
 
 ### Jina MCP Setup (Article Fetching)
 
@@ -65,64 +66,18 @@ cd MCP && npm install && npm run start
 - `search_web`, `search_arxiv`, `search_images` - Search capabilities
 - `sort_by_relevance`, `deduplicate_strings` - Content processing
 
-### Translator MCP Setup (Translation)
+### Translation Setup
 
-**Recommended Setup** for optimal translation quality and speed:
+**Translation Strategy**: This skill uses Claude's native translation capabilities through the **translator skill**.
 
-### Option 1: Use Public MCP Server (Easiest)
+The translator skill provides:
+- Professional-grade translation quality
+- Preservation of Markdown formatting and code blocks
+- Consistent technical terminology handling
+- Language-specific best practices (zh, fr, ko, en)
+- No external dependencies or API keys required
 
-Add to your Claude configuration:
-```json
-{
-  "mcpServers": {
-    "translator": {
-      "url": "https://t.deeptoai.com/sse",
-      "transport": "sse"
-    }
-  }
-}
-```
-
-**Note**: This public server uses Zhipu AI (GLM-4.6/4.5) for high-quality translation.
-
-### Option 2: Self-Hosted MCP Server
-
-1. **Clone and install**:
-   ```bash
-   git clone https://github.com/foreveryh/translator-mcp-server
-   cd translator-mcp-server/mcp-server
-   npm install
-   ```
-
-2. **Configure environment** (create `.env` file):
-   ```bash
-   TRANSLATION_API_KEY=your_api_key
-   TRANSLATION_MODEL=your_model  # e.g., gpt-4, claude-3-sonnet
-   TRANSLATION_BASE_URL=your_api_url
-   PORT=3031  # Optional, default 3031
-   ```
-
-3. **Start the server**:
-   ```bash
-   npm start
-   # Or with Docker:
-   docker run -p 3031:3031 wizdy/airylark-mcp-server
-   ```
-
-4. **Configure Claude to use it**:
-   ```json
-   {
-     "mcpServers": {
-       "translator": {
-         "url": "http://localhost:3031/sse"
-       }
-     }
-   }
-   ```
-
-### Fallback
-
-If Translator MCP is not configured, the skill will fall back to using Claude directly with translation prompts from `references/translation-prompts.md`. This works but is slower (~20-40s per language vs ~5-10s with MCP).
+**How it works**: When this skill needs to translate content, it will automatically trigger Claude to use the translator skill. You don't need to configure anything - Claude will compose the two skills automatically based on the task requirements.
 
 ## Workflow
 
@@ -137,14 +92,19 @@ Ask the user for the following information:
 
 **Using Jina MCP** (Recommended - best integration with Claude):
 
-1. **Fetch article content**:
+1. **Fetch article content with images** (RECOMMENDED - enables smart image filtering):
    ```
    Tool: read_url
    Parameters:
      - url: {article_url}
+     - withAllImages: true  ← ADD THIS
 
-   Returns: Markdown-formatted article content
+   Returns:
+     - content: Markdown-formatted article content
+     - images: Array of image objects with URLs and metadata
+     - title, description, etc.
    ```
+   **Why this matters**: Returns structured image data instead of parsing markdown. You can access `response.images` directly.
 
 2. **Get publication date** (optional but recommended):
    ```
@@ -160,7 +120,8 @@ Ask the user for the following information:
    - Author (if available in content)
    - Publication date (from guess_datetime_url or content)
    - Main content (body text)
-   - All image URLs (extract from markdown image syntax)
+   - All image URLs (from `response.images` array if withAllImages=true, else extract from markdown)
+   - Detect YouTube videos (search for youtube.com/embed, youtu.be, youtube.com/watch URLs)
 
 **Alternative: Using Jina API directly** (if MCP not available):
 
@@ -190,30 +151,147 @@ Create a URL-friendly slug from the article title:
 
 Example: "Building React Apps with TypeScript" → "building-react-apps-with-typescript"
 
-### Step 4: Process Images
+### Step 3.5: Filter Content Images (HEURISTIC FILTERING)
 
-If user chose to download images:
+**Critical improvement**: Most articles contain 15-20 images, but only 1-3 are actual content images (diagrams, charts, screenshots). The rest are decorative icons, logos, placeholders, or social preview images. We use heuristic rules to filter them.
+
+**Input**: Array of image URLs (from Step 2)
+
+**Heuristic Filtering Rules**:
+
+```typescript
+// Blacklist - IMMEDIATE REJECTION
+const blacklist = [
+  'placeholder.svg',      // Placeholder images
+  'favicon',              // Website icons
+  'logo',                 // Company logos
+  'spinner',              // Loading animations
+  'avatar',               // User avatars
+  'decoration',           // Decorative elements
+  'icon-',                // Icon files
+  'social-share',         // Social media preview
+  'og-image',             // OpenGraph preview
+  'twitter-card'          // Twitter card images
+];
+
+// Whitelist - MUST KEEP
+const whitelist = [
+  'diagram',              // Architecture diagrams
+  'chart',                // Data visualizations
+  'screenshot',           // UI screenshots
+  'visualization',        // Data viz
+  'architecture',         // System architecture
+  'flowchart',            // Process flows
+  'graph',                // Charts/graphs
+  'timeline'              // Timeline graphics
+];
+
+function heuristicFilter(images: ImageInfo[]): ImageInfo[] {
+  return images.filter(img => {
+    const url = img.url.toLowerCase();
+    const filename = img.filename.toLowerCase();
+
+    // 🚫 BLACKLIST: Immediate rejection
+    if (blacklist.some(term => url.includes(term) || filename.includes(term))) {
+      return false; // Skip decorative images
+    }
+
+    // ✅ WHITELIST: Must keep
+    if (whitelist.some(term => url.includes(term) || filename.includes(term))) {
+      return true; // Keep content images
+    }
+
+    // 📏 FILE TYPE & SIZE RULES
+    if (url.endsWith('.png') && img.fileSize > 10000) return true; // PNG > 10KB likely content
+    if (url.endsWith('.jpg') && img.fileSize > 15000) return true; // JPG > 15KB likely content
+    if (url.endsWith('.svg') && !url.includes('placeholder')) return true; // SVG (except placeholder)
+
+    // 🎯 CONTEXT RULES
+    // If image appears near keywords like "diagram", "figure", "example"
+    if (isNearContext(img, ['diagram', 'figure', 'example', 'illustration'])) {
+      return true;
+    }
+
+    return false; // Default: exclude if uncertain
+  }).slice(0, 5); // MAX 5 images to avoid clutter
+}
+```
+
+**Example Filtering**:
+- Input: 18 images from claude.com blog
+- Detected: 1 placeholder.svg (11 variations), 1 og-image.jpg, 5 decorative SVG icons, 1 MCP diagram PNG
+- Filtered: **Only 1 image kept** (MCP diagram)
+- Result: 94% reduction in noise
+
+**User Confirmation** (shows transparency):
+```
+📊 Image Analysis Complete:
+✅ Found 18 images total
+🎯 Identified 1 content image (MCP protocol diagram)
+🚫 Filtered 17 decorative/placeholder images
+
+Image to download:
+[Preview: https://cdn.../mcp-diagram.png]
+Description: MCP protocol architecture diagram
+
+Download? (Enter=yes, no=skip):
+```
+
+### Step 4: Process Filtered Images
+
+If user chose to download images (from Step 3.5):
+
+**User Confirmation** (show transparency):
+```
+📊 Image Processing Summary:
+✅ Found {total_images} total images on the page
+🎯 Identified {filtered_images} content images (diagrams, charts, screenshots)
+🚫 Filtered {skipped_images} decorative/placeholder images
+
+Content images to download:
+1. [Preview URL: https://.../mcp-diagram.png]
+   → Description: MCP protocol architecture diagram
+   → Size: 142KB PNG
+
+2. [Preview URL: https://.../data-flow.png]
+   → Description: Data flow visualization
+   → Size: 89KB PNG
+
+Download these images? (Enter=yes, no=no) [yes]:
+```
+
+If user confirms (default=yes):
 
 1. Create image directory:
    ```bash
    mkdir -p "public/images/docs/{article-slug}"
    ```
 
-2. For each image URL in the article:
-   - Generate descriptive name from context (e.g., "component-tree", "data-flow")
-   - Add index number: `{descriptive-name}-{index}.{ext}`
+2. For each **filtered** image URL:
+   - Generate descriptive name from context (e.g., "mcp-architecture", "data-flow-diagram")
+   - Add index only if multiple similar images: `{descriptive-name}-{index}.{ext}`
    - Download using curl with retry logic:
      ```bash
      curl -f -L -o "public/images/docs/{slug}/{image-name}" "{image_url}" || \
      curl -f -L -o "public/images/docs/{slug}/{image-name}" "{image_url}" || \
-     echo "Failed to download: {image_url}"
+     echo "⚠️  Failed to download: {image_url}"
      ```
 
 3. Update image references in content:
-   - Original: `![alt](https://example.com/image.png)`
-   - Updated: `![alt](/images/docs/{article-slug}/component-tree-1.png)`
+   - Original: `![MCP architecture](https://example.com/mcp-diagram.png)`
+   - Updated: `![MCP architecture](/images/docs/{article-slug}/mcp-architecture.png)`
 
-4. Keep original URLs for failed downloads (do not block the process)
+4. Handle failed downloads gracefully:
+   - If download fails after 2 retries, keep original URL
+   - Log failure but continue with other images
+   - Report failures in final summary
+
+**Important difference from v1.0**: Instead of downloading ALL images (15-20), we now:
+- ✅ Filter intelligently (3-5 content images)
+- ✅ Show preview to user
+- ✅ Get confirmation before downloading
+- ✅ Skip decorative images automatically
+- ✅ Faster downloads, less storage waste
 
 ### Step 5: Classify Article
 
@@ -242,64 +320,54 @@ Load `references/classification-rules.md` and analyze the article to determine:
 
 ### Step 6: Translate Content
 
-**Using Translator MCP Server** (Recommended for best quality and speed):
+**Translation Strategy**: Use professional translation for each target language.
 
 For each target language (en, zh, fr, ko):
 
 1. **Prepare content for translation**:
    - Combine title, description, and main content
-   - Keep code blocks as-is with markers
-   - Preserve image references
+   - Ensure code blocks are clearly marked
+   - Keep image references intact
 
-2. **Use MCP translate_text tool**:
-   ```
-   Tool: translate_text
-   Parameters:
-     - text: {article_content}
-     - target_language: {language_code}  # 'zh', 'fr', 'ko'
-     - source_language: 'en' (optional)
-     - high_quality: true  # Enable three-stage translation workflow
-   ```
+2. **Request translation**:
+   - Ask for professional translation to the target language
+   - Specify that this is technical documentation
+   - Emphasize the need to preserve Markdown formatting and code blocks
 
-3. **Translation happens automatically with**:
-   - Stage 1: Analysis and planning (domain recognition, terminology extraction)
-   - Stage 2: Segmented translation (paragraph-by-paragraph with context)
-   - Stage 3: Full-text review (consistency check, style alignment)
-
-4. **Quality validation** (optional but recommended):
+   Example request format:
    ```
-   Tool: evaluate_translation
-   Parameters:
-     - original_text: {english_content}
-     - translated_text: {translated_content}
-     - detailed_feedback: true
+   Please translate the following article to {language_name} ({language_code}).
+   This is technical documentation - preserve all Markdown syntax, code blocks,
+   and image references exactly as they appear.
+
+   [Article content here]
    ```
 
-   This evaluates:
-   - Accuracy: Semantic fidelity to original
-   - Fluency: Natural language flow
-   - Terminology: Technical term consistency
-   - Style: Preservation of tone and format
+3. **Translation will automatically apply**:
+   - Professional translation quality (via translator skill)
+   - Preservation of all Markdown syntax
+   - Code blocks remain unchanged
+   - Image references stay the same (paths unchanged)
+   - Heading hierarchy maintained
+   - Technical terms handled appropriately for target language
+   - Natural, fluent target language text
 
-5. **Important Translation Rules** (handled by MCP):
-   - ✅ Preserves all Markdown syntax exactly
-   - ✅ Keeps code blocks unchanged
-   - ✅ Preserves image references (paths stay the same)
-   - ✅ Maintains heading hierarchy
-   - ✅ Keeps technical terms appropriate for target language
-   - ✅ Adapts examples to be culturally relevant
+4. **Language-specific handling**:
+   - **Chinese (zh)**: Simplified Chinese, technical terms stay in English when appropriate
+   - **French (fr)**: Standard French technical terminology, formal tone
+   - **Korean (ko)**: Formal style (합니다), technical terms mixed with Korean
+   - **English (en)**: Clear, professional US English
 
-6. **Fallback**: If MCP server is not available, use Claude directly:
-   - Load translation guidelines from `references/translation-prompts.md`
-   - Translate using Claude with explicit rules
-   - Manual quality check
+5. **Quality considerations**:
+   - Translation preserves the original meaning and intent
+   - Technical accuracy is maintained
+   - Content reads naturally in the target language
+   - Format and structure remain identical to source
 
-7. Save original English version first, then translations
-
-**Performance**:
-- With MCP: ~5-10 seconds per language (very fast!)
-- With Claude fallback: ~20-40 seconds per language
-- Quality: MCP provides professional-grade translation with terminology consistency
+6. **Save translations**:
+   - Save original English version first
+   - Then save each translated version
+   - Maintain consistent file structure across all languages
 
 ### Step 7: Generate MDX Files
 
@@ -336,10 +404,24 @@ For each language, create the MDX file:
    - **CRITICAL**: Never implement custom components. Only use built-in Fumadocs components
    - Keep standard Markdown for paragraphs, lists, headings, code blocks
 
-4. **Validate MDX Syntax**:
+4. **Validate and Fix MDX Syntax**:
    - Ensure all JSX components are properly closed
    - Check that code blocks use correct syntax (triple backticks)
    - Verify frontmatter YAML is valid
+   - **CRITICAL - Escape special characters**:
+     - Replace `<` with `&lt;` when used in text (not in JSX tags or code blocks)
+     - Common cases: `<5`, `<10`, `<100`, `<script`, `<div` in plain text
+     - Example: "less than 5k" → write as `&lt;5k` if written as `<5k`
+     - Do NOT escape `<` inside code blocks (triple backticks) or valid JSX components
+     - Replace `>` with `&gt;` when used in text comparisons
+   - **Check for MDX parsing traps**:
+     - Patterns like `<number`, `<word` in plain text will break MDX
+     - Use HTML entities or rephrase: `<5k` → `&lt;5k` or "less than 5k"
+   - **Ensure Markdown formatting has proper spacing**:
+     - Bold/italic must have space after closing marker before next char
+     - Pattern: `**粗体：** 文字` not `**粗体：**文字`
+     - Run regex fix: replace `\*\*([^*]+)\*\*([^ \n*-])` with `**$1** $2`
+     - This prevents MDX rendering issues especially in non-Latin languages
    - Confirm no syntax errors that would break rendering
 
 5. Create the file:
@@ -348,21 +430,128 @@ For each language, create the MDX file:
    # Write the MDX content to file
    ```
 
-### Step 8: Update Navigation (Optional)
+### Step 8: Create/Update meta.json for All Languages
 
-Check if `content/docs/{lang}/{category}/meta.json` exists:
-- If yes: Ask user if they want to add the new article to navigation
-- If no: Create a basic meta.json with the new article
+**CRITICAL**: Create proper meta.json files for sidebar navigation with localized titles.
 
-Example meta.json:
-```json
-{
-  "title": "{Category Name}",
-  "pages": [
-    "{article-slug}"
-  ]
-}
-```
+Load reference files:
+- `references/category-translations.json` - Get translated category names
+- `references/category-icons.json` - Get appropriate icons
+
+For **each language** (en, zh, fr, ko):
+
+1. **Create/Update category meta.json**: `content/docs/{lang}/{category}/meta.json`
+
+   ```json
+   {
+     "title": "{translated_category_name}",
+     "icon": "{category_icon}",
+     "pages": ["{article-slug}", "..."],
+     "defaultOpen": false
+   }
+   ```
+
+   **Example for ai-ml category:**
+   - **English** (`content/docs/en/ai-ml/meta.json`):
+     ```json
+     {
+       "title": "AI & Machine Learning",
+       "icon": "Brain",
+       "pages": ["{article-slug}", "..."],
+       "defaultOpen": false
+     }
+     ```
+
+   - **Chinese** (`content/docs/zh/ai-ml/meta.json`):
+     ```json
+     {
+       "title": "AI 与机器学习",
+       "icon": "Brain",
+       "pages": ["{article-slug}", "..."],
+       "defaultOpen": false
+     }
+     ```
+
+   - **French** (`content/docs/fr/ai-ml/meta.json`):
+     ```json
+     {
+       "title": "IA et Apprentissage Automatique",
+       "icon": "Brain",
+       "pages": ["{article-slug}", "..."],
+       "defaultOpen": false
+     }
+     ```
+
+   - **Korean** (`content/docs/ko/ai-ml/meta.json`):
+     ```json
+     {
+       "title": "AI 및 머신러닝",
+       "icon": "Brain",
+       "pages": ["{article-slug}", "..."],
+       "defaultOpen": false
+     }
+     ```
+
+2. **Handling existing meta.json:**
+   - If file exists, read current `pages` array
+   - Ask user: "Where to add new article? (1: top, 2: bottom, 3: alphabetical)"
+   - Preserve other user customizations (icon, defaultOpen, etc.)
+   - If `pages` array exists, insert article slug; if not, create with `["{slug}", "..."]`
+
+3. **Update/Create root meta.json**: `content/docs/{lang}/meta.json`
+
+   - Check if category is listed in root `pages` array
+   - If not, ask user: "Add '{category}' to root navigation? (yes/no)"
+   - If yes, ask: "Where to add? (1: top, 2: bottom, 3: after specific item)"
+
+   **Example root meta.json:**
+   ```json
+   {
+     "title": "Documentation",
+     "pages": [
+       "index",
+       "getting-started",
+       "---[Book]Categories---",
+       "ai-ml",
+       "development",
+       "data",
+       "..."
+     ]
+   }
+   ```
+
+4. **Translation mapping for all 8 categories:**
+
+   | Category | English | Chinese | French | Korean |
+   |----------|---------|---------|--------|--------|
+   | ai-ml | AI & Machine Learning | AI 与机器学习 | IA et Apprentissage Automatique | AI 및 머신러닝 |
+   | development | Development | 开发 | Développement | 개발 |
+   | data | Data | 数据 | Données | 데이터 |
+   | design | Design | 设计 | Design | 디자인 |
+   | content | Content | 内容 | Contenu | 콘텐츠 |
+   | business | Business | 商业 | Affaires | 비즈니스 |
+   | devops | DevOps | DevOps | DevOps | DevOps |
+   | security | Security | 安全 | Sécurité | 보안 |
+
+5. **Icon mapping for categories:**
+
+   | Category | Icon | Alternative Icons |
+   |----------|------|-------------------|
+   | ai-ml | Brain | Cpu, Zap, Sparkles |
+   | development | Code | Terminal, Braces, FileCode |
+   | data | Database | BarChart, PieChart, TrendingUp |
+   | design | Palette | Paintbrush, Layers, Layout |
+   | content | FileText | BookOpen, Book, FileEdit |
+   | business | Briefcase | TrendingUp, DollarSign, Users |
+   | devops | Server | Cloud, Container, GitBranch |
+   | security | Shield | Lock, ShieldCheck, Key |
+
+**Important Notes:**
+- Always create meta.json for ALL 4 languages, not just English
+- Use localized titles from the translation mapping
+- Use the `...` syntax to auto-include other pages: `["featured-article", "..."]`
+- Never hardcode English titles in non-English meta.json files
+- Preserve user's existing customizations when updating
 
 ### Step 9: Archive Original Content
 
@@ -421,6 +610,14 @@ Provide a comprehensive summary to the user:
   ✅ fr: content/docs/fr/{category}/{slug}.mdx
   ✅ ko: content/docs/ko/{category}/{slug}.mdx
 
+📂 Navigation (meta.json):
+  ✅ en: content/docs/en/{category}/meta.json ("{English Category Name}")
+  ✅ zh: content/docs/zh/{category}/meta.json ("{Chinese Category Name}")
+  ✅ fr: content/docs/fr/{category}/meta.json ("{French Category Name}")
+  ✅ ko: content/docs/ko/{category}/meta.json ("{Korean Category Name}")
+  📌 Article added to sidebar navigation
+  🎨 Icon: {category_icon}
+
 🖼️  Images: {successful_count}/{total_count} downloaded
   📂 Location: public/images/docs/{slug}/
 
@@ -431,13 +628,15 @@ Provide a comprehensive summary to the user:
 
 ⚠️  Issues (if any):
   - Failed images: {list_of_failed_urls}
+  - meta.json conflicts: {any_merge_issues}
   - Warnings: {any_warnings}
 
 🎉 Next Steps:
   1. Review the generated MDX files for accuracy
-  2. Test the article in your local Fumadocs site
-  3. Adjust translations if needed
-  4. Update meta.json for navigation (if not done automatically)
+  2. Check sidebar navigation shows correct category names in all languages
+  3. Test the article in your local Fumadocs site (npm run dev)
+  4. Adjust translations or meta.json ordering if needed
+  5. Verify images display correctly
 ```
 
 ## Error Handling
@@ -459,9 +658,21 @@ Provide a comprehensive summary to the user:
 - Always provide at least 3 tags (use generic terms if needed)
 
 ### MDX Validation Errors
-- Check for common syntax errors before saving
-- If validation fails, save as .md instead and notify user
+- **Check for common syntax errors before saving**:
+  - Scan for unescaped `<` in plain text (e.g., `<5`, `<number`, `<word`)
+  - Verify all JSX tags are properly closed
+  - Ensure code blocks are properly fenced with triple backticks
+  - Check that blockquotes (`>`) don't interfere with JSX
+- **Auto-fix common issues**:
+  - Replace `<` with `&lt;` in plain text contexts
+  - Replace `>` with `&gt;` in comparison contexts
+  - Wrap problematic expressions in backticks if appropriate
+- If validation fails after fixes, save as .md instead and notify user
 - Provide specific error messages for debugging
+- **Common MDX pitfalls to avoid**:
+  - `<5k tokens` → `&lt;5k tokens` or "less than 5k tokens"
+  - `<script>` in text → `&lt;script&gt;` or use code formatting
+  - Unclosed JSX tags (always use `<Tag>...</Tag>` or self-close `<Tag />`)
 
 ## Examples
 

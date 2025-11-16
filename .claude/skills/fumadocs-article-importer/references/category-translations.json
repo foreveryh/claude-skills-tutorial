@@ -1,0 +1,98 @@
+{
+  "ai-ml": {
+    "en": "AI & Machine Learning",
+    "zh": "AI 与机器学习",
+    "fr": "IA et Apprentissage Automatique",
+    "ko": "AI 및 머신러닝",
+    "description": {
+      "en": "Artificial Intelligence and Machine Learning topics",
+      "zh": "人工智能和机器学习主题",
+      "fr": "Sujets sur l'intelligence artificielle et l'apprentissage automatique",
+      "ko": "인공 지능 및 머신러닝 주제"
+    }
+  },
+  "development": {
+    "en": "Development",
+    "zh": "开发",
+    "fr": "Développement",
+    "ko": "개발",
+    "description": {
+      "en": "Software development, programming, and coding",
+      "zh": "软件开发、编程和编码",
+      "fr": "Développement logiciel, programmation et codage",
+      "ko": "소프트웨어 개발, 프로그래밍 및 코딩"
+    }
+  },
+  "data": {
+    "en": "Data",
+    "zh": "数据",
+    "fr": "Données",
+    "ko": "데이터",
+    "description": {
+      "en": "Data analysis, databases, and data engineering",
+      "zh": "数据分析、数据库和数据工程",
+      "fr": "Analyse de données, bases de données et ingénierie des données",
+      "ko": "데이터 분석, 데이터베이스 및 데이터 엔지니어링"
+    }
+  },
+  "design": {
+    "en": "Design",
+    "zh": "设计",
+    "fr": "Design",
+    "ko": "디자인",
+    "description": {
+      "en": "UI/UX design, visual design, and design systems",
+      "zh": "UI/UX 设计、视觉设计和设计系统",
+      "fr": "Conception UI/UX, design visuel et systèmes de design",
+      "ko": "UI/UX 디자인, 비주얼 디자인 및 디자인 시스템"
+    }
+  },
+  "content": {
+    "en": "Content",
+    "zh": "内容",
+    "fr": "Contenu",
+    "ko": "콘텐츠",
+    "description": {
+      "en": "Content creation, writing, and documentation",
+      "zh": "内容创作、写作和文档",
+      "fr": "Création de contenu, rédaction et documentation",
+      "ko": "콘텐츠 제작, 글쓰기 및 문서화"
+    }
+  },
+  "business": {
+    "en": "Business",
+    "zh": "商业",
+    "fr": "Affaires",
+    "ko": "비즈니스",
+    "description": {
+      "en": "Business strategy, management, and entrepreneurship",
+      "zh": "商业策略、管理和创业",
+      "fr": "Stratégie commerciale, gestion et entrepreneuriat",
+      "ko": "비즈니스 전략, 경영 및 창업"
+    }
+  },
+  "devops": {
+    "en": "DevOps",
+    "zh": "DevOps",
+    "fr": "DevOps",
+    "ko": "DevOps",
+    "description": {
+      "en": "DevOps, CI/CD, infrastructure, and deployment",
+      "zh": "DevOps、CI/CD、基础设施和部署",
+      "fr": "DevOps, CI/CD, infrastructure et déploiement",
+      "ko": "DevOps, CI/CD, 인프라 및 배포"
+    }
+  },
+  "security": {
+    "en": "Security",
+    "zh": "安全",
+    "fr": "Sécurité",
+    "ko": "보안",
+    "description": {
+      "en": "Security, privacy, and cybersecurity",
+      "zh": "安全、隐私和网络安全",
+      "fr": "Sécurité, confidentialité et cybersécurité",
+      "ko": "보안, 개인정보 보호 및 사이버 보안"
+    }
+  }
+}

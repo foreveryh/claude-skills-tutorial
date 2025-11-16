@@ -135,22 +135,19 @@ archive/{YYYY-MM}/{slug}/
   - See `references/jina-mcp-setup.md` for detailed setup
   - **Fallback**: Jina API via curl (if MCP not available)
 
-**For Translation (Highly Recommended):**
-- **Translator MCP Server**: https://github.com/foreveryh/translator-mcp-server
-  - Provides professional three-stage translation workflow
-  - 3-5x faster than direct Claude translation
-  - Better terminology consistency
-  - **Quick Setup**:
-    - Public server: `https://t.deeptoai.com/sse` (easiest, free to use)
-    - NPM: `npx translator-mcp-server` (quick local setup)
-    - Self-hosted: Clone repo, configure `.env`, `npm run build && npm start`
-  - See `references/translator-mcp-setup.md` for detailed setup
-  - **Fallback**: Direct Claude translation (if MCP not available)
+**For Translation (Built-in):**
+- **Translator Skill**: Built-in professional translation
+  - Uses Claude's native translation capabilities
+  - Preserves Markdown formatting and code blocks
+  - Consistent technical terminology handling
+  - Language-specific best practices (zh, fr, ko, en)
+  - **No configuration required** - automatically activated when needed
+  - Located in `.claude/skills/translator/`
 
-**Performance with Both MCPs:**
-- Article fetching: ~3-4 seconds (vs ~10+ seconds with curl)
-- Translation (4 languages): ~15-30 seconds (vs ~60-120 seconds with Claude)
-- **Total improvement: 3-5x faster overall**
+**Performance:**
+- Article fetching with Jina MCP: ~3-4 seconds (vs ~10+ seconds with curl)
+- Translation (4 languages): Automatic via translator skill
+- **Overall: Fast and efficient workflow with no external dependencies for translation**
 
 ### Directory Permissions
 - Write access to `content/docs/`
