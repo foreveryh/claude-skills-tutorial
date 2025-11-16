@@ -4,21 +4,40 @@
 
 ---
 
-## 📋 测试目标
+## ⚠️ 重要说明：环境差异
 
-验证以下功能：
-1. ✅ Translator MCP 连接成功
-2. ✅ Jina MCP 连接成功（可选）
-3. ✅ Skill 能够检测到 MCP 工具
-4. ✅ translate_text 工具可用并正常工作
-5. ✅ read_url 工具可用（如果配置了 Jina MCP）
-6. ✅ 完整的文章导入流程能够跑通
+**本指南适用于**：
+- ✅ Claude Desktop（桌面应用）
+- ⚠️ Claude Code CLI（部分适用，配置方式不同）
+- ❌ Claude Code（浏览器版）- 不支持自定义 MCP 配置
+
+**如果你在使用 Claude Code（浏览器版）**：
+→ **跳过 MCP 配置部分**，直接看 [Fallback 模式测试](#fallback-模式测试)
+→ Skill 会自动使用 Jina API + Claude 直接翻译
+→ 功能完全可用，只是速度慢一些
 
 ---
 
-## 🚀 快速开始（5 分钟设置）
+## 📋 测试目标
 
-### Step 1: 配置 Claude Desktop
+验证以下功能：
+1. ✅ Translator MCP 连接成功（仅 Claude Desktop）
+2. ✅ Jina MCP 连接成功（仅 Claude Desktop，可选）
+3. ✅ Skill 能够检测到 MCP 工具
+4. ✅ translate_text 工具可用并正常工作
+5. ✅ read_url 工具可用（如果配置了 Jina MCP）
+6. ✅ 完整的文章导入流程能够跑通（MCP 或 Fallback 模式）
+
+---
+
+## 🚀 快速开始
+
+### 选择你的环境
+
+<details>
+<summary><b>A. Claude Desktop（桌面应用）- 完整 MCP 支持</b></summary>
+
+#### Step 1: 配置 Claude Desktop
 
 **编辑配置文件**：
 
@@ -52,12 +71,12 @@ notepad $env:APPDATA\Claude\claude_desktop_config.json
 
 **保存并退出**
 
-### Step 2: 重启 Claude
+#### Step 2: 重启 Claude Desktop
 
-- **Claude Desktop**: 完全退出（Cmd+Q / Alt+F4）并重新打开
-- **Claude Code CLI**: 退出当前会话，重新启动
+- 完全退出（Cmd+Q / Alt+F4）
+- 重新打开 Claude Desktop
 
-### Step 3: 验证 MCP 连接
+#### Step 3: 验证 MCP 连接
 
 在 Claude 中输入：
 
@@ -84,6 +103,31 @@ Jina MCP:
 **如果看到这些工具 → 配置成功！继续下一步**
 
 **如果没看到 → 跳到"故障排查"部分**
+
+</details>
+
+<details>
+<summary><b>B. Claude Code（浏览器版）- Fallback 模式</b></summary>
+
+#### 重要说明
+
+**Claude Code 浏览器版目前不支持自定义 MCP 配置**
+
+因此你需要使用 **Fallback 模式**：
+- ✅ Jina API（通过 curl）获取文章
+- ✅ Claude 直接翻译
+- ✅ 功能完全可用
+- ⚠️ 速度较慢（2-3 倍）
+
+#### 无需配置！
+
+Skill 会自动检测 MCP 不可用，并使用 fallback 策略。
+
+#### 直接开始测试
+
+跳转到 [Fallback 模式测试](#fallback-模式测试)
+
+</details>
 
 ---
 
@@ -626,6 +670,136 @@ Step 8: 归档                      1 秒
 
 ---
 
+---
+
+## 🔄 Fallback 模式测试
+
+**适用于 Claude Code（浏览器版）或没有配置 MCP 的用户**
+
+### 什么是 Fallback 模式？
+
+当 MCP 不可用时，Skill 自动使用：
+- **Jina API**（`curl "https://r.jina.ai/{url}"`）- 获取文章
+- **Claude 直接翻译** - 使用 `references/translation-prompts.md` 中的提示词
+
+### Fallback 模式测试
+
+#### 测试 1: 验证 Jina API 可用
+
+**在终端测试**：
+```bash
+curl "https://r.jina.ai/https://example.com" | head -20
+```
+
+**期望**：返回 Markdown 格式的网页内容
+
+#### 测试 2: 完整文章导入（Fallback）
+
+**在 Claude Code 中**：
+
+```
+我想导入这篇文章到 Fumadocs：
+https://example.com/some-article
+
+翻译到：en, zh
+下载图片：no（为了加快测试）
+```
+
+**期望流程**：
+
+```
+⚠️  检测 MCP 状态
+   → Translator MCP: 不可用
+   → Jina MCP: 不可用
+   → 使用 Fallback 模式
+
+✅ Step 1: 获取文章信息
+
+✅ Step 2: 使用 Jina API 获取文章
+   → curl "https://r.jina.ai/{url}"
+   → 耗时 8-12 秒
+   → 返回 Markdown
+
+✅ Step 3-4: 生成 slug、处理图片（跳过）
+
+✅ Step 5: 分类文章
+   → AI 分析内容
+   → 确定 category, difficulty, tags
+
+✅ Step 6: 使用 Claude 直接翻译
+   中文翻译：
+   → 加载 translation-prompts.md
+   → Claude 翻译（25-35 秒）
+   ✅ 完成
+
+✅ Step 7-9: 生成 MDX、归档
+
+✅ Step 10: 汇总报告
+```
+
+**验证点**：
+- [ ] Skill 检测到 MCP 不可用
+- [ ] 自动切换到 Fallback 模式
+- [ ] Jina API 成功获取文章
+- [ ] Claude 直接翻译成功
+- [ ] 文件创建正确
+- [ ] 总耗时 < 90 秒（比 MCP 慢但可接受）
+
+#### 测试 3: 性能对比
+
+**记录数据**：
+```
+Fallback 模式（2 种语言）：
+- 文章获取: _____ 秒
+- 中文翻译: _____ 秒
+- 总耗时: _____ 秒
+
+预期：50-80 秒
+```
+
+### Fallback 模式的优势
+
+✅ **无需配置** - 开箱即用
+✅ **环境无关** - Claude Code 浏览器版也能用
+✅ **功能完整** - 所有功能都可用
+✅ **可靠性高** - 不依赖第三方 MCP 服务
+
+### Fallback 模式的劣势
+
+⚠️ **速度较慢** - 约 2-3 倍慢于 MCP 模式
+⚠️ **翻译质量略低** - 没有三阶段翻译流程
+⚠️ **成本稍高** - 使用更多 Claude tokens
+
+---
+
+## 📊 性能对比总结
+
+### MCP 模式（仅 Claude Desktop）
+
+```
+2 种语言导入：
+总耗时：15-24 秒 ⚡
+- 文章获取 (Jina MCP): 3-5s
+- 翻译 x2 (Translator MCP): 6-9s × 2
+```
+
+### Fallback 模式（所有环境）
+
+```
+2 种语言导入：
+总耗时：50-80 秒 🐌
+- 文章获取 (Jina API): 8-12s
+- 翻译 x2 (Claude 直接): 25-35s × 2
+```
+
+**对于 Claude Code 浏览器版用户**：
+- ✅ Fallback 是唯一选项
+- ✅ 但完全够用！
+- ✅ 50-80 秒导入一篇文章是可接受的
+
+---
+
 **准备好开始测试了吗？** 🎯
 
-从 **Step 1: 配置 Claude Desktop** 开始！
+**Claude Desktop 用户**：从 [A. Claude Desktop 配置](#选择你的环境) 开始
+**Claude Code 用户**：从 [B. Fallback 模式测试](#fallback-模式测试) 开始
