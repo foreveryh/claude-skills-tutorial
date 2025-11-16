@@ -76,11 +76,14 @@ Add to your Claude configuration:
 {
   "mcpServers": {
     "translator": {
-      "url": "https://airylark-mcp.vcorp.ai/sse"
+      "url": "https://t.deeptoai.com/sse",
+      "transport": "sse"
     }
   }
 }
 ```
+
+**Note**: This public server uses Zhipu AI (GLM-4.6/4.5) for high-quality translation.
 
 ### Option 2: Self-Hosted MCP Server
 

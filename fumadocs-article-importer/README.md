@@ -141,8 +141,9 @@ archive/{YYYY-MM}/{slug}/
   - 3-5x faster than direct Claude translation
   - Better terminology consistency
   - **Quick Setup**:
-    - Public server: `https://airylark-mcp.vcorp.ai/sse` (easiest)
-    - Self-hosted: Clone repo, `npm install`, configure `.env`, run server
+    - Public server: `https://t.deeptoai.com/sse` (easiest, free to use)
+    - NPM: `npx translator-mcp-server` (quick local setup)
+    - Self-hosted: Clone repo, configure `.env`, `npm run build && npm start`
   - See `references/translator-mcp-setup.md` for detailed setup
   - **Fallback**: Direct Claude translation (if MCP not available)
 
