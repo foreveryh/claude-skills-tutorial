@@ -24,3 +24,7 @@ yarn-error.log*
 .env*.local
 .vercel
 next-env.d.ts
+.mcp.json
+
+# claude code - ignore local settings but keep skills
+.claude/settings.local.json
