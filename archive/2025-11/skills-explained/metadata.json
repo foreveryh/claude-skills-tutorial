@@ -1,0 +1,25 @@
+{
+  "source_url": "https://claude.com/blog/skills-explained",
+  "download_date": "2025-11-16T10:00:00.000Z",
+  "title": "Skills explained: How Skills compares to prompts, Projects, MCP, and subagents",
+  "author": "Claude Team",
+  "languages": ["en", "zh", "fr", "ko"],
+  "category": "ai-ml",
+  "difficulty": "intermediate",
+  "tags": ["ai", "agents", "workflows", "skills", "claude", "automation"],
+  "published_files": {
+    "en": "content/docs/en/ai-ml/skills-explained.mdx",
+    "zh": "content/docs/zh/ai-ml/skills-explained.mdx",
+    "fr": "content/docs/fr/ai-ml/skills-explained.mdx",
+    "ko": "content/docs/ko/ai-ml/skills-explained.mdx"
+  },
+  "images": [],
+  "slug": "skills-explained",
+  "processing_summary": {
+    "content_fetched": true,
+    "translation_completed": true,
+    "mdx_files_created": 4,
+    "images_processed": 0,
+    "archive_created": true
+  }
+}
