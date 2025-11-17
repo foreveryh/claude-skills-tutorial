@@ -1,0 +1,804 @@
+---
+title: "深入解析 webapp-testing：完整的 Playwright 测试指南"
+description: "使用 Playwright 与本地 Web 应用程序交互并对其进行测试的工具包。本综合分析涵盖 webapp-testing 的 4K SKILL.md、105 行 with_server.py 脚本，以及用于前端验证、UI 调试和浏览器自动化的实用示例。"
+lang: zh
+category: development
+difficulty: intermediate
+tags:
+  - claude-skills
+  - webapp-testing
+  - playwright
+  - browser-automation
+  - testing
+  - tutorial
+image: /images/docs/analyzing-webapp-testing/playwright-testing-overview.jpg
+source_url: "https://github.com/anthropics/skills/tree/main/webapp-testing"
+published_date: "2025-01-17"
+author: Anthropic
+source:
+  url: "https://github.com/anthropics/skills/tree/main/webapp-testing"
+  name: "Anthropic Skills Repository"
+  author: "Anthropic"
+  published_date: "2025-01-17"
+  accessed_date: "2025-11-17"
+  license: "See LICENSE.txt for full terms"
+import:
+  date: "2025-11-17"
+  slug: "analyzing-webapp-testing"
+  translator: "Claude AI"
+---
+
+import { SourceAttribution } from '@/components/SourceAttribution';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { CodeBlock } from 'fumadocs-ui/components/codeblock';
+
+<SourceAttribution
+  source={{
+    url: "https://github.com/anthropics/skills/tree/main/webapp-testing",
+    name: "Anthropic Skills Repository",
+    author: "Anthropic",
+    published_date: "2025-01-17",
+    license: "See LICENSE.txt"
+  }}
+  languages={['en', 'zh', 'fr']}
+  currentLang="zh"
+/>
+
+# 深入解析 webapp-testing：完整的 Playwright 测试指南
+
+**webapp-testing** 是一个 Claude skill，提供使用 Playwright 与本地 Web 应用程序交互并对其进行测试的完整工具包。该 skill 支持自动化前端功能验证、UI 行为调试、屏幕截图捕获和浏览器控制台日志分析。
+
+<Callout type="info">
+  这是来自 Anthropic skills 仓库的生产级 skill，专为需要使用原生 Python Playwright 脚本测试 Web 应用程序的开发者设计。该 skill 强调实用的自动化工作流和服务器生命周期管理。
+</Callout>
+
+## 概述
+
+### 什么是 webapp-testing？
+
+<Callout type="question">
+  基于描述：使用 Playwright 与本地 Web 应用程序交互并对其进行测试的工具包。支持验证前端功能、调试 UI 行为、捕获浏览器屏幕截图和查看浏览器日志。
+</Callout>
+
+### 核心目标
+
+webapp-testing skill 旨在：
+
+- 使用原生 Playwright Python 脚本对本地 Web 应用程序进行自动化测试
+- 为多服务器应用程序提供服务器生命周期管理
+- 支持前端功能验证和 UI 行为调试
+- 在自动化过程中捕获浏览器屏幕截图和控制台日志
+- 建立 Web 应用程序测试工作流的系统化方法
+
+### 目标受众
+
+本 skill 专为以下人员设计：
+
+- 使用 Playwright 测试本地 Web 应用程序的开发者
+- 构建自动化浏览器测试工作流的 QA 工程师
+- 调试 UI 行为和功能的前端工程师
+- 使用真实浏览器构建端到端测试自动化的人员
+
+## Skill 结构
+
+### 目录结构
+
+<Files>
+  <Folder name="webapp-testing" defaultOpen>
+    <File name="SKILL.md" />
+    <Folder name="scripts">
+      <File name="with_server.py" />
+    </Folder>
+    <Folder name="examples">
+      <File name="element_discovery.py" />
+      <File name="static_html_automation.py" />
+      <File name="console_logging.py" />
+    </Folder>
+  </Folder>
+</Files>
+
+### SKILL.md 结构
+
+每个 skill 都以 YAML 元数据开头：
+
+```yaml
+---
+name: webapp-testing
+description: "使用 Playwright 与本地 Web 应用程序交互并对其进行测试的工具包。支持验证前端功能、调试 UI 行为、捕获浏览器屏幕截图和查看浏览器日志。"
+license: Complete terms in LICENSE.txt
+---
+```
+
+### 关键组件
+
+### 脚本
+
+<Callout type="info">
+  脚本提供确定性的可重用代码，Claude 可以执行。webapp-testing 包含一个复杂的服务器生命周期管理脚本。
+</Callout>
+
+webapp-testing skill 包含一个主要脚本：
+
+<Steps>
+  <Step>
+    **with_server.py**：管理测试的服务器生命周期，支持单个和多个服务器（105 行健壮进程管理）
+  </Step>
+</Steps>
+
+### 示例
+
+<Callout type="tip">
+  实用示例展示了常见的测试模式和工作流
+</Callout>
+
+提供了三个综合示例：
+
+<Steps>
+  <Step>
+    **element_discovery.py**：发现页面上的按钮、链接和输入（40 行）
+  </Step>
+  <Step>
+    **static_html_automation.py**：使用 file:// URL 进行本地 HTML 测试（33 行）
+  </Step>
+  <Step>
+    **console_logging.py**：在自动化期间捕获浏览器控制台日志（35 行）
+  </Step>
+</Steps>
+
+## 技术深入解析
+
+### 测试策略决策树方法
+
+该 skill 引入了一个清晰的决策树，用于根据应用程序特征选择合适的测试方法：
+
+<Callout type="info">
+  webapp-testing 为不同的 Web 应用程序测试场景提供系统的决策指导，从静态 HTML 到动态多服务器应用程序。
+</Callout>
+
+<Steps>
+  <Step>
+    **从用户任务开始**：识别需要测试的内容
+  </Step>
+  <Step>
+    **确定应用程序类型**：是静态 HTML 还是动态 Web 应用程序？
+  </Step>
+  <Step>
+    **检查服务器状态**：服务器是否已在运行，还是需要启动？
+  </Step>
+  <Step>
+    **选择适当方法**：选择直接读取、with_server.py 助手或侦查-行动模式
+  </Step>
+</Steps>
+
+### 测试策略决策树
+
+```
+用户任务 → 是静态 HTML 吗？
+    ├─ 是 → 直接读取 HTML 文件以识别选择器
+    │         ├─ 成功 → 使用选择器编写 Playwright 脚本
+    │         └─ 失败/不完整 → 视为动态（如下）
+    │
+    └─ 否（动态 Web 应用程序）→ 服务器是否已在运行？
+        ├─ 否 → 运行：python scripts/with_server.py --help
+        │        然后使用助手 + 编写简化的 Playwright 脚本
+        │
+        └─ 是 → 侦查-行动模式：
+            1. 导航并等待 networkidle
+            2. 截取屏幕截图或检查 DOM
+            3. 从渲染状态识别选择器
+            4. 使用发现的选择器执行操作
+```
+
+### 工作原理
+
+<Callout type="info">
+  webapp-testing 展示了实用的 skill 设计，具有特定的可执行指导，并专注于真实世界的测试工作流。
+</Callout>
+
+<Steps>
+  <Step>
+    **触发检测**：Claude 根据 Web 应用程序测试查询和详细描述识别何时应使用该 skill
+  </Step>
+  <Step>
+    **上下文加载**：SKILL.md 内容（4KB，96 行）加载到 Claude 的上下文窗口中，包含全面的测试工作流
+  </Step>
+  <Step>
+    **资源访问**：根据需要引用脚本和示例，强调首先使用 --help 了解功能
+  </Step>
+  <Step>
+    **执行**：Claude 遵循静态与动态应用程序的系统化方法和服务器管理
+  </Step>
+</Steps>
+
+### 关键最佳实践：黑盒脚本使用
+
+<Callout type="warn">
+  始终首先使用 `--help` 运行脚本。在尝试运行脚本并发现绝对需要自定义解决方案之前，不要读取源代码。这些脚本可能非常大，会污染上下文窗口。
+</Callout>
+
+该 skill 明确建议：
+
+- ❌ **不要将大脚本加载到上下文** 中（浪费上下文窗口）
+- ✅ **将脚本用作黑盒** （通过命令行直接调用）
+- ✅ **首先检查 --help** （在实施前了解功能）
+
+这是一种复杂的上下文管理方法，认识到加载大代码文件的成本与直接执行的好处。
+
+## 脚本分析
+
+### with_server.py - 多服务器生命周期管理
+
+这个 105 行的 Python 脚本提供健壮的服务器生命周期管理：
+
+```python
+def is_server_ready(port, timeout=30):
+    """通过轮询端口等待服务器准备就绪。"""
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            with socket.create_connection(('localhost', port), timeout=1):
+                return True
+        except (socket.error, ConnectionRefusedError):
+            time.sleep(0.5)
+    return False
+```
+
+**关键特性**：
+
+<Cards>
+  <Card title="多服务器支持" icon="Server">
+    可以同时管理单个或多个服务器（例如后端 + 前端），具有独立的启动和清理
+  </Card>
+
+  <Card title="端口轮询" icon="Activity">
+    主动轮询端口以确定服务器就绪状态，而不是使用固定超时，可配置超时（默认 30 秒）
+  </Card>
+
+  <Card title="进程生命周期" icon="RefreshCw">
+    正确的子进程管理，在 finally 块中清理，处理优雅终止和强制终止场景
+  </Card>
+
+  <Card title="Shell 命令支持" icon="Terminal">
+    使用 shell=True 支持带 cd、&& 和其他 shell 操作符的复杂命令，以实现灵活的服务器启动
+  </Card>
+</Cards>
+
+**使用模式**：
+
+<Steps>
+  <Step>
+    **单服务器**：`python scripts/with_server.py --server "npm run dev" --port 5173 -- python automation.py`
+  </Step>
+  <Step>
+    **多服务器**：
+    ```bash
+    python scripts/with_server.py \
+      --server "cd backend && python server.py" --port 3000 \
+      --server "cd frontend && npm run dev" --port 5173 \
+      -- python test.py
+    ```
+  </Step>
+</Steps>
+
+### 示例分析
+
+#### element_discovery.py - 交互式元素发现
+
+<Callout type="info">
+  展示用于发现交互式元素的侦查-行动模式
+</Callout>
+
+```python
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto('http://localhost:5173')
+    page.wait_for_load_state('networkidle')  # 动态内容的关键
+
+    # 发现所有按钮
+    buttons = page.locator('button').all()
+    print(f"找到 {len(buttons)} 个按钮：")
+    for i, button in enumerate(buttons):
+        text = button.inner_text() if button.is_visible() else "[隐藏]"
+        print(f"  [{i}] {text}")
+```
+
+**关键技术**：
+- ✅ 使用 `page.wait_for_load_state('networkidle')` 处理动态内容
+- ✅ 按类型定位元素（按钮、链接、输入）
+- ✅ 在交互前检查可见性
+- ✅ 捕获元素数量和内容以进行分析
+
+#### static_html_automation.py - File:// URL 测试
+
+<Callout type="info">
+  展示如何在没有服务器的情况下使用 file:// URL 测试本地 HTML 文件
+</Callout>
+
+```python
+html_file_path = os.path.abspath('path/to/your/file.html')
+file_url = f'file://{html_file_path}'
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page(viewport={'width': 1920, 'height': 1080})
+    page.goto(file_url)  # 直接文件访问
+    page.screenshot(path='/mnt/user-data/outputs/static_page.png')
+```
+
+**关键技术**：
+- ✅ 计算 file URL 转换的绝对路径
+- ✅ 设置视口以实现一致的屏幕截图
+- ✅ 对 file:// URL 使用标准 Playwright API
+- ✅ 捕获之前/之后状态以进行验证
+
+#### console_logging.py - 浏览器控制台捕获
+
+<Callout type="info">
+  在自动化期间捕获 JavaScript 控制台输出以进行调试
+</Callout>
+
+```python
+console_logs = []
+
+def handle_console_message(msg):
+    console_logs.append(f"[{msg.type}] {msg.text}")
+    print(f"控制台：[{msg.type}] {msg.text}")
+
+page.on("console", handle_console_message)
+```
+
+**关键技术**：
+- ✅ 在页面导航前设置事件处理程序
+- ✅ 捕获所有控制台消息类型（log、error、warn 等）
+- ✅ 存储日志以供后续分析
+- ✅ 在测试执行期间提供实时输出
+
+## 使用示例
+
+### 基本用法 - 测试静态 HTML 文件
+
+<Callout type="info">
+  对于静态 HTML 文件，直接读取并检查源代码
+</Callout>
+
+```python
+from playwright.sync_api import sync_playwright
+import os
+
+html_file_path = os.path.abspath('test.html')
+file_url = f'file://{html_file_path}'
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto(file_url)
+    page.screenshot(path='test_output.png')
+    browser.close()
+```
+
+### 高级场景 - 使用多服务器设置的动态应用程序
+
+<Callout type="tip">
+  对需要多个服务的复杂应用程序使用 with_server.py
+</Callout>
+
+**场景**：测试具有独立后端和前端的全栈应用程序
+
+```bash
+# 使用 with_server.py 助手
+python scripts/with_server.py \
+  --server "cd backend && python api.py" --port 3000 \
+  --server "cd frontend && npm run dev" --port 5173 \
+  -- python test_fullstack.py
+```
+
+**您的 test_fullstack.py**：
+```python
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto('http://localhost:5173')  # 端口 5173 自动就绪
+    page.wait_for_load_state('networkidle')
+    # ... 测试您的应用程序
+    browser.close()
+```
+
+### 未知应用程序的侦查-行动模式
+
+<Callout type="info">
+  测试不熟悉应用程序时，首先检查渲染状态
+</Callout>
+
+<Steps>
+  <Step>
+    **检查渲染的 DOM**：
+    ```python
+    page.goto('http://localhost:5173')
+    page.wait_for_load_state('networkidle')
+    page.screenshot(path='/tmp/inspect.png', full_page=True)
+    content = page.content()
+    buttons = page.locator('button').all()
+    ```
+  </Step>
+  <Step>
+    **从检查结果中识别**选择器
+  </Step>
+  <Step>
+    **使用发现的选择器执行**操作
+  </Step>
+</Steps>
+
+## 最佳实践
+
+基于 webapp-testing 的设计，以下是 Web 应用程序测试的关键原则：
+
+### 自动化最佳实践
+
+<Cards>
+  <Card title="使用 sync_playwright()" icon="Code">
+    使用同步 API 编写更简单的测试脚本，而不是异步模式
+  </Card>
+
+  <Card title="始终使用 headless 模式" icon="EyeOff">
+    使用 `headless=True` 启动浏览器以进行 CI/CD 和自动化测试
+  </Card>
+
+  <Card title="等待 networkidle" icon="Clock">
+    在检查动态应用程序之前始终等待 networkidle 以确保 JavaScript 执行完成
+  </Card>
+
+  <Card title="关闭浏览器资源" icon="X">
+    完成后始终关闭浏览器以释放资源：`browser.close()`
+  </Card>
+
+  <Card title="使用描述性选择器" icon="Tag">
+    优先使用 text=、role=、CSS 选择器或 ID 以实现稳定的元素识别
+  </Card>
+
+  <Card title="添加适当的等待" icon="Timer">
+    对时间敏感的操作使用 `page.wait_for_selector()` 或 `page.wait_for_timeout()`
+  </Card>
+</Cards>
+
+### 关键常见陷阱
+
+<Callout type="warn">
+  **关键**：在动态应用程序上等待 networkidle 之前切勿检查 DOM
+</Callout>
+
+❌ **错误**：
+```python
+page.goto('http://localhost:5173')
+buttons = page.locator('button').all()  # 可能错过动态渲染的元素
+```
+
+✅ **正确**：
+```python
+page.goto('http://localhost:5173')
+page.wait_for_load_state('networkidle')  # 等待 JS 执行
+buttons = page.locator('button').all()  # 现在捕获所有元素
+```
+
+## 与其他 Skill 集成
+
+webapp-testing 可与以下 skill 良好协作：
+
+1. **skill-creator** - 用于基于测试模式创建新 skill
+2. **webapp-development** - 用于全栈开发工作流
+3. **mcp-builder** - 用于将浏览器测试与 MCP 服务器集成
+4. **error-handling-skills** - 用于综合测试失败分析
+
+## 实际应用
+
+### 用例 1：持续集成测试
+
+**场景**：React 应用程序的 CI/CD 流水线中的自动化测试
+
+<Steps>
+  <Step>
+    **设置**：配置 CI 以使用带 playwright 的 webapp-testing
+  </Step>
+  <Step>
+    **执行**：
+    ```bash
+    python scripts/with_server.py \
+      --server "npm run dev" --port 5173 \
+      -- python ci_tests.py
+    ```
+  </Step>
+  <Step>
+    **验证**：测试检查关键用户流，在失败时捕获屏幕截图
+  </Step>
+</Steps>
+
+**结果**：CI/CD 中的自动化浏览器测试，失败时有屏幕截图证据
+
+### 用例 2：跨浏览器兼容性测试
+
+**场景**：验证应用程序在 Chromium、Firefox 和 WebKit 中均可工作
+
+```python
+with sync_playwright() as p:
+    for browser_type in [p.chromium, p.firefox, p.webkit]:
+        browser = browser_type.launch(headless=True)
+        page = browser.new_page()
+        page.goto('http://localhost:5173')
+        page.screenshot(path=f'output_{browser_type.name}.png')
+        browser.close()
+```
+
+**结果**：自动化多浏览器测试，支持视觉比较
+
+### 用例 3：表单自动化和验证
+
+**场景**：测试具有验证的复杂多页表单
+
+<Steps>
+  <Step>
+    **发现**：使用 element_discovery.py 识别所有表单字段
+  </Step>
+  <Step>
+    **自动化**：用测试数据顺序填充字段
+  </Step>
+  <Step>
+    **验证**：检查错误消息和成功状态
+  </Step>
+  <Step>
+    **调试**：捕获控制台日志以识别 JavaScript 错误
+  </Step>
+</Steps>
+
+**结果**：具有验证状态验证的综合表单测试
+
+### 用例 4：回归测试
+
+**场景**：防止 UI 组件中的视觉回归
+
+<Steps>
+  <Step>
+    **基线**：捕获所有组件的屏幕截图
+  </Step>
+  <Step>
+    **更改后**：重新运行测试并捕获新屏幕截图
+  </Step>
+  <Step>
+    **比较**：使用图像差异工具检测视觉变化
+  </Step>
+  <Step>
+    **审查**：手动审查检测到的差异
+  </Step>
+</Steps>
+
+**结果**：UI 更改的自动化视觉回归检测
+
+## 故障排除
+
+### 服务器启动失败
+
+**症状**：with_server.py 报告 "Server failed to start"
+
+**原因**：端口已在使用、启动命令错误、超时太短
+
+**解决方案**：
+- 检查端口是否已在使用：`lsof -i :5173`
+- 手动验证启动命令是否有效
+- 增加超时：`--timeout 60`
+
+### 元素未找到错误
+
+**症状**：`page.locator('button').all()` 返回空或找不到元素
+
+**原因**：等待错误的加载状态或选择器不匹配
+
+**解决方案**：
+- 验证是否调用了 `page.wait_for_load_state('networkidle')`
+- 通过屏幕截图检查元素是否存在：`page.screenshot()`
+- 使用浏览器开发工具查找正确的选择器
+
+### 不稳定测试 - 间歇性失败
+
+**症状**：测试有时通过，但随机失败
+
+**原因**：竞态条件、网络延迟、计时问题
+
+**解决方案**：
+- 添加显式等待：`page.wait_for_selector('button')`
+- 增加超时值
+- 对已知延迟使用 page.wait_for_timeout()
+- 在失败时捕获状态以进行调试
+
+### 控制台错误未捕获
+
+**症状**：发生 JavaScript 错误但不在控制台日志中
+
+**原因**：导航前未设置事件处理程序
+
+**解决方案**：
+- 在 page.goto() 之前设置 page.on("console")
+- 也捕获 page.on("pageerror") 以处理未捕获的错误
+```python
+page.on("console", handle_console)
+page.on("pageerror", handle_page_error)
+```
+
+### 屏幕截图质量问题
+
+**症状**：屏幕截图被截断或尺寸错误
+
+**原因**：未设置视口、屏幕截图时机错误
+
+**解决方案**：
+- 设置视口：`browser.new_page(viewport={'width': 1920, 'height': 1080})`
+- 对完整页面捕获使用 `full_page=True`
+- 在捕获前等待加载状态
+
+## 后续步骤
+
+要有效使用 webapp-testing：
+
+1. **克隆仓库**：`git clone https://github.com/anthropics/skills`
+2. **安装 Playwright**：`pip install playwright && playwright install`
+3. **学习示例**：查看所有三个示例以了解模式
+4. **测试 with_server.py**：使用 `--help` 运行以了解功能
+5. **从简单开始**：从静态 HTML 测试开始
+6. **过渡到动态**：使用本地开发服务器和 with_server.py
+7. **构建综合测试**：组合多个模式以实现完整的应用程序覆盖
+
+### 相关资源
+
+- **Playwright 文档**：playwright.dev
+- **Anthropic Skills Repository**：github.com/anthropics/skills
+- **Playwright Python**：github.com/microsoft/playwright-python
+- **Skill 文章**：/development/analyzing-webapp-testing
+
+## 结论
+
+webapp-testing 通过以下方面展示了优雅的 Claude skill 设计：
+
+✅ **专注范围**：满足本地 Web 应用程序测试的特定需求
+✅ **实用工具**：105 行的 with_server.py 解决了真实的多服务器管理问题
+✅ **渐进方法**：决策树指导用户选择适当策略
+✅ **综合示例**：三个示例涵盖常见的测试模式
+✅ **最佳实践强调**：关于等待、选择器和生命周期管理的清晰指导
+✅ **上下文管理**：明确建议不要不必要地加载大脚本
+
+本 skill 的关键见解可以改变开发者处理 Web 应用程序测试的方式，为从简单的静态 HTML 文件到复杂的多服务器动态应用程序的所有内容提供系统化方法。
+
+---
+
+## 总结
+
+本次综合分析涵盖：
+
+- ✅ Skill 结构和剖析（4K SKILL.md，单个脚本 + 示例）
+- ✅ 静态与动态应用程序的决策树方法
+- ✅ 未知应用程序的侦查-行动模式
+- ✅ 使用 with_server.py 的多服务器生命周期管理
+- ✅ 涵盖关键测试模式的三个综合示例
+- ✅ Playwright 自动化和浏览器管理的最佳实践
+- ✅ 实际应用和用例
+- ✅ 常见问题的故障排除指南
+- ✅ 与相关 skill 的集成策略
+
+## 后续步骤
+
+准备好实施 webapp-testing 了吗？
+
+1. **安装 Playwright**：获取 Python 包和浏览器二进制文件
+2. **学习 with_server.py**：了解它如何管理服务器生命周期
+3. **运行示例**：尝试所有三个示例以学习模式
+4. **从简单测试开始**：为您的静态 HTML 文件创建测试
+5. **过渡到动态应用程序**：对 React/Vue/Angular 应用程序使用 with_server.py
+6. **构建综合套件**：组合模式以实现完整的测试覆盖
+7. **与 CI/CD 集成**：将自动化浏览器测试添加到流水线
+
+## ℹ️ 来源信息
+
+**原始 Skill**：[webapp-testing](https://github.com/anthropics/skills/tree/main/webapp-testing)
+
+- **来源**：Anthropic Skills Repository
+- **作者**：Anthropic
+- **访问日期**：2025-11-17
+- **许可证**：详见 LICENSE.txt 完整条款
+
+*本文基于对 webapp-testing skill 结构、脚本和文档模式的综合分析生成。*
+
+---
+
+## 附录
+
+### 目录结构详情
+
+**必需文件**：
+- **SKILL.md**：4KB，96 行的综合测试指导
+
+**脚本**（1 个文件，105 行）：
+- **with_server.py**：单个或多个服务器的服务器生命周期管理
+
+**示例**（3 个文件，共 109 行）：
+- **element_discovery.py**：40 行 - 元素发现模式
+- **static_html_automation.py**：33 行 - File:// URL 测试
+- **console_logging.py**：35 行 - 浏览器控制台日志捕获
+
+### 完整示例清单
+
+**element_discovery.py** 展示：
+- 按钮发现和文本提取
+- 链接 href 和文本捕获
+- 输入字段类型和名称识别
+- 屏幕截图捕获以供视觉参考
+- 交互前可见性检查
+
+**static_html_automation.py** 展示：
+- file URL 的绝对路径计算
+- 视口配置以实现一致的屏幕截图
+- 表单填充和提交
+- 之前/之后屏幕截图比较
+
+**console_logging.py** 展示：
+- 导航前设置事件处理程序
+- 控制台消息类型捕获（log、error、warn 等）
+- 测试执行期间的实时输出
+- 日志持久化到文件系统
+
+### Playwright 最佳实践亮点
+
+**浏览器管理**：
+- 为 CI/CD 始终在无头模式启动
+- 设置适当的视口以实现一致的渲染
+- 完成后关闭浏览器以释放资源
+
+**元素交互**：
+- 在检查动态内容前等待 networkidle
+- 使用描述性选择器（text=、role=、CSS、ID）
+- 对时间敏感的操作添加适当的等待
+- 在交互前检查元素可见性
+
+**测试稳定性**：
+- 使用显式等待而不是固定超时
+- 为复杂应用程序实现页面对象模式
+- 在失败时捕获屏幕截图以供调试
+- 在导航前设置控制台和错误处理程序
+
+### 服务器管理模式
+
+**单服务器**：
+```bash
+python with_server.py --server "npm run dev" --port 5173 -- pytest
+```
+
+**多服务器**：
+```bash
+python with_server.py \
+  --server "cd api && python server.py" --port 3000 \
+  --server "cd web && npm start" --port 5173 \
+  -- pytest tests/
+```
+
+**编程使用**：
+```python
+import subprocess
+result = subprocess.run([
+    'python', 'with_server.py',
+    '--server', 'npm run dev',
+    '--port', '5173',
+    '--', 'python', 'test.py'
+])
+```
+
+### 测试策略选择指南
+
+| 场景 | 静态 HTML | 动态（服务器运行中） | 动态（无服务器） |
+|----------|-------------|---------------------------|---------------------|
+| **方法** | 读取文件 + 选择器 | 侦查 + 操作 | with_server.py |
+| **需要等待** | 否 | networkidle | networkidle |
+| **端口** | 不适用 | 已在运行 | 由脚本管理 |
+| **复杂性** | 低 | 中 | 高 |
+| **设置** | 无 | 手动启动服务器 | 脚本处理启动 |

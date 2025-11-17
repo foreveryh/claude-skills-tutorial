@@ -2,6 +2,8 @@
   "title": "Développement",
   "icon": "Code",
   "pages": [
+    "analyzing-mcp-builder",
+    "analyzing-webapp-testing",
     "improving-frontend-design-through-skills",
     "agent-skills-overview",
     "agent-skills-sdk",

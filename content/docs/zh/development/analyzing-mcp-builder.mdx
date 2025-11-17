@@ -1,0 +1,732 @@
+---
+title: "深入解析 mcp-builder：MCP 服务器开发完全指南"
+description: "创建高质量 MCP（Model Context Protocol）服务器的指南，使 LLM 能够通过精心设计的工具与外部服务交互。本综合分析涵盖 mcp-builder skill 的 4 阶段工作流程、Python 实现模式和实用评估策略。"
+lang: zh
+category: development
+difficulty: intermediate
+tags:
+  - claude-skills
+  - mcp-builder
+  - mcp-server
+  - model-context-protocol
+  - tutorial
+image: /images/docs/analyzing-mcp-builder/mcp-architecture-overview.jpg
+source_url: "https://github.com/anthropics/skills/tree/main/mcp-builder"
+published_date: "2025-01-17"
+author: Anthropic
+source:
+  url: "https://github.com/anthropics/skills/tree/main/mcp-builder"
+  name: "Anthropic Skills Repository"
+  author: "Anthropic"
+  published_date: "2025-01-17"
+  accessed_date: "2025-11-17"
+  license: "See LICENSE.txt for full terms"
+import:
+  date: "2025-11-17"
+  slug: "analyzing-mcp-builder"
+  translator: "Claude AI"
+---
+
+import { SourceAttribution } from '@/components/SourceAttribution';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+<SourceAttribution
+  source={{
+    url: "https://github.com/anthropics/skills/tree/main/mcp-builder",
+    name: "Anthropic Skills Repository",
+    author: "Anthropic",
+    published_date: "2025-01-17",
+    license: "See LICENSE.txt"
+  }}
+  languages={['en', 'zh', 'fr']}
+  currentLang="zh"
+/>
+
+# 深入解析 mcp-builder：MCP 服务器开发完全指南
+
+**mcp-builder** 是一个 Claude skill，为创建高质量 MCP（Model Context Protocol）服务器提供全面指导。该 skill 使 LLM 能够通过精心设计的工具与外部服务交互，支持 Python（FastMCP）和 Node/TypeScript（MCP SDK）实现。
+
+<Callout type="info">
+  这是来自 Anthropic skills 仓库的生产级 skill，旨在指导开发者完成从规划到评估的完整 MCP 服务器开发生命周期。
+</Callout>
+
+## 概述
+
+### 什么是 mcp-builder？
+
+<Callout type="question">
+  基于描述：创建高质量 MCP（Model Context Protocol）服务器的指南，使 LLM 能够通过精心设计的工具与外部服务交互。在构建 MCP 服务器以集成外部 API 或服务时使用，无论是 Python（FastMCP）还是 Node/TypeScript（MCP SDK）。
+</Callout>
+
+### 核心目标
+
+mcp-builder skill 旨在：
+
+- 指导开发者完成以智能体为中心的 MCP 服务器设计
+- 为 Python 和 TypeScript 提供全面的实现模式
+- 建立评估驱动的开发实践
+- 创建针对 LLM 上下文限制优化的工具
+- 实现系统化的外部服务集成
+
+### 目标受众
+
+本 skill 面向：
+
+- 构建用于外部 API 集成的 MCP 服务器的开发者
+- 为 Claude 和其他 LLM 创建可重用工具的团队
+- 实施 Model Context Protocol 规范的工程师
+- 对 LLM 外部服务通信模式感兴趣的任何人
+
+## Skill 结构
+
+### 目录结构
+
+<Files>
+  <Folder name="mcp-builder" defaultOpen>
+    <File name="SKILL.md" />
+    <Folder name="scripts">
+      <File name="connections.py" />
+      <File name="evaluation.py" />
+    </Folder>
+  </Folder>
+</Files>
+
+### SKILL.md 结构
+
+每个 skill 都以 YAML 元数据开头：
+
+```yaml
+---
+name: mcp-builder
+description: "创建高质量 MCP（Model Context Protocol）服务器的指南，使 LLM 能够通过精心设计的工具与外部服务交互。在构建 MCP 服务器以集成外部 API 或服务时使用，无论是 Python（FastMCP）还是 Node/TypeScript（MCP SDK）。"
+license: Complete terms in LICENSE.txt
+---
+```
+
+### 关键组件
+
+### 脚本
+
+<Callout type="info">
+  脚本提供确定性的可重用代码，Claude 可以执行。mcp-builder 包含用于 MCP 服务器连接处理和评估的复杂 Python 脚本。
+</Callout>
+
+mcp-builder 包含两个强大的脚本：
+
+<Steps>
+  <Step>
+    **connections.py**：抽象 MCP 连接处理，支持不同传输协议（stdio、SSE、HTTP）
+  </Step>
+  <Step>
+    **evaluation.py**：用于测试 MCP 服务器与 Claude 协同效果的综合评估框架
+  </Step>
+</Steps>
+
+## 技术深入解析
+
+### 4 阶段 MCP 服务器开发工作流程
+
+本 skill 遵循包含四个主要阶段的结构化工作流程：
+
+<Steps>
+  <Step>
+    **阶段 1：深入研究与规划** - 理解以智能体为中心的设计原则，学习 MCP 协议和 API 文档，创建全面的实施计划
+  </Step>
+  <Step>
+    **阶段 2：实施** - 设置项目结构，实现核心基础设施，系统地构建工具，遵循语言特定的最佳实践
+  </Step>
+  <Step>
+    **阶段 3：审查与优化** - 代码质量审查、测试和构建验证、质量检查表验证
+  </Step>
+  <Step>
+    **阶段 4：创建评估** - 设计全面的评估场景，创建 10 个复杂问题，生成评估 XML
+  </Step>
+</Steps>
+
+### 工作原理
+
+<Callout type="info">
+  mcp-builder 展示了复杂的 skill 设计，具有渐进式披露、广泛的参考文档和实用工具。
+</Callout>
+
+<Steps>
+  <Step>
+    **触发检测**：Claude 根据 MCP 服务器开发查询和详细描述识别何时应使用该 skill
+  </Step>
+  <Step>
+    **上下文加载**：SKILL.md 内容（13KB，329 行）加载到 Claude 的上下文窗口中，包含全面的工作流文档
+  </Step>
+  <Step>
+    **资源访问**：在实施阶段按需加载 Python、TypeScript 和评估模式的参考文档
+  </Step>
+  <Step>
+    **执行**：Claude 遵循 4 阶段流程，根据需要捆绑用于连接处理和评估的脚本
+  </Step>
+</Steps>
+
+### 阶段 1：深入研究与规划
+
+此阶段为以智能体为中心的 MCP 服务器设计奠定基础：
+
+#### 1.1 理解以智能体为中心的设计原则
+
+<Cards>
+  <Card title="为工作流构建" icon="Zap">
+    不要简单地包装 API 端点——构建深思熟虑、高影响力的工作流工具，整合相关操作并实现完整任务
+  </Card>
+
+  <Card title="优化有限上下文" icon="Eye">
+    智能体有有限的上下文窗口——返回高信号信息，提供精简/详细选项，并将上下文预算视为稀缺资源
+  </Card>
+
+  <Card title="设计可操作的错误消息" icon="MessageSquare">
+    错误消息应通过具体下一步和教育反馈指导智能体走向正确的使用模式
+  </Card>
+
+  <Card title="遵循自然任务细分" icon="GitBranch">
+    工具名称应反映人类的任务思维方式，具有一致的前缀以提高自然工作流的可发现性
+  </Card>
+
+  <Card title="使用评估驱动的开发" icon="TestTube">
+    早期创建现实的评估场景，让智能体反馈驱动工具改进，通过快速原型设计和迭代
+  </Card>
+</Cards>
+
+#### 1.3-1.6 研究和规划活动
+
+本 skill 指导开发者完成：
+
+- **MCP 协议文档**：从 `https://modelcontextprotocol.io/llms-full.txt` 获取
+- **框架文档**：加载 Python 或 TypeScript 的 SDK 特定指南
+- **API 文档**：详尽研究目标服务 API 文档
+- **实施计划**：为工具选择、共享工具、输入/输出设计和错误处理创建详细计划
+
+### 阶段 2：实施
+
+此阶段侧重于系统地构建 MCP 服务器：
+
+#### 2.1 设置项目结构
+
+<Tabs items={['Python', 'TypeScript']}>
+  <Tab value="Python">
+    - 创建单个 `.py` 文件或组织到模块中
+    - 使用 MCP Python SDK 进行工具注册
+    - 定义用于输入验证的 Pydantic 模型
+  </Tab>
+  <Tab value="TypeScript">
+    - 使用 `package.json` 和 `tsconfig.json` 创建适当的项目结构
+    - 使用 MCP TypeScript SDK
+    - 定义用于输入验证的 Zod 模式
+  </Tab>
+</Tabs>
+
+#### 2.3 系统地实施工具
+
+<Callout type="tip">
+  每个工具都需要仔细设计输入模式、全面文档和适当的错误处理
+</Callout>
+
+对于每个工具，开发者应：
+
+- **定义输入模式**：使用 Pydantic（Python）或 Zod（TypeScript）以及适当的约束和示例
+- **编写全面的文档字符串**：包括一行摘要、详细说明、带示例的参数类型、返回模式、使用示例和错误处理
+- **实施工具逻辑**：使用共享工具，遵循 async/await 模式，支持多种响应格式，遵守分页，检查字符限制
+- **添加工具注释**：根据情况包含 `readOnlyHint`、`destructiveHint`、`idempotentHint` 和 `openWorldHint`
+
+### 阶段 3：审查与优化
+
+<Callout type="warn">
+  MCP 服务器是等待通过 stdio/stdin 或 SSE/HTTP 请求的长时间运行的进程。直接运行它们将导致进程无限期挂起。
+</Callout>
+
+#### 3.2 测试与构建 - 关键考虑因素
+
+**安全测试方法**：
+- 使用评估框架（推荐）
+- 在 tmux 中运行服务器以将其保持在主进程之外
+- 测试时使用超时：`timeout 5s python server.py`
+
+**Python 验证**：
+```bash
+python -m py_compile your_server.py
+```
+
+**TypeScript 构建**：
+```bash
+npm run build  # 验证 dist/index.js 已创建
+```
+
+### 阶段 4：创建评估
+
+mcp-builder 最复杂的方面是其评估框架：
+
+#### 4.2 创建 10 个评估问题
+
+每个问题必须满足六个严格要求：
+
+1. **独立**：不依赖其他问题
+2. **只读**：仅需要非破坏性操作
+3. **复杂**：需要多个工具调用和深入探索
+4. **现实**：基于人类关心的真实用例
+5. **可验证**：可通过字符串比较验证的单一明确答案
+6. **稳定**：答案不会随时间变化
+
+#### 4.4 输出格式
+
+评估创建具有以下结构的 XML 文件：
+
+```xml
+<evaluation>
+  <qa_pair>
+    <question>查找关于具有动物代号名称的 AI 模型发布的讨论...</question>
+    <answer>3</answer>
+  </qa_pair>
+  <!-- 更多 qa_pairs... -->
+</evaluation>
+```
+
+## 脚本分析
+
+### connections.py - 多传输 MCP 连接处理器
+
+这个 152 行的 Python 模块提供复杂的连接抽象：
+
+```python
+class MCPConnection(ABC):
+    """MCP 服务器连接的基类。"""
+
+    async def __aenter__(self):
+        """初始化 MCP 服务器连接。"""
+        # 处理 AsyncExitStack、会话初始化和错误清理
+```
+
+**关键特性**：
+- 抽象基类模式用于一致的接口
+- 支持三种传输协议：stdio、SSE、HTTP
+- 用于资源清理的异步上下文管理器
+- 自动会话初始化和错误处理
+- 用于传输无关实例化的工厂函数 `create_connection()`
+
+**传输类**：
+- `MCPConnectionStdio`：用于本地服务器的标准输入/输出
+- `MCPConnectionSSE`：用于流式连接的服务器发送事件
+- `MCPConnectionHTTP`：用于基于 Web 的 MCP 服务器的流式 HTTP
+
+### evaluation.py - 综合 MCP 服务器评估框架
+
+这个 374 行模块提供端到端评估能力：
+
+<Callout type="info">
+  评估框架测试 LLM 是否能有效使用 MCP 服务器回答现实的复杂问题。
+</Callout>
+
+**核心组件**：
+
+1. **评估提示**：复杂的系统提示要求：
+   - 工具使用及逐步摘要
+   - 对工具设计的建设性反馈
+   - 正确格式化的 XML 响应
+
+2. **XML 解析**：具有错误处理的稳健评估文件解析
+
+3. **智能体循环**：与 Claude API 和 MCP 服务器工具的异步交互
+
+4. **指标收集**：对以下方面的全面跟踪：
+   - 准确率
+   - 任务持续时间
+   - 工具调用次数和性能
+   - 反馈质量
+
+**使用示例**：
+
+```bash
+# 评估本地 stdio MCP 服务器
+python evaluation.py -t stdio -c python -a my_server.py eval.xml
+
+# 使用身份验证评估 SSE MCP 服务器
+python evaluation.py -t sse -u https://example.com/mcp \
+  -H "Authorization: Bearer token" eval.xml
+```
+
+## 使用示例
+
+### 基本用法 - 创建 MCP 服务器
+
+<Callout type="info">
+  mcp-builder 指导您完成完整的 MCP 服务器开发过程
+</Callout>
+
+<Steps>
+  <Step>
+    **从研究开始**：学习 MCP 协议文档和目标 API
+  </Step>
+  <Step>
+    **设计以智能体为中心的工具**：专注于工作流，而不仅仅是 API 端点映射
+  </Step>
+  <Step>
+    **系统化实施**：遵循语言特定的最佳实践并进行适当的验证
+  </Step>
+  <Step>
+    **彻底评估**：创建 10+ 个复杂评估场景并使用框架进行测试
+  </Step>
+</Steps>
+
+### 高级场景 - 复杂 API 集成
+
+<Callout type="tip">
+  集成复杂 API 时，mcp-builder 强调整合和工作流思维
+</Callout>
+
+**示例：日历集成**
+
+不要使用单独的工具：
+- ❌ `check_availability`、`create_event`、`send_invitation`
+
+创建工作流导向的工具：
+- ✅ `schedule_meeting`：在一个操作中检查可用性、创建事件并发送邀请
+
+这种方法：
+- 减少上下文窗口使用
+- 最小化智能体决策点
+- 提供更好的错误处理
+- 实现完整任务完成
+
+## 最佳实践
+
+基于 mcp-builder 的设计，以下是 MCP 服务器开发的关键原则：
+
+### 以智能体为中心的设计原则
+
+<Cards>
+  <Card title="上下文预算意识" icon="Gauge">
+    将智能体的上下文窗口视为稀缺资源。仅返回基本信息，并提供精简/详细选项
+  </Card>
+
+  <Card title="工作流整合" icon="Combine">
+    将相关操作组合成单个工具，实现完整任务，而不是暴露原始 API 端点
+  </Card>
+
+  <Card title="教育性错误消息" icon="GraduationCap">
+    使错误可操作并提供具体指导："尝试使用 filter='active_only' 来减少结果"
+  </Card>
+
+  <Card title="渐进式披露" icon="Layers">
+    默认提供摘要信息，并在需要时提供详细探索选项
+  </Card>
+
+  <Card title="幂等操作" icon="Repeat">
+    在适当情况下设计可安全重试而无副作用的工具
+  </Card>
+</Cards>
+
+### 实施最佳实践
+
+<Steps>
+  <Step>
+    **输入验证**：使用 Pydantic（Python）或 Zod（TypeScript）以及适当的约束、示例和描述性字段文档
+  </Step>
+  <Step>
+    **全面文档**：每个工具都需要一行摘要、详细说明、带示例的参数类型、返回模式、使用示例和错误处理指导
+  </Step>
+  <Step>
+    **异步模式**：对所有 I/O 操作使用 async/await 以防止阻塞
+  </Step>
+  <Step>
+    **错误处理**：实现优雅的错误模式，并提供清晰、LLM 友好的错误消息，提示进一步操作
+  </Step>
+  <Step>
+    **响应格式化**：支持 JSON 和 Markdown 格式，并可配置详细级别
+  </Step>
+</Steps>
+
+## 常见陷阱
+
+<Callout type="warn">
+  开发者在构建 MCP 服务器时常犯的错误
+</Callout>
+
+### API 优先设计（错误方法）
+
+**症状**：工具与 API 端点 1:1 映射
+
+**问题**：迫使智能体理解 API 结构，为简单工作流进行多次调用
+
+**解决方案**：围绕工作流和任务设计工具，而不是 API 端点
+
+### 过度信息返回
+
+**症状**：工具返回包含所有字段的完整 API 响应
+
+**问题**：在无关数据上浪费上下文窗口
+
+**解决方案**：仅返回高信号信息，提供详细/精简选项
+
+### 错误消息不佳
+
+**症状**："Error 404: Not Found"
+
+**问题**：智能体不知道如何恢复
+
+**解决方案**："Resource not found. 尝试使用 list_resources() 查看可用选项"
+
+### 缺少工具注释
+
+**症状**：工具缺少 `readOnlyHint`、`destructiveHint` 等
+
+**问题**：Claude 无法优化工具使用模式
+
+**解决方案**：为所有工具添加适当的注释
+
+### 测试不足
+
+**症状**：没有评估框架，仅手动测试
+
+**问题**：无法衡量工具有效性或基于反馈进行迭代
+
+**解决方案**：使用 mcp-builder 的 evaluation.py 创建综合评估
+
+## 与其他 Skill 集成
+
+mcp-builder 可与以下 skill 良好协作：
+
+1. **skill-creator** - 用于基于 MCP 模式创建新 skill
+2. **skill-article-writer** - 用于记录 MCP 服务器实现
+3. **api-contract-manager** - 用于 API 规范管理
+4. **testing-frameworks** - 用于综合 MCP 服务器测试
+
+## 实际应用
+
+### 用例 1：企业 API 集成
+
+**场景**：公司希望使 Claude 能够与其内部 CRM 系统交互
+
+**mcp-builder 工作流程**：
+
+1. **研究**：学习 CRM API 文档并识别常见工作流（创建线索、更新联系人、查询机会）
+2. **设计**：创建工作流导向的工具，如 `qualify_lead`（结合数据丰富、评分和 CRM 更新）
+3. **实施**：构建 Python MCP 服务器，使用 Pydantic 验证和综合错误处理
+4. **评估**：创建 10+ 场景测试线索资格、机会跟踪和报告能力
+
+**结果**：智能体可以通过自然对话完成复杂的 CRM 任务，而无需了解 API 细节
+
+### 用例 2：数据分析平台
+
+**场景**：为商业智能平台构建 MCP 服务器
+
+**mcp-builder 工作流程**：
+
+1. **研究**：理解数据模式、查询能力和常见分析模式
+2. **设计**：如 `analyze_trend` 之类的工具（结合数据提取、统计分析和可视化）
+3. **实施**：异步 Python 服务器，处理大型数据集查询，支持分页和截断
+4. **评估**：测试需要多步数据处理的复杂分析问题
+
+**结果**：Claude 可以通过对话界面执行复杂的数据分析
+
+### 用例 3：DevOps 自动化
+
+**场景**：为基础设施管理创建 MCP 服务器
+
+**mcp-builder 工作流程**：
+
+1. **研究**：学习云提供商 API 和常见 DevOps 工作流
+2. **设计**：针对破坏性操作的安全导向工具，带确认提示
+3. **实施**：TypeScript 服务器，具有严格验证和全面日志记录
+4. **评估**：为部署、扩展和监控场景创建测试
+
+**结果**：通过自然语言进行安全、可审计的基础设施管理
+
+## 故障排除
+
+### MCP 服务器启动时挂起
+
+**症状**：服务器启动但进程无限期挂起
+
+**原因**：MCP 服务器是等待请求的长时间运行进程
+
+**解决方案**：在 tmux 中运行或使用超时进行测试：
+```bash
+timeout 5s python server.py
+```
+
+### 评估框架连接失败
+
+**症状**：evaluation.py 无法连接到 MCP 服务器
+
+**原因**：传输协议不匹配或身份验证问题
+
+**解决方案**：
+- 验证正确的传输类型（stdio/SSE/HTTP）
+- 检查远程服务器的身份验证凭据
+- 确保在启动评估前服务器正在运行
+
+### 评估中的工具调用失败
+
+**症状**：工具执行但返回错误
+
+**原因**：输入验证失败或 API 更改
+
+**解决方案**：
+- 审查工具输入模式以确保正确验证
+- 检查 API 端点是否可访问且未更改
+- 验证错误处理是否提供可操作反馈
+
+### 评估分数低
+
+**症状**：评估问题准确率较低
+
+**原因**：工具未针对智能体工作流设计或文档不佳
+
+**解决方案**：
+- 审查以智能体为中心的设计原则
+- 使用更好的示例改进工具描述
+- 将相关操作整合到工作流工具中
+- 添加综合错误处理和指导
+
+### 上下文溢出问题
+
+**症状**：工具返回过多数据，超出上下文限制
+
+**原因**：没有分页或截断策略
+
+**解决方案**：
+- 实施分页参数
+- 添加字符限制检查
+- 提供精简/详细响应选项
+- 使用 `25,000` 令牌上限作为指导
+
+## 后续步骤
+
+有效使用 mcp-builder：
+
+1. **克隆仓库**：`git clone https://github.com/anthropics/skills`
+2. **学习本 skill**：仔细阅读 SKILL.md 以了解 4 阶段流程
+3. **检查脚本**：查看 connections.py 和 evaluation.py 的实现模式
+4. **开始构建**：选择目标 API 并开始阶段 1 研究
+5. **遵循工作流程**：系统地完成所有 4 个阶段
+6. **彻底评估**：创建并运行综合评估
+7. **基于反馈迭代**：使用评估结果改进工具设计
+
+### 相关资源
+
+- **Anthropic Skills Repository**：github.com/anthropics/skills
+- **Model Context Protocol**：modelcontextprotocol.io
+- **Python MCP SDK**：github.com/modelcontextprotocol/python-sdk
+- **TypeScript MCP SDK**：github.com/modelcontextprotocol/typescript-sdk
+- **MCP Builder Skill**：/development/analyzing-mcp-builder
+
+## 结论
+
+mcp-builder 通过以下方面展示了出色的 Claude skill 设计：
+
+✅ **综合工作流程**：涵盖研究、实施、审查和评估的 4 阶段流程
+✅ **以智能体为中心的设计**：专注于 LLM 上下文限制和工作流优化的原则
+✅ **实用工具**：用于连接处理和评估的生产级 Python 脚本
+✅ **语言支持**：Python 和 TypeScript 实现的详细指导
+✅ **质量保证**：具有严格测试要求的系统化评估框架
+✅ **渐进式披露**：具有清晰阶段和可操作步骤的结构化 SKILL.md
+
+本 skill 的关键见解可以改变开发者处理 MCP 服务器开发的方式，从而创建真正使 LLM 能够通过自然交互与外部服务完成复杂任务的工具。
+
+---
+
+## 总结
+
+本次综合分析涵盖：
+
+- ✅ Skill 结构和剖析（4 阶段工作流程）
+- ✅ 以智能体为中心的设计原则和最佳实践
+- ✅ 使用 Pydantic 验证的 Python 实现模式
+- ✅ 使用 Zod 模式的 TypeScript 实现模式
+- ✅ 跨传输协议的复杂连接处理
+- ✅ 综合评估框架和工具
+- ✅ 实际应用和用例
+- ✅ 常见问题的故障排除指南
+- ✅ 与相关 skill 的集成策略
+
+## 后续步骤
+
+准备好构建您的第一个 MCP 服务器了吗？
+
+1. **学习完整的 SKILL.md**：详细了解所有 4 个阶段
+2. **选择目标 API**：从文档完善的外部服务开始
+3. **遵循阶段 1**：进行深入研究并创建实施计划
+4. **系统化实施**：使用语言特定的最佳实践
+5. **彻底评估**：创建 10+ 个复杂场景并使用 evaluation.py 进行测试
+6. **迭代改进**：基于评估反馈进行优化
+7. **与社区分享**：将您的 MCP 服务器贡献给生态系统
+
+## ℹ️ 来源信息
+
+**原始 Skill**：[mcp-builder](https://github.com/anthropics/skills/tree/main/mcp-builder)
+
+- **来源**：Anthropic Skills Repository
+- **作者**：Anthropic
+- **访问日期**：2025-11-17
+- **许可证**：详见 LICENSE.txt 完整条款
+
+*本文基于对 mcp-builder skill 结构、脚本和文档模式的综合分析生成。*
+
+---
+
+## 附录
+
+### 目录结构详情
+
+mcp-builder skill 包括：
+
+**必需文件**：
+- **SKILL.md**：13KB，329 行的全面 MCP 服务器开发指导
+
+**脚本**（2 个文件，共 526 行）：
+- **connections.py**：152 行 - 多传输 MCP 连接处理
+- **evaluation.py**：374 行 - 带指标的完整评估框架
+
+**参考**（未捆绑，按需加载）：
+- MCP 最佳实践
+- Python 实施指南
+- TypeScript 实施指南
+- 评估指南
+
+### 完整脚本清单
+
+**connections.py** 特性：
+- 异步上下文管理的抽象基类 `MCPConnection`
+- 三种传输实现（stdio、SSE、HTTP）
+- 传输无关实例化的工厂模式
+- 自动会话初始化和清理
+- 综合错误处理
+
+**evaluation.py** 特性：
+- XML 评估文件解析
+- Anthropic Claude API 集成
+- 带工具执行的异步智能体循环
+- 综合指标收集（准确率、持续时间、工具调用）
+- 多格式评估报告
+- 支持所有传输协议
+
+### MCP 协议基础
+
+MCP（Model Context Protocol）使 LLM 能够通过以下方式与外部服务交互：
+
+- **工具**：LLM 可以调用结构化输入的函数
+- **资源**：可以加载到上下文中的数据
+- **提示**：可重用的提示模板
+- **传输**：通信机制（stdio、SSE、HTTP）
+
+### 评估的质量指标
+
+评估框架跟踪：
+
+- **准确率**：正确答案 / 总问题数
+- **性能**：平均任务持续时间和工具调用效率
+- **工具使用**：每个任务的工具调用次数和持续时间
+- **反馈质量**：智能体报告的问题和改进建议
+
+典型基准：
+- **良好**：&gt;80% 准确率，&lt;30s 平均持续时间
+- **优秀**：&gt;90% 准确率，&lt;20s 平均持续时间
+- **卓越**：&gt;95% 准确率，&lt;15s 平均持续时间

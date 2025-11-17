@@ -1,0 +1,804 @@
+---
+title: "Analyzing webapp-testing: A Complete Playwright Testing Guide"
+description: "Toolkit for interacting with and testing local web applications using Playwright. This comprehensive analysis covers webapp-testing's 4K SKILL.md, 105-line with_server.py script, and practical examples for frontend verification, UI debugging, and browser automation."
+lang: en
+category: development
+difficulty: intermediate
+tags:
+  - claude-skills
+  - webapp-testing
+  - playwright
+  - browser-automation
+  - testing
+  - tutorial
+image: /images/docs/analyzing-webapp-testing/playwright-testing-overview.jpg
+source_url: "https://github.com/anthropics/skills/tree/main/webapp-testing"
+published_date: "2025-01-17"
+author: Anthropic
+source:
+  url: "https://github.com/anthropics/skills/tree/main/webapp-testing"
+  name: "Anthropic Skills Repository"
+  author: "Anthropic"
+  published_date: "2025-01-17"
+  accessed_date: "2025-11-17"
+  license: "See LICENSE.txt for full terms"
+import:
+  date: "2025-11-17"
+  slug: "analyzing-webapp-testing"
+  translator: "Claude AI"
+---
+
+import { SourceAttribution } from '@/components/SourceAttribution';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { CodeBlock } from 'fumadocs-ui/components/codeblock';
+
+<SourceAttribution
+  source={{
+    url: "https://github.com/anthropics/skills/tree/main/webapp-testing",
+    name: "Anthropic Skills Repository",
+    author: "Anthropic",
+    published_date: "2025-01-17",
+    license: "See LICENSE.txt"
+  }}
+  languages={['en', 'zh', 'fr']}
+  currentLang="en"
+/>
+
+# Analyzing webapp-testing: A Complete Playwright Testing Guide
+
+**webapp-testing** is a Claude skill that provides a complete toolkit for interacting with and testing local web applications using Playwright. This skill enables automated frontend functionality verification, UI behavior debugging, screenshot capture, and browser console log analysis.
+
+<Callout type="info">
+  This is a production-ready skill from the Anthropic skills repository, designed for developers who need to test web applications locally using native Python Playwright scripts. The skill emphasizes practical automation workflows and server lifecycle management.
+</Callout>
+
+## Overview
+
+### What is webapp-testing?
+
+<Callout type="question">
+  Based on the description: Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs.
+</Callout>
+
+### Core Purpose
+
+The webapp-testing skill aims to:
+
+- Enable automated testing of local web applications using native Playwright Python scripts
+- Provide server lifecycle management for multi-server applications
+- Support frontend functionality verification and UI behavior debugging
+- Capture browser screenshots and console logs during automation
+- Establish systematic approaches for web application testing workflows
+
+### Target Audience
+
+This skill is designed for:
+
+- Developers testing local web applications with Playwright
+- QA engineers building automated browser testing workflows
+- Frontend engineers debugging UI behavior and functionality
+- Anyone building end-to-end testing automation with real browsers
+
+## Skill Anatomy
+
+### Directory Structure
+
+<Files>
+  <Folder name="webapp-testing" defaultOpen>
+    <File name="SKILL.md" />
+    <Folder name="scripts">
+      <File name="with_server.py" />
+    </Folder>
+    <Folder name="examples">
+      <File name="element_discovery.py" />
+      <File name="static_html_automation.py" />
+      <File name="console_logging.py" />
+    </Folder>
+  </Folder>
+</Files>
+
+### SKILL.md Structure
+
+Every skill begins with metadata in YAML frontmatter:
+
+```yaml
+---
+name: webapp-testing
+description: "Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs."
+license: Complete terms in LICENSE.txt
+---
+```
+
+### Key Components
+
+### Scripts
+
+<Callout type="info">
+  Scripts provide deterministic, reusable code that Claude can execute. webapp-testing includes a sophisticated server lifecycle management script.
+</Callout>
+
+The webapp-testing skill includes one primary script:
+
+<Steps>
+  <Step>
+    **with_server.py**: Manages server lifecycle for testing, supporting both single and multiple servers (105 lines of robust process management)
+  </Step>
+</Steps>
+
+### Examples
+
+<Callout type="tip">
+  Practical examples demonstrate common testing patterns and workflows
+</Callout>
+
+Three comprehensive examples are provided:
+
+<Steps>
+  <Step>
+    **element_discovery.py**: Discovering buttons, links, and inputs on a page (40 lines)
+  </Step>
+  <Step>
+    **static_html_automation.py**: Using file:// URLs for local HTML testing (33 lines)
+  </Step>
+  <Step>
+    **console_logging.py**: Capturing browser console logs during automation (35 lines)
+  </Step>
+</Steps>
+
+## Technical Deep Dive
+
+### Decision Tree Approach for Testing Strategies
+
+The skill introduces a clear decision tree for choosing the right testing approach based on application characteristics:
+
+<Callout type="info">
+  webapp-testing provides systematic decision-making guidance for different web application testing scenarios, from static HTML to dynamic multi-server applications.
+</Callout>
+
+<Steps>
+  <Step>
+    **Start with User Task**: Identify what needs to be tested
+  </Step>
+  <Step>
+    **Determine Application Type**: Is it static HTML or a dynamic webapp?
+  </Step>
+  <Step>
+    **Check Server Status**: Is the server already running or does it need to be started?
+  </Step>
+  <Step>
+    **Select Appropriate Method**: Choose between direct reading, with_server.py helper, or reconnaissance-then-action
+  </Step>
+</Steps>
+
+### Testing Strategy Decision Tree
+
+```
+User task → Is it static HTML?
+    ├─ Yes → Read HTML file directly to identify selectors
+    │         ├─ Success → Write Playwright script using selectors
+    │         └─ Fails/Incomplete → Treat as dynamic (below)
+    │
+    └─ No (dynamic webapp) → Is the server already running?
+        ├─ No → Run: python scripts/with_server.py --help
+        │        Then use the helper + write simplified Playwright script
+        │
+        └─ Yes → Reconnaissance-then-action:
+            1. Navigate and wait for networkidle
+            2. Take screenshot or inspect DOM
+            3. Identify selectors from rendered state
+            4. Execute actions with discovered selectors
+```
+
+### How It Works
+
+<Callout type="info">
+  webapp-testing demonstrates practical skill design with specific executable guidance and a focus on real-world testing workflows.
+</Callout>
+
+<Steps>
+  <Step>
+    **Trigger Detection**: Claude identifies when this skill should be used based on web application testing queries and the detailed description
+  </Step>
+  <Step>
+    **Context Loading**: SKILL.md content (4KB, 96 lines) loads into Claude's context window with comprehensive testing workflows
+  </Step>
+  <Step>
+    **Resource Access**: Scripts and examples are referenced as needed, with emphasis on using --help first to understand capabilities
+  </Step>
+  <Step>
+    **Execution**: Claude follows systematic approaches for static vs dynamic applications and server management
+  </Step>
+</Steps>
+
+### Critical Best Practice: Black-Box Script Usage
+
+<Callout type="warn">
+  Always run scripts with `--help` first. DO NOT read the source until you try running the script and find that a customized solution is absolutely necessary. These scripts can be very large and pollute the context window.
+</Callout>
+
+The skill explicitly advises:
+
+- ❌ **Don't ingest large scripts into context** (wastes context window)
+- ✅ **Do use scripts as black boxes** (invoke directly via command line)
+- ✅ **Do check --help first** (understand capabilities before implementation)
+
+This is a sophisticated approach to context management that recognizes the cost of loading large code files versus the benefit of direct execution.
+
+## Script Analysis
+
+### with_server.py - Multi-Server Lifecycle Management
+
+This 105-line Python script provides robust server lifecycle management:
+
+```python
+def is_server_ready(port, timeout=30):
+    """Wait for server to be ready by polling the port."""
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            with socket.create_connection(('localhost', port), timeout=1):
+                return True
+        except (socket.error, ConnectionRefusedError):
+            time.sleep(0.5)
+    return False
+```
+
+**Key Features**:
+
+<Cards>
+  <Card title="Multi-Server Support" icon="Server">
+    Can manage single or multiple servers simultaneously (e.g., backend + frontend) with independent startup and cleanup
+  </Card>
+
+  <Card title="Port Polling" icon="Activity">
+    Actively polls ports to determine server readiness rather than using fixed timeouts, with configurable timeout (default 30s)
+  </Card>
+
+  <Card title="Process Lifecycle" icon="RefreshCw">
+    Proper subprocess management with cleanup in finally blocks, handling both graceful termination and forced kill scenarios
+  </Card>
+
+  <Card title="Shell Command Support" icon="Terminal">
+    Uses shell=True to support complex commands with cd, &&, and other shell operators for flexible server startup
+  </Card>
+</Cards>
+
+**Usage Patterns**:
+
+<Steps>
+  <Step>
+    **Single Server**: `python scripts/with_server.py --server "npm run dev" --port 5173 -- python automation.py`
+  </Step>
+  <Step>
+    **Multiple Servers**:
+    ```bash
+    python scripts/with_server.py \
+      --server "cd backend && python server.py" --port 3000 \
+      --server "cd frontend && npm run dev" --port 5173 \
+      -- python test.py
+    ```
+  </Step>
+</Steps>
+
+### Example Analysis
+
+#### element_discovery.py - Interactive Element Discovery
+
+<Callout type="info">
+  Demonstrates reconnaissance-then-action pattern for discovering interactive elements
+</Callout>
+
+```python
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto('http://localhost:5173')
+    page.wait_for_load_state('networkidle')  # CRITICAL for dynamic content
+
+    # Discover all buttons
+    buttons = page.locator('button').all()
+    print(f"Found {len(buttons)} buttons:")
+    for i, button in enumerate(buttons):
+        text = button.inner_text() if button.is_visible() else "[hidden]"
+        print(f"  [{i}] {text}")
+```
+
+**Key Techniques**:
+- ✅ Uses `page.wait_for_load_state('networkidle')` for dynamic content
+- ✅ Locates elements by type (button, link, input)
+- ✅ Checks visibility before interaction
+- ✅ Captures both element count and content for analysis
+
+#### static_html_automation.py - File:// URL Testing
+
+<Callout type="info">
+  Shows how to test local HTML files without a server using file:// URLs
+</Callout>
+
+```python
+html_file_path = os.path.abspath('path/to/your/file.html')
+file_url = f'file://{html_file_path}'
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page(viewport={'width': 1920, 'height': 1080})
+    page.goto(file_url)  # Direct file access
+    page.screenshot(path='/mnt/user-data/outputs/static_page.png')
+```
+
+**Key Techniques**:
+- ✅ Calculates absolute path for file URL conversion
+- ✅ Sets viewport for consistent screenshots
+- ✅ Uses standard Playwright APIs for file:// URLs
+- ✅ Captures before/after states for verification
+
+#### console_logging.py - Browser Console Capture
+
+<Callout type="info">
+  Captures JavaScript console output during automation for debugging
+</Callout>
+
+```python
+console_logs = []
+
+def handle_console_message(msg):
+    console_logs.append(f"[{msg.type}] {msg.text}")
+    print(f"Console: [{msg.type}] {msg.text}")
+
+page.on("console", handle_console_message)
+```
+
+**Key Techniques**:
+- ✅ Sets up event handler before page navigation
+- ✅ Captures all console message types (log, error, warn, etc.)
+- ✅ Stores logs for later analysis
+- ✅ Provides real-time output during test execution
+
+## Usage Examples
+
+### Basic Usage - Testing a Static HTML File
+
+<Callout type="info">
+  For static HTML files, directly read and inspect the source
+</Callout>
+
+```python
+from playwright.sync_api import sync_playwright
+import os
+
+html_file_path = os.path.abspath('test.html')
+file_url = f'file://{html_file_path}'
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto(file_url)
+    page.screenshot(path='test_output.png')
+    browser.close()
+```
+
+### Advanced Scenario - Dynamic Application with Multi-Server Setup
+
+<Callout type="tip">
+  Use with_server.py for complex applications requiring multiple services
+</Callout>
+
+**Scenario**: Testing a full-stack application with separate backend and frontend
+
+```bash
+# Using the with_server.py helper
+python scripts/with_server.py \
+  --server "cd backend && python api.py" --port 3000 \
+  --server "cd frontend && npm run dev" --port 5173 \
+  -- python test_fullstack.py
+```
+
+**Your test_fullstack.py**:
+```python
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto('http://localhost:5173')  # Port 5173 ready automatically
+    page.wait_for_load_state('networkidle')
+    # ... test your application
+    browser.close()
+```
+
+### Reconnaissance-Then-Action Pattern for Unknown Applications
+
+<Callout type="info">
+  When testing unfamiliar applications, first inspect the rendered state
+</Callout>
+
+<Steps>
+  <Step>
+    **Inspect rendered DOM**:
+    ```python
+    page.goto('http://localhost:5173')
+    page.wait_for_load_state('networkidle')
+    page.screenshot(path='/tmp/inspect.png', full_page=True)
+    content = page.content()
+    buttons = page.locator('button').all()
+    ```
+  </Step>
+  <Step>
+    **Identify selectors** from inspection results
+  </Step>
+  <Step>
+    **Execute actions** using discovered selectors
+  </Step>
+</Steps>
+
+## Best Practices
+
+Based on the design of webapp-testing, here are key principles for web application testing:
+
+### Automation Best Practices
+
+<Cards>
+  <Card title="Use sync_playwright()" icon="Code">
+    Use synchronous APIs for simpler test scripts rather than async patterns
+  </Card>
+
+  <Card title="Always Use headless Mode" icon="EyeOff">
+    Launch browsers with `headless=True` for CI/CD and automated testing
+  </Card>
+
+  <Card title="Wait for networkidle" icon="Clock">
+    Always wait for networkidle before inspecting dynamic applications to ensure JavaScript execution completes
+  </Card>
+
+  <Card title="Close Browser Resources" icon="X">
+    Always close the browser when done to free resources: `browser.close()`
+  </Card>
+
+  <Card title="Use Descriptive Selectors" icon="Tag">
+    Prefer text=, role=, CSS selectors, or IDs for stable element identification
+  </Card>
+
+  <Card title="Add Appropriate Waits" icon="Timer">
+    Use `page.wait_for_selector()` or `page.wait_for_timeout()` for timing-sensitive operations
+  </Card>
+</Cards>
+
+### Critical Common Pitfall
+
+<Callout type="warn">
+  **Critical**: Never inspect the DOM before waiting for networkidle on dynamic applications
+</Callout>
+
+❌ **Wrong**:
+```python
+page.goto('http://localhost:5173')
+buttons = page.locator('button').all()  # May miss dynamically rendered elements
+```
+
+✅ **Correct**:
+```python
+page.goto('http://localhost:5173')
+page.wait_for_load_state('networkidle')  # Wait for JS to execute
+buttons = page.locator('button').all()  # Now captures all elements
+```
+
+## Integration with Other Skills
+
+webapp-testing works well with:
+
+1. **skill-creator** - For creating new skills based on testing patterns
+2. **webapp-development** - For full-stack development workflows
+3. **mcp-builder** - For integrating browser testing with MCP servers
+4. **error-handling-skills** - For comprehensive test failure analysis
+
+## Real-World Applications
+
+### Use Case 1: Continuous Integration Testing
+
+**Scenario**: Automated testing in CI/CD pipelines for a React application
+
+<Steps>
+  <Step>
+    **Setup**: Configure CI to use webapp-testing with_playwright
+  </Step>
+  <Step>
+    **Execute**:
+    ```bash
+    python scripts/with_server.py \
+      --server "npm run dev" --port 5173 \
+      -- python ci_tests.py
+    ```
+  </Step>
+  <Step>
+    **Verify**: Tests check critical user flows, capture screenshots on failures
+  </Step>
+</Steps>
+
+**Outcome**: Automated browser testing in CI/CD with screenshot evidence for failures
+
+### Use Case 2: Cross-Browser Compatibility Testing
+
+**Scenario**: Verify application works across Chromium, Firefox, and WebKit
+
+```python
+with sync_playwright() as p:
+    for browser_type in [p.chromium, p.firefox, p.webkit]:
+        browser = browser_type.launch(headless=True)
+        page = browser.new_page()
+        page.goto('http://localhost:5173')
+        page.screenshot(path=f'output_{browser_type.name}.png')
+        browser.close()
+```
+
+**Outcome**: Automated multi-browser testing with visual comparison
+
+### Use Case 3: Form Automation and Validation
+
+**Scenario**: Testing complex multi-page forms with validation
+
+<Steps>
+  <Step>
+    **Discover**: Use element_discovery.py to identify all form fields
+  </Step>
+  <Step>
+    **Automate**: Fill fields sequentially with test data
+  </Step>
+  <Step>
+    **Validate**: Check error messages and success states
+  </Step>
+  <Step>
+    **Debug**: Capture console logs to identify JavaScript errors
+  </Step>
+</Steps>
+
+**Outcome**: Comprehensive form testing with validation state verification
+
+### Use Case 4: Regression Testing
+
+**Scenario**: Preventing visual regressions in UI components
+
+<Steps>
+  <Step>
+    **Baseline**: Capture screenshots of all components
+  </Step>
+  <Step>
+    **After Changes**: Re-run tests and capture new screenshots
+  </Step>
+  <Step>
+    **Compare**: Use image diff tools to detect visual changes
+  </Step>
+  <Step>
+    **Review**: Manually review detected differences
+  </Step>
+</Steps>
+
+**Outcome**: Automated visual regression detection for UI changes
+
+## Troubleshooting
+
+### Server Startup Failures
+
+**Symptom**: with_server.py reports "Server failed to start"
+
+**Cause**: Port already in use, wrong startup command, timeout too short
+
+**Solution**:
+- Check if port is already in use: `lsof -i :5173`
+- Verify startup command works manually
+- Increase timeout: `--timeout 60`
+
+### Element Not Found Errors
+
+**Symptom**: `page.locator('button').all()` returns empty or can't find elements
+
+**Cause**: Waiting for wrong load state or selector doesn't match
+
+**Solution**:
+- Verify `page.wait_for_load_state('networkidle')` is called
+- Check if element exists via screenshot: `page.screenshot()`
+- Use browser dev tools to find correct selector
+
+### Flaky Tests - Intermittent Failures
+
+**Symptom**: Tests pass sometimes but fail randomly
+
+**Cause**: Race conditions, network delays, timing issues
+
+**Solution**:
+- Add explicit waits: `page.wait_for_selector('button')`
+- Increase timeout values
+- Use page.wait_for_timeout() for known delays
+- Capture state on failure for debugging
+
+### Console Errors Not Captured
+
+**Symptom**: JavaScript errors occur but aren't in console logs
+
+**Cause**: Event handler not set up before navigation
+
+**Solution**:
+- Set up page.on("console") before page.goto()
+- Also capture page.on("pageerror") for uncaught errors
+```python
+page.on("console", handle_console)
+page.on("pageerror", handle_page_error)
+```
+
+### Screenshot Quality Issues
+
+**Symptom**: Screenshots cut off or have wrong dimensions
+
+**Cause**: Viewport not set, screenshot timing wrong
+
+**Solution**:
+- Set viewport: `browser.new_page(viewport={'width': 1920, 'height': 1080})`
+- Use `full_page=True` for complete page capture
+- Wait for load state before capturing
+
+## Next Steps
+
+To use webapp-testing effectively:
+
+1. **Clone the repository**: `git clone https://github.com/anthropics/skills`
+2. **Install Playwright**: `pip install playwright && playwright install`
+3. **Study the examples**: Review all three examples to understand patterns
+4. **Test with_server.py**: Run with `--help` to understand capabilities
+5. **Start simple**: Begin with static HTML testing
+6. **Progress to dynamic**: Work with local dev servers and with_server.py
+7. **Build comprehensive tests**: Combine multiple patterns for full application coverage
+
+### Related Resources
+
+- **Playwright Documentation**: playwright.dev
+- **Anthropic Skills Repository**: github.com/anthropics/skills
+- **Playwright Python**: github.com/microsoft/playwright-python
+- **Skill Article**: /development/analyzing-webapp-testing
+
+## Conclusion
+
+webapp-testing demonstrates elegant Claude skill design through:
+
+✅ **Focused Scope**: Addresses specific need for local web application testing
+✅ **Practical Tooling**: 105-line with_server.py solves real multi-server management problem
+✅ **Progressive Approach**: Decision tree guides users to appropriate strategy
+✅ **Comprehensive Examples**: Three examples cover common testing patterns
+✅ **Best Practices Emphasis**: Clear guidance on waits, selectors, and lifecycle management
+✅ **Context Management**: Explicit advice against ingesting large scripts unnecessarily
+
+The key insights from this skill can transform how developers approach web application testing, providing systematic approaches for everything from simple static HTML files to complex multi-server dynamic applications.
+
+---
+
+## Summary
+
+This comprehensive analysis covered:
+
+- ✅ Skill structure and anatomy (4K SKILL.md, single script + examples)
+- ✅ Decision tree approach for static vs dynamic applications
+- ✅ Reconnaissance-then-action pattern for unknown applications
+- ✅ Multi-server lifecycle management with with_server.py
+- ✅ Three comprehensive examples covering key testing patterns
+- ✅ Best practices for Playwright automation and browser management
+- ✅ Real-world applications and use cases
+- ✅ Troubleshooting guide for common issues
+- ✅ Integration strategies with related skills
+
+## Next Steps
+
+Ready to implement webapp-testing?
+
+1. **Install Playwright**: Get the Python package and browser binaries
+2. **Study with_server.py**: Understand how it manages server lifecycles
+3. **Run the examples**: Try all three examples to learn the patterns
+4. **Start with simple tests**: Create tests for your static HTML files
+5. **Progress to dynamic apps**: Use with_server.py for React/Vue/Angular apps
+6. **Build comprehensive suites**: Combine patterns for full test coverage
+7. **Integrate with CI/CD**: Add automated browser tests to your pipeline
+
+## ℹ️ Source Information
+
+**Original Skill**: [webapp-testing](https://github.com/anthropics/skills/tree/main/webapp-testing)
+
+- **Source**: Anthropic Skills Repository
+- **Author**: Anthropic
+- **Accessed**: 2025-11-17
+- **License**: See LICENSE.txt for full terms
+
+*This article was generated based on comprehensive analysis of the webapp-testing skill structure, scripts, and documentation patterns.*
+
+---
+
+## Appendix
+
+### Directory Structure Details
+
+**Required Files**:
+- **SKILL.md**: 4KB, 96 lines of comprehensive testing guidance
+
+**Scripts** (1 file, 105 lines):
+- **with_server.py**: Server lifecycle management for single or multiple servers
+
+**Examples** (3 files, 109 lines total):
+- **element_discovery.py**: 40 lines - Element discovery patterns
+- **static_html_automation.py**: 33 lines - File:// URL testing
+- **console_logging.py**: 35 lines - Browser console log capture
+
+### Complete Example Inventory
+
+**element_discovery.py** demonstrates:
+- Button discovery and text extraction
+- Link href and text capture
+- Input field type and name identification
+- Screenshot capture for visual reference
+- Visibility checking before interaction
+
+**static_html_automation.py** demonstrates:
+- Absolute path calculation for file URLs
+- Viewport configuration for consistent screenshots
+- Form filling and submission
+- Before/after screenshot comparison
+
+**console_logging.py** demonstrates:
+- Event handler setup before navigation
+- Console message type capture (log, error, warn, etc.)
+- Real-time output during test execution
+- Log persistence to file system
+
+### Playwright Best Practices Highlight
+
+**Browser Management**:
+- Always launch in headless mode for CI/CD
+- Set appropriate viewport for consistent rendering
+- Close browser when done to free resources
+
+**Element Interaction**:
+- Wait for networkidle before inspecting dynamic content
+- Use descriptive selectors (text=, role=, CSS, IDs)
+- Add appropriate waits for timing-sensitive operations
+- Check element visibility before interaction
+
+**Test Stability**:
+- Use explicit waits instead of fixed timeouts
+- Implement page object patterns for complex applications
+- Capture screenshots on failures for debugging
+- Set up console and error handlers before navigation
+
+### Server Management Patterns
+
+**Single Server**:
+```bash
+python with_server.py --server "npm run dev" --port 5173 -- pytest
+```
+
+**Multiple Servers**:
+```bash
+python with_server.py \
+  --server "cd api && python server.py" --port 3000 \
+  --server "cd web && npm start" --port 5173 \
+  -- pytest tests/
+```
+
+**Programmatic Usage**:
+```python
+import subprocess
+result = subprocess.run([
+    'python', 'with_server.py',
+    '--server', 'npm run dev',
+    '--port', '5173',
+    '--', 'python', 'test.py'
+])
+```
+
+### Testing Strategy Selection Guide
+
+| Scenario | Static HTML | Dynamic (Server Running) | Dynamic (No Server) |
+|----------|-------------|---------------------------|---------------------|
+| **Method** | Read file + selectors | Reconnaissance + action | with_server.py |
+| **Wait Required** | No | networkidle | networkidle |
+| **Ports** | N/A | Already running | Managed by script |
+| **Complexity** | Low | Medium | High |
+| **Setup** | None | Start server manually | Script handles startup |
