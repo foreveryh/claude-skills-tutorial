@@ -1,0 +1,1085 @@
+---
+title: "SessionStart Hook Skill: Automating Claude Code Web Environment Setup"
+description: "Master the SessionStart hook skill for Claude Code on the web - automatically install dependencies, configure environments, and ensure tests and linters work in every session"
+lang: en
+---
+
+# SessionStart Hook Skill: Automating Claude Code Web Environment Setup
+
+## Introduction
+
+The **session-start-hook** skill (officially named `startup-hook-skill`) provides a systematic approach to creating SessionStart hooks for Claude Code on the web. SessionStart hooks are scripts that run automatically when a Claude Code session begins, enabling critical setup tasks like dependency installation, environment configuration, and project initialization.
+
+<Callout type="info">
+**Problem Solved**: Claude Code on the web runs in ephemeral containers. Without SessionStart hooks, you'd need to manually install dependencies every session before running tests or linters. This skill automates that setup process.
+</Callout>
+
+### What This Skill Does
+
+This skill guides Claude through an 8-step process to:
+
+1. Analyze your project's dependencies
+2. Design an appropriate startup hook
+3. Create the hook script file
+4. Register it in Claude settings
+5. Validate the hook executes correctly
+6. Verify linters work with installed dependencies
+7. Verify tests run successfully
+8. Commit and push the configuration
+
+### When to Use This Skill
+
+Use this skill when:
+
+✅ Setting up a repository for Claude Code on the web
+✅ Your project needs dependencies installed for tests/linters
+✅ You want automatic environment setup on session start
+✅ You need to configure environment variables for the session
+
+Don't use this skill when:
+
+❌ Using Claude Code desktop (dependencies persist locally)
+❌ Your project has no dependencies
+❌ You only need one-time setup (use manual commands instead)
+
+## Understanding SessionStart Hooks
+
+Before diving into the skill workflow, understand how SessionStart hooks work in Claude Code.
+
+### Hook Lifecycle
+
+SessionStart hooks execute at four different moments, indicated by the `source` field:
+
+- **`startup`**: New session created from scratch
+- **`resume`**: Existing session resumed after disconnection
+- **`clear`**: Session cleared with `/clear` command
+- **`compact`**: Session context compacted for memory management
+
+<Callout type="tip">
+**Design consideration**: Your hook should be idempotent—safe to run multiple times—because it may execute on resume, clear, or compact events.
+</Callout>
+
+### Input Format
+
+SessionStart hooks receive JSON input via stdin:
+
+```json
+{
+  "session_id": "abc123",
+  "source": "startup|resume|clear|compact",
+  "transcript_path": "/path/to/transcript.jsonl",
+  "permission_mode": "default",
+  "hook_event_name": "SessionStart",
+  "cwd": "/workspace/repo"
+}
+```
+
+**Key fields**:
+- `session_id`: Unique identifier for the session
+- `source`: Why the hook was triggered
+- `cwd`: Current working directory (project root)
+
+### Execution Modes: Synchronous vs Asynchronous
+
+SessionStart hooks support two execution modes:
+
+#### Synchronous Mode (Default)
+
+The hook completes before the session starts:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+npm install
+echo '{"success": true}'
+```
+
+**Pros**: Guarantees dependencies are installed before Claude starts
+**Cons**: Session startup delayed until hook completes
+
+#### Asynchronous Mode
+
+The hook runs in the background while the session starts:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+echo '{"async": true, "asyncTimeout": 300000}'
+
+npm install
+```
+
+**Pros**: Faster session startup
+**Cons**: Race condition—Claude might run tests before dependencies install
+
+<Callout type="warn">
+**Recommendation**: Start with synchronous mode. Only switch to async if the user requests faster startup and understands the trade-offs.
+</Callout>
+
+### Environment Variables
+
+Three critical environment variables are available in SessionStart hooks:
+
+#### `$CLAUDE_PROJECT_DIR`
+
+Points to the repository root:
+
+```bash
+cd "$CLAUDE_PROJECT_DIR"
+npm install
+```
+
+#### `$CLAUDE_ENV_FILE`
+
+Path to write persistent environment variables for the session:
+
+```bash
+echo 'export PYTHONPATH="."' >> "$CLAUDE_ENV_FILE"
+echo 'export DEBUG=true' >> "$CLAUDE_ENV_FILE"
+```
+
+Variables written to this file become available in all subsequent commands during the session.
+
+#### `$CLAUDE_CODE_REMOTE`
+
+Indicates whether running in Claude Code on the web:
+
+```bash
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  # Skip hook for desktop Claude Code
+  exit 0
+fi
+
+# Web-only setup continues...
+npm install
+```
+
+<Callout type="info">
+**Best Practice**: Use `$CLAUDE_CODE_REMOTE` to only run setup in web environments, where containers are ephemeral and need dependency installation.
+</Callout>
+
+## The 8-Step Workflow
+
+The session-start-hook skill follows a systematic 8-step process. Let's examine each step in detail.
+
+### Step 1: Analyze Dependencies
+
+**Purpose**: Identify what needs to be installed
+
+The skill searches for dependency manifests:
+
+<Files>
+  <Folder name="Project Root" defaultOpen>
+    <File name="package.json" />
+    <File name="package-lock.json" />
+    <File name="pyproject.toml" />
+    <File name="requirements.txt" />
+    <File name="Cargo.toml" />
+    <File name="go.mod" />
+    <File name="Gemfile" />
+    <File name="README.md" />
+  </Folder>
+</Files>
+
+**Package manager mapping**:
+
+| Files Found | Package Manager | Install Command |
+|------------|-----------------|-----------------|
+| `package.json` / `package-lock.json` | npm | `npm install` |
+| `pyproject.toml` | Poetry | `poetry install` |
+| `requirements.txt` | pip | `pip install -r requirements.txt` |
+| `Cargo.toml` | cargo | `cargo build` |
+| `go.mod` | go | `go mod download` |
+| `Gemfile` | bundler | `bundle install` |
+
+The skill also reads documentation (README.md) to understand any special setup requirements.
+
+### Step 2: Design Hook
+
+**Purpose**: Create a script that installs dependencies correctly
+
+**Key design principles**:
+
+1. **Web-only by default**: Use `$CLAUDE_CODE_REMOTE` check
+2. **Synchronous first**: Don't use async mode initially
+3. **Cache-friendly**: Prefer commands that leverage container caching
+4. **Idempotent**: Safe to run multiple times
+5. **Non-interactive**: No user input required
+
+**Example hook design** for a Node.js project:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# Only run in Claude Code on the web
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+# Install dependencies
+cd "$CLAUDE_PROJECT_DIR"
+npm install
+
+echo '{"success": true}'
+```
+
+**Cache optimization insight**:
+
+Claude Code on the web caches container state after the hook completes. This means:
+
+- `npm install` is better than `npm ci` (preserves `node_modules/`)
+- `pip install` is better than `pip install --force-reinstall`
+- Cache-friendly commands make subsequent sessions start faster
+
+### Step 3: Create Hook File
+
+**Purpose**: Write the hook script to the filesystem
+
+Create the hooks directory and script file:
+
+```bash
+mkdir -p .claude/hooks
+cat > .claude/hooks/session-start.sh << 'EOF'
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+npm install
+
+echo '{"success": true}'
+EOF
+
+chmod +x .claude/hooks/session-start.sh
+```
+
+**Important**: The script must be executable (`chmod +x`)
+
+### Step 4: Register in Settings
+
+**Purpose**: Tell Claude Code to run the hook on session start
+
+Add configuration to `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**If `.claude/settings.json` exists**: Merge the hooks configuration rather than overwriting the file.
+
+**Settings structure explained**:
+
+- `"hooks"`: Top-level hooks configuration
+- `"SessionStart"`: Array of hook configurations for the SessionStart event
+- `"hooks"`: Array of individual hook scripts (you can have multiple)
+- `"type": "command"`: Hook is a shell command
+- `"command"`: Path to the hook script
+
+### Step 5: Validate Hook
+
+**Purpose**: Ensure the hook executes successfully
+
+Run the hook script directly with the web environment flag:
+
+```bash
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
+```
+
+**Validation checks**:
+
+✅ Script executes without errors
+✅ Dependencies are installed
+✅ Expected files/directories are created
+✅ Output indicates success
+
+**Common issues at this stage**:
+
+- **Permission denied**: Missing `chmod +x`
+- **Command not found**: Package manager not available in container
+- **Connection timeout**: Network issues (rare in Claude Code environments)
+
+### Step 6: Validate Linter
+
+**Purpose**: Verify linters work with installed dependencies
+
+The skill identifies the linting command and runs it on a sample file:
+
+```bash
+# Example for JavaScript projects
+npm run lint -- src/index.js
+
+# Example for Python projects
+ruff check src/main.py
+
+# Example for Rust projects
+cargo clippy -- -D warnings
+```
+
+**What to verify**:
+
+✅ Linter command executes
+✅ Dependencies required by linter are available
+✅ Configuration files are found
+✅ Linter produces output (warnings/errors are okay; command failure is not)
+
+**If validation fails**: Update the startup script to install missing dependencies, then re-test.
+
+### Step 7: Validate Test
+
+**Purpose**: Verify tests run successfully with installed dependencies
+
+Run a single test to validate the environment:
+
+```bash
+# Example for JavaScript projects
+npm test -- --testPathPattern=example.test.js
+
+# Example for Python projects
+pytest tests/test_example.py
+
+# Example for Rust projects
+cargo test test_example
+```
+
+**What to verify**:
+
+✅ Test command executes
+✅ Test framework finds test files
+✅ Dependencies required for tests are available
+✅ Tests can run (pass/fail doesn't matter; execution does)
+
+**If validation fails**: Update the startup script to install test dependencies or configure test paths, then re-test.
+
+<Callout type="tip">
+**Pro tip**: You don't need to run the entire test suite. Running one test validates that the test environment is correctly configured.
+</Callout>
+
+### Step 8: Commit and Push
+
+**Purpose**: Persist the hook configuration in version control
+
+Create a commit with the hook files:
+
+```bash
+git add .claude/hooks/session-start.sh
+git add .claude/settings.json
+git commit -m "feat: add SessionStart hook for dependency installation"
+git push origin <branch-name>
+```
+
+**Why this matters**: Once merged to the default branch, all future Claude Code sessions automatically use the hook—no manual setup required.
+
+## Technical Deep Dive
+
+### How SessionStart Hooks Integrate with Claude Code
+
+When a Claude Code session starts:
+
+1. **Container initialization**: Claude Code creates or restores a container
+2. **Hook discovery**: Reads `.claude/settings.json` for registered hooks
+3. **Hook execution**: Runs SessionStart hooks based on configuration
+4. **Context injection**: Hook output can add context to the session
+5. **Session start**: Claude becomes available for user interaction
+
+### Container State Caching
+
+Claude Code on the web caches the container filesystem after SessionStart hooks complete:
+
+**First session**:
+```
+1. Container created (empty)
+2. SessionStart hook runs
+3. Dependencies installed (takes time)
+4. Container state cached
+```
+
+**Subsequent sessions**:
+```
+1. Container restored from cache
+2. SessionStart hook runs
+3. Dependencies already present (fast)
+4. Hook completes quickly
+```
+
+This caching mechanism is why the skill recommends cache-friendly install commands like `npm install` over `npm ci`.
+
+### Hook Output and Context Injection
+
+Hooks can inject additional context into the session via the `additionalContext` field:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+npm install
+
+cat << EOF
+{
+  "success": true,
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "Dependencies installed: $(npm list --depth=0)"
+  }
+}
+EOF
+```
+
+The `additionalContext` string is added to Claude's system prompt, making the information available throughout the session.
+
+### Advanced: Multiple Hooks
+
+You can register multiple SessionStart hooks:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/install-deps.sh"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/setup-env.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Hooks execute sequentially in the order listed.
+
+## Usage Examples
+
+### Example 1: Node.js Project with npm
+
+**Scenario**: React project requiring `npm install` before tests and linting
+
+**Hook script** (`.claude/hooks/session-start.sh`):
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+npm install
+
+echo '{"success": true}'
+```
+
+**Settings** (`.claude/settings.json`):
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Validation**:
+
+```bash
+# Test hook
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
+
+# Test linter
+npm run lint
+
+# Test test command
+npm test
+```
+
+### Example 2: Python Project with Poetry
+
+**Scenario**: Python project using Poetry for dependency management
+
+**Hook script**:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+
+# Install dependencies with Poetry
+poetry install
+
+# Set PYTHONPATH for imports
+echo 'export PYTHONPATH="."' >> "$CLAUDE_ENV_FILE"
+
+echo '{"success": true}'
+```
+
+**Validation**:
+
+```bash
+# Test hook
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
+
+# Test linter
+poetry run ruff check src/
+
+# Test test command
+poetry run pytest tests/test_example.py
+```
+
+### Example 3: Rust Project with cargo
+
+**Scenario**: Rust project requiring `cargo build` for dependencies
+
+**Hook script**:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+
+# Build dependencies
+cargo build
+
+echo '{"success": true}'
+```
+
+**Validation**:
+
+```bash
+# Test hook
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
+
+# Test linter
+cargo clippy
+
+# Test test command
+cargo test test_example
+```
+
+### Example 4: Monorepo with Multiple Package Managers
+
+**Scenario**: Monorepo with frontend (npm) and backend (pip)
+
+**Hook script**:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+
+# Install frontend dependencies
+cd frontend
+npm install
+cd ..
+
+# Install backend dependencies
+cd backend
+pip install -r requirements.txt
+cd ..
+
+# Set environment variables
+echo 'export PYTHONPATH="backend"' >> "$CLAUDE_ENV_FILE"
+
+echo '{"success": true}'
+```
+
+### Example 5: Async Mode for Faster Startup
+
+**Scenario**: Large project where dependency installation is slow
+
+**Hook script with async**:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+# Enable async mode (5-minute timeout)
+echo '{"async": true, "asyncTimeout": 300000}'
+
+cd "$CLAUDE_PROJECT_DIR"
+npm install
+
+echo '{"success": true}'
+```
+
+<Callout type="warn">
+**Trade-off**: With async mode, the session starts immediately but dependencies may not be ready. Claude might fail if it tries to run tests before `npm install` completes.
+</Callout>
+
+## Best Practices
+
+### Design Principles
+
+1. **Idempotency is critical**
+
+   Your hook will run on `startup`, `resume`, `clear`, and `compact` events. Ensure it's safe to run multiple times:
+
+   ```bash
+   # Good: npm install is idempotent
+   npm install
+
+   # Bad: Appending to file multiple times
+   echo 'export PATH=$PATH:/custom' >> "$CLAUDE_ENV_FILE"
+
+   # Good: Check before appending
+   if ! grep -q '/custom' "$CLAUDE_ENV_FILE" 2>/dev/null; then
+     echo 'export PATH=$PATH:/custom' >> "$CLAUDE_ENV_FILE"
+   fi
+   ```
+
+2. **Web-only by default**
+
+   Use `$CLAUDE_CODE_REMOTE` to skip execution on desktop:
+
+   ```bash
+   if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+     exit 0
+   fi
+   ```
+
+3. **Prefer cache-friendly commands**
+
+   Optimize for container state caching:
+
+   ```bash
+   # Good: Preserves node_modules/ in cache
+   npm install
+
+   # Less optimal: Reinstalls everything
+   npm ci
+   ```
+
+4. **Non-interactive execution**
+
+   Never require user input:
+
+   ```bash
+   # Good: Non-interactive flag
+   pip install -r requirements.txt --no-input
+
+   # Bad: May prompt for confirmation
+   npm install
+   ```
+
+5. **Error handling**
+
+   Use `set -euo pipefail` for strict error handling:
+
+   ```bash
+   #!/bin/bash
+   set -euo pipefail  # Exit on error, undefined variable, pipe failure
+
+   npm install
+   ```
+
+### Performance Optimization
+
+1. **Minimize hook execution time**: Only install critical dependencies
+2. **Leverage caching**: Use commands that preserve installed packages
+3. **Consider async mode**: For very slow installations (but understand trade-offs)
+4. **Skip unnecessary work**: Check if dependencies are already installed
+
+### Security Considerations
+
+1. **Review scripts carefully**: Hooks execute with full project access
+2. **Avoid external fetches**: Don't download arbitrary scripts from the internet
+3. **Validate inputs**: Don't trust data from stdin without validation
+4. **Use version-locked dependencies**: Pin dependency versions for reproducibility
+
+## Troubleshooting
+
+### Hook Not Executing
+
+**Symptom**: SessionStart hook doesn't run when session starts
+
+**Causes**:
+- Script not executable (`chmod +x` missing)
+- Incorrect path in settings.json
+- Syntax error in settings.json
+
+**Solutions**:
+
+```bash
+# Make script executable
+chmod +x .claude/hooks/session-start.sh
+
+# Verify settings.json syntax
+jq . .claude/settings.json
+
+# Test hook manually
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
+```
+
+### Dependencies Not Installing
+
+**Symptom**: Hook runs but dependencies aren't available
+
+**Causes**:
+- Package manager not available in container
+- Network connectivity issues
+- Incorrect dependency file path
+
+**Solutions**:
+
+```bash
+# Check package manager availability
+which npm
+which pip
+which cargo
+
+# Verify dependency file exists
+ls -la package.json requirements.txt Cargo.toml
+
+# Check for error output
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh 2>&1 | tee hook-output.log
+```
+
+### Linter/Test Failures After Hook
+
+**Symptom**: Hook succeeds but linters/tests fail
+
+**Causes**:
+- Missing dev dependencies
+- Environment variables not set
+- Configuration files not found
+
+**Solutions**:
+
+```bash
+# Install dev dependencies explicitly
+npm install --include=dev
+
+# Set required environment variables
+echo 'export NODE_ENV=test' >> "$CLAUDE_ENV_FILE"
+
+# Verify configuration files
+ls -la .eslintrc.json jest.config.js
+```
+
+### Async Race Conditions
+
+**Symptom**: With async mode, tests fail intermittently
+
+**Cause**: Claude runs tests before async hook completes
+
+**Solutions**:
+
+1. **Switch to synchronous mode**:
+
+   Remove the async output line:
+
+   ```bash
+   # Remove this line
+   echo '{"async": true, "asyncTimeout": 300000}'
+   ```
+
+2. **Increase timeout**:
+
+   Give more time for installation:
+
+   ```bash
+   echo '{"async": true, "asyncTimeout": 600000}'  # 10 minutes
+   ```
+
+3. **Add dependency checks**:
+
+   Make tests wait for dependencies:
+
+   ```bash
+   # In test script
+   while [ ! -d "node_modules" ]; do
+     sleep 1
+   done
+   npm test
+   ```
+
+### Settings.json Merge Conflicts
+
+**Symptom**: Existing settings.json configuration gets overwritten
+
+**Cause**: Not properly merging hook configuration with existing settings
+
+**Solution**: Use `jq` to merge configurations:
+
+```bash
+# Read existing settings
+existing=$(cat .claude/settings.json)
+
+# Merge with hook configuration
+echo "$existing" | jq '.hooks.SessionStart = [{"hooks": [{"type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"}]}]' > .claude/settings.json
+```
+
+## Real-World Use Cases
+
+### Use Case 1: Onboarding New Team Members
+
+**Scenario**: New developers join the team and need quick environment setup
+
+**Implementation**: Add SessionStart hook to the main branch
+
+**Benefits**:
+- New developers clone the repo
+- First Claude Code session automatically installs dependencies
+- No manual setup instructions needed
+- Consistent environment across team members
+
+### Use Case 2: CI/CD Preview Environments
+
+**Scenario**: Preview branches for pull requests need working test/lint commands
+
+**Implementation**: SessionStart hook ensures dependencies are available
+
+**Benefits**:
+- Every PR branch has a working environment
+- Reviewers can test changes immediately
+- No manual "run npm install first" comments on PRs
+
+### Use Case 3: Teaching and Demos
+
+**Scenario**: Workshop or tutorial repository for teaching
+
+**Implementation**: SessionStart hook sets up student environments
+
+**Benefits**:
+- Students don't need to understand dependency management
+- Workshop time focused on learning, not troubleshooting setup
+- Consistent environment across all student sessions
+
+### Use Case 4: Open Source Projects
+
+**Scenario**: Open source project with many first-time contributors
+
+**Implementation**: SessionStart hook lowers contribution barrier
+
+**Benefits**:
+- Contributors can start coding immediately
+- Reduced "how do I set up?" issues
+- More time spent on actual contributions
+
+## Integration Patterns
+
+### With Other Claude Code Features
+
+#### Combined with Slash Commands
+
+Create a slash command that leverages installed dependencies:
+
+```bash
+# .claude/commands/test.sh
+#!/bin/bash
+npm test -- "$@"
+```
+
+The SessionStart hook ensures `npm test` works by installing dependencies first.
+
+#### Combined with CLAUDE.md
+
+Reference installed tools in project context:
+
+```markdown
+# Project Context
+
+This project uses Jest for testing and ESLint for linting.
+Dependencies are automatically installed via SessionStart hook.
+
+To run tests: `npm test`
+To run linter: `npm run lint`
+```
+
+### With CI/CD Pipelines
+
+Align SessionStart hook with CI/CD:
+
+```yaml
+# .github/workflows/test.yml
+jobs:
+  test:
+    steps:
+      - name: Install dependencies
+        run: npm install  # Same as SessionStart hook
+
+      - name: Run tests
+        run: npm test
+```
+
+This ensures the Claude Code environment matches CI/CD.
+
+### With Development Containers
+
+Share configuration between SessionStart hooks and devcontainers:
+
+```json
+// .devcontainer/devcontainer.json
+{
+  "postCreateCommand": "npm install",
+  "postStartCommand": "./.claude/hooks/session-start.sh"
+}
+```
+
+## Advanced Topics
+
+### Conditional Hook Execution
+
+Run different setup based on project state:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+
+# Check if this is a fresh clone
+if [ ! -d "node_modules" ]; then
+  echo "First-time setup: installing all dependencies"
+  npm install
+else
+  echo "Updating dependencies only"
+  npm update
+fi
+
+echo '{"success": true}'
+```
+
+### Multi-Environment Support
+
+Support both web and desktop with different behavior:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+cd "$CLAUDE_PROJECT_DIR"
+
+if [ "${CLAUDE_CODE_REMOTE:-}" == "true" ]; then
+  # Web: Install everything
+  npm install
+else
+  # Desktop: Just check for updates
+  npm outdated || true
+fi
+
+echo '{"success": true}'
+```
+
+### Dynamic Dependency Detection
+
+Analyze changed files to install only needed dependencies:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+
+# Check if package.json changed recently
+if [ "$(find package.json -mmin -60)" ]; then
+  echo "package.json recently modified, installing dependencies"
+  npm install
+else
+  echo "No recent package.json changes, skipping install"
+fi
+
+echo '{"success": true}'
+```
+
+## Conclusion
+
+The **session-start-hook** skill transforms Claude Code on the web from an ephemeral environment requiring manual setup into a fully automated development workspace. By following the 8-step workflow, you create robust SessionStart hooks that:
+
+✅ **Automatically install dependencies** on every session
+✅ **Ensure tests and linters work** without manual intervention
+✅ **Leverage container caching** for fast subsequent sessions
+✅ **Provide consistent environments** across all team members
+✅ **Lower contribution barriers** for new developers
+
+### Key Takeaways
+
+1. **SessionStart hooks are essential** for Claude Code web environments
+2. **The 8-step workflow ensures** comprehensive setup and validation
+3. **Synchronous mode is safer** than async for dependency installation
+4. **Container caching makes** subsequent sessions fast
+5. **Validation steps prevent** runtime failures during development
+
+### Next Steps
+
+To implement SessionStart hooks in your project:
+
+1. **Identify your dependencies**: Check for package.json, requirements.txt, etc.
+2. **Create the hook script**: Follow Step 3 in the workflow
+3. **Register in settings**: Add to .claude/settings.json
+4. **Validate thoroughly**: Test hook, linter, and tests
+5. **Commit to version control**: Make it available for all sessions
+6. **Merge to main branch**: Enable automatic setup for everyone
+
+Once your SessionStart hook is merged to the default branch, every future Claude Code session will automatically have a fully configured development environment. No more "install dependencies first" messages—just start coding.
+
+---
+
+<Callout type="default">
+## Source Information
+
+This article analyzes the **session-start-hook** skill (startup-hook-skill) from the Claude Code ecosystem. The skill provides a systematic workflow for creating and validating SessionStart hooks for web-based development environments.
+
+**Skill location**: `.claude/skills/session-start-hook/`
+**Official documentation**: [Claude Code Hooks Reference](https://docs.claude.com/en/docs/claude-code/hooks)
+</Callout>

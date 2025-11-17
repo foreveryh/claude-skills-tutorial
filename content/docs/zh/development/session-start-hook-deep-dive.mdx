@@ -1,0 +1,1085 @@
+---
+title: "SessionStart Hook 技能：自动化 Claude Code Web 环境设置"
+description: "掌握 Claude Code web 版的 SessionStart hook 技能 - 自动安装依赖、配置环境，确保测试和代码检查器在每个会话中正常工作"
+lang: zh
+---
+
+# SessionStart Hook 技能：自动化 Claude Code Web 环境设置
+
+## 简介
+
+**session-start-hook** 技能（官方名称为 `startup-hook-skill`）提供了一种系统化的方法，用于为 Claude Code web 版创建 SessionStart hooks。SessionStart hooks 是在 Claude Code 会话开始时自动运行的脚本，能够执行关键的设置任务，如依赖安装、环境配置和项目初始化。
+
+<Callout type="info">
+**解决的问题：** Claude Code web 版在临时容器中运行。如果没有 SessionStart hooks，你需要在每个会话中手动安装依赖，然后才能运行测试或代码检查器。此技能自动化了整个设置过程。
+</Callout>
+
+### 此技能的功能
+
+此技能引导 Claude 完成 8 步流程：
+
+1. 分析项目的依赖关系
+2. 设计合适的启动 hook
+3. 创建 hook 脚本文件
+4. 在 Claude 设置中注册
+5. 验证 hook 正确执行
+6. 验证代码检查器与已安装的依赖一起工作
+7. 验证测试成功运行
+8. 提交并推送配置
+
+### 何时使用此技能
+
+在以下情况下使用此技能：
+
+✅ 为 Claude Code web 版设置仓库
+✅ 项目需要为测试/代码检查器安装依赖
+✅ 希望在会话启动时自动设置环境
+✅ 需要为会话配置环境变量
+
+在以下情况下不要使用此技能：
+
+❌ 使用 Claude Code 桌面版（依赖在本地持久化）
+❌ 项目没有依赖
+❌ 只需要一次性设置（使用手动命令代替）
+
+## 理解 SessionStart Hooks
+
+在深入了解技能工作流之前，先理解 SessionStart hooks 在 Claude Code 中的工作原理。
+
+### Hook 生命周期
+
+SessionStart hooks 在四个不同时刻执行，由 `source` 字段指示：
+
+- **`startup`：** 从头开始创建新会话
+- **`resume`：** 断开连接后恢复现有会话
+- **`clear`：** 使用 `/clear` 命令清除会话
+- **`compact`：** 为内存管理压缩会话上下文
+
+<Callout type="tip">
+**设计考虑：** 你的 hook 应该是幂等的——可以安全地多次运行——因为它可能会在 resume、clear 或 compact 事件时执行。
+</Callout>
+
+### 输入格式
+
+SessionStart hooks 通过 stdin 接收 JSON 输入：
+
+```json
+{
+  "session_id": "abc123",
+  "source": "startup|resume|clear|compact",
+  "transcript_path": "/path/to/transcript.jsonl",
+  "permission_mode": "default",
+  "hook_event_name": "SessionStart",
+  "cwd": "/workspace/repo"
+}
+```
+
+**关键字段：**
+- `session_id`：会话的唯一标识符
+- `source`：触发 hook 的原因
+- `cwd`：当前工作目录（项目根目录）
+
+### 执行模式：同步 vs 异步
+
+SessionStart hooks 支持两种执行模式：
+
+#### 同步模式（默认）
+
+hook 在会话启动前完成：
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+npm install
+echo '{"success": true}'
+```
+
+**优点：** 保证在 Claude 启动前安装依赖
+**缺点：** 会话启动延迟，直到 hook 完成
+
+#### 异步模式
+
+hook 在后台运行，同时会话启动：
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+echo '{"async": true, "asyncTimeout": 300000}'
+
+npm install
+```
+
+**优点：** 更快的会话启动
+**缺点：** 竞态条件——Claude 可能在依赖安装前运行测试
+
+<Callout type="warn">
+**建议：** 从同步模式开始。只有在用户请求更快的启动并理解权衡时才切换到异步模式。
+</Callout>
+
+### 环境变量
+
+SessionStart hooks 中有三个关键的环境变量可用：
+
+#### `$CLAUDE_PROJECT_DIR`
+
+指向仓库根目录：
+
+```bash
+cd "$CLAUDE_PROJECT_DIR"
+npm install
+```
+
+#### `$CLAUDE_ENV_FILE`
+
+用于为会话写入持久环境变量的路径：
+
+```bash
+echo 'export PYTHONPATH="."' >> "$CLAUDE_ENV_FILE"
+echo 'export DEBUG=true' >> "$CLAUDE_ENV_FILE"
+```
+
+写入此文件的变量在会话期间的所有后续命令中都可用。
+
+#### `$CLAUDE_CODE_REMOTE`
+
+指示是否在 Claude Code web 版中运行：
+
+```bash
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  # 跳过桌面版 Claude Code 的 hook
+  exit 0
+fi
+
+# 仅 web 版的设置继续...
+npm install
+```
+
+<Callout type="info">
+**最佳实践：** 使用 `$CLAUDE_CODE_REMOTE` 仅在 web 环境中运行设置，因为容器是临时的，需要依赖安装。
+</Callout>
+
+## 8 步工作流程
+
+session-start-hook 技能遵循系统化的 8 步流程。让我们详细检查每一步。
+
+### 步骤 1：分析依赖
+
+**目的：** 识别需要安装的内容
+
+技能搜索依赖清单文件：
+
+<Files>
+  <Folder name="Project Root" defaultOpen>
+    <File name="package.json" />
+    <File name="package-lock.json" />
+    <File name="pyproject.toml" />
+    <File name="requirements.txt" />
+    <File name="Cargo.toml" />
+    <File name="go.mod" />
+    <File name="Gemfile" />
+    <File name="README.md" />
+  </Folder>
+</Files>
+
+**包管理器映射：**
+
+| 找到的文件 | 包管理器 | 安装命令 |
+|------------|----------|----------|
+| `package.json` / `package-lock.json` | npm | `npm install` |
+| `pyproject.toml` | Poetry | `poetry install` |
+| `requirements.txt` | pip | `pip install -r requirements.txt` |
+| `Cargo.toml` | cargo | `cargo build` |
+| `go.mod` | go | `go mod download` |
+| `Gemfile` | bundler | `bundle install` |
+
+技能还会读取文档（README.md）以了解任何特殊的设置要求。
+
+### 步骤 2：设计 Hook
+
+**目的：** 创建一个正确安装依赖的脚本
+
+**关键设计原则：**
+
+1. **默认仅限 web：** 使用 `$CLAUDE_CODE_REMOTE` 检查
+2. **优先同步：** 最初不使用异步模式
+3. **缓存友好：** 优先使用利用容器缓存的命令
+4. **幂等性：** 可以安全地多次运行
+5. **非交互式：** 不需要用户输入
+
+**Node.js 项目的 hook 设计示例：**
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# 仅在 Claude Code web 版中运行
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+# 安装依赖
+cd "$CLAUDE_PROJECT_DIR"
+npm install
+
+echo '{"success": true}'
+```
+
+**缓存优化见解：**
+
+Claude Code web 版在 hook 完成后缓存容器状态。这意味着：
+
+- `npm install` 比 `npm ci` 更好（保留 `node_modules/`）
+- `pip install` 比 `pip install --force-reinstall` 更好
+- 缓存友好的命令使后续会话启动更快
+
+### 步骤 3：创建 Hook 文件
+
+**目的：** 将 hook 脚本写入文件系统
+
+创建 hooks 目录和脚本文件：
+
+```bash
+mkdir -p .claude/hooks
+cat > .claude/hooks/session-start.sh << 'EOF'
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+npm install
+
+echo '{"success": true}'
+EOF
+
+chmod +x .claude/hooks/session-start.sh
+```
+
+**重要：** 脚本必须是可执行的（`chmod +x`）
+
+### 步骤 4：在设置中注册
+
+**目的：** 告诉 Claude Code 在会话启动时运行 hook
+
+将配置添加到 `.claude/settings.json`：
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**如果 `.claude/settings.json` 存在：** 合并 hooks 配置而不是覆盖文件。
+
+**设置结构说明：**
+
+- `"hooks"`：顶级 hooks 配置
+- `"SessionStart"`：SessionStart 事件的 hook 配置数组
+- `"hooks"`：单个 hook 脚本数组（可以有多个）
+- `"type": "command"`：Hook 是 shell 命令
+- `"command"`：Hook 脚本的路径
+
+### 步骤 5：验证 Hook
+
+**目的：** 确保 hook 成功执行
+
+使用 web 环境标志直接运行 hook 脚本：
+
+```bash
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
+```
+
+**验证检查：**
+
+✅ 脚本执行无错误
+✅ 依赖已安装
+✅ 创建了预期的文件/目录
+✅ 输出指示成功
+
+**此阶段的常见问题：**
+
+- **权限被拒绝：** 缺少 `chmod +x`
+- **找不到命令：** 包管理器在容器中不可用
+- **连接超时：** 网络问题（在 Claude Code 环境中很少见）
+
+### 步骤 6：验证代码检查器
+
+**目的：** 验证代码检查器与已安装的依赖一起工作
+
+技能识别 linting 命令并在示例文件上运行它：
+
+```bash
+# JavaScript 项目示例
+npm run lint -- src/index.js
+
+# Python 项目示例
+ruff check src/main.py
+
+# Rust 项目示例
+cargo clippy -- -D warnings
+```
+
+**要验证的内容：**
+
+✅ Linter 命令执行
+✅ Linter 所需的依赖可用
+✅ 找到配置文件
+✅ Linter 产生输出（警告/错误可以；命令失败不行）
+
+**如果验证失败：** 更新启动脚本以安装缺少的依赖，然后重新测试。
+
+### 步骤 7：验证测试
+
+**目的：** 验证测试与已安装的依赖成功运行
+
+运行单个测试以验证环境：
+
+```bash
+# JavaScript 项目示例
+npm test -- --testPathPattern=example.test.js
+
+# Python 项目示例
+pytest tests/test_example.py
+
+# Rust 项目示例
+cargo test test_example
+```
+
+**要验证的内容：**
+
+✅ 测试命令执行
+✅ 测试框架找到测试文件
+✅ 测试所需的依赖可用
+✅ 测试可以运行（通过/失败无关紧要；执行才重要）
+
+**如果验证失败：** 更新启动脚本以安装测试依赖或配置测试路径，然后重新测试。
+
+<Callout type="tip">
+**专业提示：** 你不需要运行整个测试套件。运行一个测试就可以验证测试环境配置正确。
+</Callout>
+
+### 步骤 8：提交并推送
+
+**目的：** 在版本控制中持久化 hook 配置
+
+使用 hook 文件创建提交：
+
+```bash
+git add .claude/hooks/session-start.sh
+git add .claude/settings.json
+git commit -m "feat: add SessionStart hook for dependency installation"
+git push origin <branch-name>
+```
+
+**为什么这很重要：** 一旦合并到默认分支，所有未来的 Claude Code 会话都会自动使用 hook——无需手动设置。
+
+## 技术深入探讨
+
+### SessionStart Hooks 如何与 Claude Code 集成
+
+当 Claude Code 会话启动时：
+
+1. **容器初始化：** Claude Code 创建或恢复容器
+2. **Hook 发现：** 读取 `.claude/settings.json` 以查找注册的 hooks
+3. **Hook 执行：** 根据配置运行 SessionStart hooks
+4. **上下文注入：** Hook 输出可以向会话添加上下文
+5. **会话启动：** Claude 可供用户交互
+
+### 容器状态缓存
+
+Claude Code web 版在 SessionStart hooks 完成后缓存容器文件系统：
+
+**首次会话：**
+```
+1. 创建容器（空）
+2. SessionStart hook 运行
+3. 安装依赖（耗时）
+4. 缓存容器状态
+```
+
+**后续会话：**
+```
+1. 从缓存恢复容器
+2. SessionStart hook 运行
+3. 依赖已存在（快速）
+4. Hook 快速完成
+```
+
+这种缓存机制是为什么技能推荐使用缓存友好的安装命令（如 `npm install` 而不是 `npm ci`）的原因。
+
+### Hook 输出和上下文注入
+
+Hooks 可以通过 `additionalContext` 字段向会话注入额外的上下文：
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+npm install
+
+cat << EOF
+{
+  "success": true,
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "Dependencies installed: $(npm list --depth=0)"
+  }
+}
+EOF
+```
+
+`additionalContext` 字符串被添加到 Claude 的系统提示中，使信息在整个会话中可用。
+
+### 高级：多个 Hooks
+
+你可以注册多个 SessionStart hooks：
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/install-deps.sh"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/setup-env.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Hooks 按列出的顺序依次执行。
+
+## 使用示例
+
+### 示例 1：使用 npm 的 Node.js 项目
+
+**场景：** React 项目需要在测试和 linting 前运行 `npm install`
+
+**Hook 脚本**（`.claude/hooks/session-start.sh`）：
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+npm install
+
+echo '{"success": true}'
+```
+
+**设置**（`.claude/settings.json`）：
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**验证：**
+
+```bash
+# 测试 hook
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
+
+# 测试 linter
+npm run lint
+
+# 测试测试命令
+npm test
+```
+
+### 示例 2：使用 Poetry 的 Python 项目
+
+**场景：** 使用 Poetry 进行依赖管理的 Python 项目
+
+**Hook 脚本：**
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+
+# 使用 Poetry 安装依赖
+poetry install
+
+# 设置 PYTHONPATH 用于导入
+echo 'export PYTHONPATH="."' >> "$CLAUDE_ENV_FILE"
+
+echo '{"success": true}'
+```
+
+**验证：**
+
+```bash
+# 测试 hook
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
+
+# 测试 linter
+poetry run ruff check src/
+
+# 测试测试命令
+poetry run pytest tests/test_example.py
+```
+
+### 示例 3：使用 cargo 的 Rust 项目
+
+**场景：** Rust 项目需要 `cargo build` 来构建依赖
+
+**Hook 脚本：**
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+
+# 构建依赖
+cargo build
+
+echo '{"success": true}'
+```
+
+**验证：**
+
+```bash
+# 测试 hook
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
+
+# 测试 linter
+cargo clippy
+
+# 测试测试命令
+cargo test test_example
+```
+
+### 示例 4：使用多个包管理器的 Monorepo
+
+**场景：** 前端（npm）和后端（pip）的 monorepo
+
+**Hook 脚本：**
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+
+# 安装前端依赖
+cd frontend
+npm install
+cd ..
+
+# 安装后端依赖
+cd backend
+pip install -r requirements.txt
+cd ..
+
+# 设置环境变量
+echo 'export PYTHONPATH="backend"' >> "$CLAUDE_ENV_FILE"
+
+echo '{"success": true}'
+```
+
+### 示例 5：异步模式实现更快启动
+
+**场景：** 依赖安装速度较慢的大型项目
+
+**使用异步的 Hook 脚本：**
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+# 启用异步模式（5 分钟超时）
+echo '{"async": true, "asyncTimeout": 300000}'
+
+cd "$CLAUDE_PROJECT_DIR"
+npm install
+
+echo '{"success": true}'
+```
+
+<Callout type="warn">
+**权衡：** 使用异步模式，会话会立即启动，但依赖可能还没准备好。如果 Claude 在 `npm install` 完成前尝试运行测试，可能会失败。
+</Callout>
+
+## 最佳实践
+
+### 设计原则
+
+1. **幂等性至关重要**
+
+   你的 hook 将在 `startup`、`resume`、`clear` 和 `compact` 事件时运行。确保可以安全地多次运行：
+
+   ```bash
+   # 好：npm install 是幂等的
+   npm install
+
+   # 坏：多次追加到文件
+   echo 'export PATH=$PATH:/custom' >> "$CLAUDE_ENV_FILE"
+
+   # 好：追加前检查
+   if ! grep -q '/custom' "$CLAUDE_ENV_FILE" 2>/dev/null; then
+     echo 'export PATH=$PATH:/custom' >> "$CLAUDE_ENV_FILE"
+   fi
+   ```
+
+2. **默认仅限 web**
+
+   使用 `$CLAUDE_CODE_REMOTE` 在桌面版上跳过执行：
+
+   ```bash
+   if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+     exit 0
+   fi
+   ```
+
+3. **优先缓存友好的命令**
+
+   为容器状态缓存优化：
+
+   ```bash
+   # 好：在缓存中保留 node_modules/
+   npm install
+
+   # 不太理想：重新安装所有内容
+   npm ci
+   ```
+
+4. **非交互式执行**
+
+   永远不要求用户输入：
+
+   ```bash
+   # 好：非交互式标志
+   pip install -r requirements.txt --no-input
+
+   # 坏：可能提示确认
+   npm install
+   ```
+
+5. **错误处理**
+
+   使用 `set -euo pipefail` 进行严格的错误处理：
+
+   ```bash
+   #!/bin/bash
+   set -euo pipefail  # 错误时退出，未定义变量，管道失败
+
+   npm install
+   ```
+
+### 性能优化
+
+1. **最小化 hook 执行时间：** 只安装关键依赖
+2. **利用缓存：** 使用保留已安装包的命令
+3. **考虑异步模式：** 对于非常慢的安装（但要理解权衡）
+4. **跳过不必要的工作：** 检查依赖是否已安装
+
+### 安全考虑
+
+1. **仔细审查脚本：** Hooks 以完整的项目访问权限执行
+2. **避免外部获取：** 不要从互联网下载任意脚本
+3. **验证输入：** 不要在没有验证的情况下信任来自 stdin 的数据
+4. **使用版本锁定的依赖：** 固定依赖版本以实现可重现性
+
+## 故障排除
+
+### Hook 未执行
+
+**症状：** SessionStart hook 在会话启动时不运行
+
+**原因：**
+- 脚本不可执行（缺少 `chmod +x`）
+- settings.json 中的路径不正确
+- settings.json 中的语法错误
+
+**解决方案：**
+
+```bash
+# 使脚本可执行
+chmod +x .claude/hooks/session-start.sh
+
+# 验证 settings.json 语法
+jq . .claude/settings.json
+
+# 手动测试 hook
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
+```
+
+### 依赖未安装
+
+**症状：** Hook 运行但依赖不可用
+
+**原因：**
+- 包管理器在容器中不可用
+- 网络连接问题
+- 依赖文件路径不正确
+
+**解决方案：**
+
+```bash
+# 检查包管理器可用性
+which npm
+which pip
+which cargo
+
+# 验证依赖文件存在
+ls -la package.json requirements.txt Cargo.toml
+
+# 检查错误输出
+CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh 2>&1 | tee hook-output.log
+```
+
+### Hook 成功后 Linter/测试失败
+
+**症状：** Hook 成功但 linters/tests 失败
+
+**原因：**
+- 缺少开发依赖
+- 环境变量未设置
+- 找不到配置文件
+
+**解决方案：**
+
+```bash
+# 明确安装开发依赖
+npm install --include=dev
+
+# 设置所需的环境变量
+echo 'export NODE_ENV=test' >> "$CLAUDE_ENV_FILE"
+
+# 验证配置文件
+ls -la .eslintrc.json jest.config.js
+```
+
+### 异步竞态条件
+
+**症状：** 使用异步模式时，测试间歇性失败
+
+**原因：** Claude 在异步 hook 完成前运行测试
+
+**解决方案：**
+
+1. **切换到同步模式：**
+
+   删除异步输出行：
+
+   ```bash
+   # 删除此行
+   echo '{"async": true, "asyncTimeout": 300000}'
+   ```
+
+2. **增加超时：**
+
+   给安装更多时间：
+
+   ```bash
+   echo '{"async": true, "asyncTimeout": 600000}'  # 10 分钟
+   ```
+
+3. **添加依赖检查：**
+
+   让测试等待依赖：
+
+   ```bash
+   # 在测试脚本中
+   while [ ! -d "node_modules" ]; do
+     sleep 1
+   done
+   npm test
+   ```
+
+### Settings.json 合并冲突
+
+**症状：** 现有的 settings.json 配置被覆盖
+
+**原因：** 没有正确地将 hook 配置与现有设置合并
+
+**解决方案：** 使用 `jq` 合并配置：
+
+```bash
+# 读取现有设置
+existing=$(cat .claude/settings.json)
+
+# 与 hook 配置合并
+echo "$existing" | jq '.hooks.SessionStart = [{"hooks": [{"type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"}]}]' > .claude/settings.json
+```
+
+## 实际用例
+
+### 用例 1：新团队成员入职
+
+**场景：** 新开发人员加入团队，需要快速环境设置
+
+**实施：** 将 SessionStart hook 添加到主分支
+
+**好处：**
+- 新开发人员克隆仓库
+- 第一个 Claude Code 会话自动安装依赖
+- 无需手动设置说明
+- 团队成员间的一致环境
+
+### 用例 2：CI/CD 预览环境
+
+**场景：** Pull request 的预览分支需要工作的测试/lint 命令
+
+**实施：** SessionStart hook 确保依赖可用
+
+**好处：**
+- 每个 PR 分支都有工作环境
+- 审查者可以立即测试更改
+- PR 上没有手动"先运行 npm install"的评论
+
+### 用例 3：教学和演示
+
+**场景：** 用于教学的研讨会或教程仓库
+
+**实施：** SessionStart hook 设置学生环境
+
+**好处：**
+- 学生不需要理解依赖管理
+- 研讨会时间专注于学习，而不是故障排除设置
+- 所有学生会话的一致环境
+
+### 用例 4：开源项目
+
+**场景：** 有许多首次贡献者的开源项目
+
+**实施：** SessionStart hook 降低贡献门槛
+
+**好处：**
+- 贡献者可以立即开始编码
+- 减少"我如何设置？"的问题
+- 更多时间花在实际贡献上
+
+## 集成模式
+
+### 与其他 Claude Code 功能结合
+
+#### 与 Slash Commands 结合
+
+创建一个利用已安装依赖的 slash command：
+
+```bash
+# .claude/commands/test.sh
+#!/bin/bash
+npm test -- "$@"
+```
+
+SessionStart hook 通过首先安装依赖来确保 `npm test` 工作。
+
+#### 与 CLAUDE.md 结合
+
+在项目上下文中引用已安装的工具：
+
+```markdown
+# 项目上下文
+
+此项目使用 Jest 进行测试，ESLint 进行 linting。
+依赖通过 SessionStart hook 自动安装。
+
+运行测试：`npm test`
+运行 linter：`npm run lint`
+```
+
+### 与 CI/CD 管道结合
+
+将 SessionStart hook 与 CI/CD 对齐：
+
+```yaml
+# .github/workflows/test.yml
+jobs:
+  test:
+    steps:
+      - name: Install dependencies
+        run: npm install  # 与 SessionStart hook 相同
+
+      - name: Run tests
+        run: npm test
+```
+
+这确保 Claude Code 环境与 CI/CD 匹配。
+
+### 与开发容器结合
+
+在 SessionStart hooks 和 devcontainers 之间共享配置：
+
+```json
+// .devcontainer/devcontainer.json
+{
+  "postCreateCommand": "npm install",
+  "postStartCommand": "./.claude/hooks/session-start.sh"
+}
+```
+
+## 高级主题
+
+### 条件 Hook 执行
+
+根据项目状态运行不同的设置：
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+
+# 检查这是否是首次克隆
+if [ ! -d "node_modules" ]; then
+  echo "首次设置：安装所有依赖"
+  npm install
+else
+  echo "仅更新依赖"
+  npm update
+fi
+
+echo '{"success": true}'
+```
+
+### 多环境支持
+
+支持 web 和桌面版的不同行为：
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+cd "$CLAUDE_PROJECT_DIR"
+
+if [ "${CLAUDE_CODE_REMOTE:-}" == "true" ]; then
+  # Web：安装所有内容
+  npm install
+else
+  # 桌面：只检查更新
+  npm outdated || true
+fi
+
+echo '{"success": true}'
+```
+
+### 动态依赖检测
+
+分析更改的文件以仅安装所需的依赖：
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+cd "$CLAUDE_PROJECT_DIR"
+
+# 检查 package.json 最近是否更改
+if [ "$(find package.json -mmin -60)" ]; then
+  echo "package.json 最近被修改，安装依赖"
+  npm install
+else
+  echo "package.json 没有最近的更改，跳过安装"
+fi
+
+echo '{"success": true}'
+```
+
+## 结论
+
+**session-start-hook** 技能将 Claude Code web 版从需要手动设置的临时环境转变为完全自动化的开发工作空间。通过遵循 8 步工作流程，你可以创建强大的 SessionStart hooks：
+
+✅ **在每个会话中自动安装依赖**
+✅ **确保测试和 linters 工作** 无需手动干预
+✅ **利用容器缓存** 实现快速的后续会话
+✅ **为所有团队成员提供一致的环境**
+✅ **降低新开发人员的贡献门槛**
+
+### 关键要点
+
+1. **SessionStart hooks 对于** Claude Code web 环境至关重要
+2. **8 步工作流程确保** 全面的设置和验证
+3. **同步模式比** 异步模式更安全用于依赖安装
+4. **容器缓存使** 后续会话快速启动
+5. **验证步骤防止** 开发期间的运行时故障
+
+### 下一步
+
+在项目中实施 SessionStart hooks：
+
+1. **识别依赖：** 检查 package.json、requirements.txt 等
+2. **创建 hook 脚本：** 遵循工作流程中的步骤 3
+3. **在设置中注册：** 添加到 .claude/settings.json
+4. **彻底验证：** 测试 hook、linter 和测试
+5. **提交到版本控制：** 使其对所有会话可用
+6. **合并到主分支：** 为所有人启用自动设置
+
+一旦你的 SessionStart hook 合并到默认分支，每个未来的 Claude Code 会话都将自动拥有完全配置的开发环境。不再有"先安装依赖"的消息——直接开始编码。
+
+---
+
+<Callout type="default">
+## 来源信息
+
+本文分析了 Claude Code 生态系统中的 **session-start-hook** 技能（startup-hook-skill）。该技能为创建和验证用于基于 web 的开发环境的 SessionStart hooks 提供了系统化的工作流程。
+
+**技能位置：** `.claude/skills/session-start-hook/`
+**官方文档：** [Claude Code Hooks Reference](https://docs.claude.com/en/docs/claude-code/hooks)
+</Callout>
