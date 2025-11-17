@@ -1,0 +1,44 @@
+{
+  "source_url": "https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview",
+  "download_date": "2025-11-17T00:00:00.000Z",
+  "title": "Agent Skills Overview",
+  "author": "Anthropic",
+  "languages": ["en", "zh", "fr"],
+  "category": "development",
+  "difficulty": "intermediate",
+  "tags": ["skills", "claude", "agents", "api", "development", "documentation"],
+  "published_date": "2025-11-07",
+  "published_files": {
+    "en": "content/docs/en/development/agent-skills-overview.mdx",
+    "zh": "content/docs/zh/development/agent-skills-overview.mdx",
+    "fr": "content/docs/fr/development/agent-skills-overview.mdx"
+  },
+  "images": [
+    {
+      "original_url": "https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-architecture.png?fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=44c5eab950e209f613a5a47f712550dc",
+      "local_path": "/images/docs/agent-skills-overview/agent-skills-architecture.png",
+      "status": "success"
+    },
+    {
+      "original_url": "https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-context-window.png?fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=0127e014bfc3dd3c86567aad8609111b",
+      "local_path": "/images/docs/agent-skills-overview/agent-skills-context-window.png",
+      "status": "success"
+    }
+  ],
+  "navigation": {
+    "category_created": true,
+    "root_meta_updated": false,
+    "category_meta_created": {
+      "en": "content/docs/en/development/meta.json",
+      "zh": "content/docs/zh/development/meta.json",
+      "fr": "content/docs/fr/development/meta.json"
+    }
+  },
+  "content_analysis": {
+    "word_count": 3850,
+    "reading_time_minutes": 15,
+    "technical_complexity": "intermediate",
+    "target_audience": "Developers, Technical Writers, Claude Users",
+    "related_articles": ["improving-frontend-design-through-skills"]
+  }
+}

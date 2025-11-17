@@ -1,0 +1,459 @@
+---
+title: "Claude Skills Deep Dive: Best Practices from skill-creator"
+description: "Learn how to create effective Claude skills by analyzing the skill-creator tool. Understand skill anatomy, bundled resources, and the 6-step creation process."
+lang: en
+category: development
+difficulty: intermediate
+tags:
+  - claude-skills
+  - skill-development
+  - claude-code
+  - workflows
+  - tutorial
+source_url: "https://github.com/anthropics/skills/blob/main/skill-creator/SKILL.md"
+published_date: "2025-10-16"
+author: "Anthropic"
+source:
+  url: "https://github.com/anthropics/skills/blob/main/skill-creator/SKILL.md"
+  name: "Anthropic Skills Repository"
+  author: "Anthropic"
+  published_date: "2025-10-16"
+  accessed_date: "2025-11-17"
+  license: "Complete terms in LICENSE.txt"
+import:
+  date: "2025-11-17"
+  slug: "skill-creator-deep-dive"
+  translator: "Claude AI"
+---
+
+import { SourceAttribution } from '@/components/SourceAttribution';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+
+<SourceAttribution
+  source={{
+    url: "https://github.com/anthropics/skills/blob/main/skill-creator/SKILL.md",
+    name: "Anthropic Skills Repository",
+    author: "Anthropic",
+    publishedDate: "2025-10-16",
+    accessedDate: "2025-11-17"
+  }}
+  languages={['en', 'zh', 'fr']}
+  currentLang="en"
+/>
+
+# Claude Skills Deep Dive: Best Practices from skill-creator
+
+**skill-creator** is one of the most important example skills in the Anthropic repository. It provides a complete framework for creating, packaging, and iterating on Claude skills. This article will dissect its structure, analyze its design principles, and extract best practices you can apply to your own skill development.
+
+<Callout type="info">
+  This is a **real, production-ready skill** that is actively used to create other skills. By understanding its design, you can apply the same patterns to build your own specialized skills.
+</Callout>
+
+## What is skill-creator?
+
+skill-creator is a meta-skill—a skill that helps create other skills. It transforms Claude from a general-purpose assistant into a specialized skill development coach equipped with:
+
+- **Specialized workflows**: 6-step process for skill creation
+- **Tool integrations**: Scripts for initialization and packaging
+- **Domain expertise**: Best practices for skill design
+- **Bundled resources**: Python scripts and validation tools
+
+### Core Value Proposition
+
+Instead of manually writing SKILL.md files and organizing directories, skill-creator provides a systematic approach that ensures consistency, quality, and efficiency across all your skills.
+
+## Anatomy of the Skill
+
+The skill-creator demonstrates the standard structure that all well-designed skills should follow:
+
+```
+skill-creator/
+├── SKILL.md (required)
+│   ├── YAML frontmatter metadata
+│   └── Markdown instructions
+└── Bundled Resources (optional)
+    ├── scripts/
+    │   ├── init_skill.py
+    │   └── package_skill.py
+    └── LICENSE.txt
+```
+
+<Callout type="info">
+  <strong>SKILL.md is the only required file.</strong> All bundled resources are optional but highly recommended for complex skills.
+</Callout>
+
+### SKILL.md Structure
+
+Every skill starts with its metadata in YAML frontmatter:
+
+```yaml
+---
+name: skill-creator
+description: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.
+license: Complete terms in LICENSE.txt
+---
+```
+
+<Callout type="tip">
+  The **name** and **description** determine when Claude will use the skill. Be specific and use third-person language ("This skill should be used when..." instead of "Use this skill when...").
+</Callout>
+
+## Bundled Resources Analysis
+
+### Scripts Directory (`scripts/`)
+
+skill-creator includes two essential Python scripts that make skill creation efficient and reliable.
+
+#### init_skill.py
+
+**Purpose**: Generate a complete skill template with proper structure
+
+**Usage**:
+```bash
+scripts/init_skill.py <skill-name> --path <output-directory>
+```
+
+**What it does**:
+1. Creates the skill directory at the specified path
+2. Generates SKILL.md template with proper frontmatter and TODO placeholders
+3. Creates empty resource directories: `scripts/`, `references/`, and `assets/`
+4. Adds example files that can be customized or deleted
+
+**Key Benefits**:
+- **Consistency**: Every skill starts with the same structure
+- **Efficiency**: No manual directory creation or file templating
+- **Reliability**: Follows Anthropic's best practices automatically
+
+<Callout type="tip">
+  Always run init_skill.py when creating a new skill from scratch. The template it generates includes everything required by the skill specification.
+</Callout>
+
+#### package_skill.py
+
+**Purpose**: Validate and package a skill into a distributable zip file
+
+**Usage**:
+```bash
+scripts/package_skill.py <path/to/skill-folder>
+
+# Optional: specify output directory
+scripts/package_skill.py <path/to/skill-folder> ./dist
+```
+
+**Validation checks**:
+1. **YAML frontmatter format**: Required fields (name, description)
+2. **Skill naming conventions**: Proper directory structure
+3. **Description quality**: Completeness and specificity
+4. **File organization**: Proper resource references
+
+**Packaging Process**:
+- Creates a zip file named after the skill (e.g., `my-skill.zip`)
+- Maintains proper directory structure for distribution
+- Only packages if validation passes
+
+<Callout type="warn">
+  Validation failures prevent packaging. The script reports specific errors that must be fixed before distribution.
+</Callout>
+
+### When to Include Bundled Resources
+
+Not every skill needs all three resource types. Here's when to use each:
+
+<Cards>
+  <Card title="Scripts" icon="Code">
+    Include when code is repeatedly rewritten or deterministic reliability is needed. Example: `scripts/rotate_pdf.py`
+
+    **Benefits**: Token efficient, deterministic, executable without context
+  </Card>
+
+  <Card title="References" icon="Book">
+    Include for documentation Claude should reference while working.
+
+    **Examples**: API docs, database schemas, company policies, domain knowledge
+  </Card>
+
+  <Card title="Assets" icon="File">
+    Include for files used in final output (templates, images, fonts).
+
+    **Examples**: Logo.png, presentation templates, boilerplate code, sample documents
+  </Card>
+</Cards>
+
+<Callout type="info">
+  **Best Practice**: Information should live in either SKILL.md or references files, not both. Move detailed reference material to `references/` to keep SKILL.md lean while making information discoverable.
+</Callout>
+
+## Progressive Disclosure Design Principle
+
+One of skill-creator's most important contributions is the progressive disclosure pattern—a three-level loading system that manages context efficiently:
+
+### Level 1: Metadata (Always in Context)
+
+**Content**: `name` and `description` from YAML frontmatter
+
+**Size**: ~100 words
+
+**When loaded**: Always in Claude's context window
+
+**Purpose**: Determines when to trigger the skill
+
+### Level 2: SKILL.md Body (When Triggered)
+
+**Content**: Complete instructions and workflows
+
+**Size**: &lt;5k words (recommended)
+
+**When loaded**: Only when skill is triggered by user query
+
+**Purpose**: Provides procedural knowledge for task execution
+
+### Level 3: Bundled Resources (As Needed)
+
+**Content**: Scripts, references, assets
+
+**Size**: Unlimited (scripts can execute without reading into context)
+
+**When loaded**: Only when Claude determines they're needed
+
+**Purpose**: Provides detailed reference material without hogging context window
+
+<Callout type="tip">
+  **Key Insight**: Scripts don't need to be loaded into context to be executed. This makes them infinitely scalable from a token perspective.
+</Callout>
+
+## The 6-Step Skill Creation Process
+
+skill-creator provides a complete workflow that transforms skill ideas into production-ready packages.
+
+### Step 1: Understanding with Concrete Examples
+
+**Purpose**: Clearly understand how the skill will be used in practice
+
+**Questions to ask users**:
+- "What functionality should this skill support?"
+- "Can you give specific examples of how this skill would be used?"
+- "What would a user say that should trigger this skill?"
+
+**Example**: For an image-editor skill, ask about specific use cases like "Remove red-eye" or "Rotate this image".
+
+<Callout type="warn">
+  Avoid asking too many questions in a single message. Start with the most important questions and follow up as needed.
+</Callout>
+
+**Output**: Clear sense of functionality the skill should support
+
+### Step 2: Planning Reusable Skill Contents
+
+**Purpose**: Identify which resources would make repeated workflows more efficient
+
+**Analysis process**:
+1. Consider how to execute each example from scratch
+2. Identify what scripts, references, and assets would be helpful when repeating these workflows
+
+**Examples**:
+
+**PDF Editor Skill**:
+- Example query: "Help me rotate this PDF"
+- Reusable resource: `scripts/rotate_pdf.py`
+- Why: Code would be rewritten repeatedly without the script
+
+**Frontend Builder Skill**:
+- Example query: "Build me a todo app"
+- Reusable resource: `assets/hello-world/` template
+- Why: Same boilerplate HTML/React needed each time
+
+**BigQuery Skill**:
+- Example query: "How many users logged in today?"
+- Reusable resource: `references/schema.md`
+- Why: Table schemas and relationships would be rediscovered each time
+
+**Output**: List of reusable resources (scripts, references, assets) to include
+
+### Step 3: Initializing the Skill
+
+**Purpose**: Create the skill directory structure using automation
+
+**When to skip**: Only if the skill already exists and needs iteration or packaging
+
+**Command**:
+```bash
+scripts/init_skill.py <skill-name> --path <output-directory>
+```
+
+**What the script creates**:
+- Skill directory at specified path
+- SKILL.md template with proper frontmatter and TODO placeholders
+- Empty resource directories: `scripts/`, `references/`, `assets/`
+- Example files that can be customized or deleted
+
+<Callout type="tip">
+  After initialization, customize or remove generated files as needed. The template provides structure but should be adapted to your specific skill.
+</Callout>
+
+### Step 4: Editing the Skill
+
+**Purpose**: Transform the template into a production-ready skill
+
+**Key mindset**: Write for another Claude instance. Focus on information that would be beneficial and non-obvious.
+
+**Start with bundled resources**:
+1. Implement scripts, references, and assets identified in Step 2
+2. Delete example files not needed for the skill
+3. Get user input if resources require their content (e.g., brand assets)
+
+#### Update SKILL.md
+
+**Critical: Writing Style**
+
+Use **imperative/infinitive form** (verb-first instructions), NOT second person:
+
+❌ **Wrong**: "You should do X" or "If you need to do X"
+✅ **Right**: "To accomplish X, do Y"
+
+This maintains consistency and clarity for AI consumption.
+
+**Questions to answer in SKILL.md**:
+
+1. **What is the purpose?** (Few sentences)
+   - Clear, concise explanation of what the skill does
+
+2. **When should the skill be used?** (Trigger conditions)
+   - Specific user queries that should activate the skill
+   - Examples of when NOT to use it
+
+3. **How should Claude use the skill?** (Practical usage)
+   - Reference all reusable resources (scripts, references, assets)
+   - Explain workflow and decision-making process
+   - Include examples of proper usage
+
+<Callout type="tip">
+  Keep SKILL.md lean. Move detailed reference material to `references/` files. This keeps the core instructions discoverable without overwhelming the context window.
+</Callout>
+
+### Step 5: Packaging the Skill
+
+**Purpose**: Validate and create a distributable zip file
+
+**Command**:
+```bash
+scripts/package_skill.py <path/to/skill-folder> [output-directory]
+```
+
+**Automatic validation checks**:
+1. YAML frontmatter format and required fields (name, description)
+2. Skill naming conventions and directory structure
+3. Description completeness and quality
+4. File organization and resource references
+
+**Outputs** (if validation passes):
+- Zip file named after the skill (e.g., `my-skill.zip`)
+- Proper directory structure maintained
+- Ready for distribution
+
+<Callout type="warn">
+  If validation fails, the script reports specific errors and exits without packaging. Fix all errors before retrying.
+</Callout>
+
+### Step 6: Iterate
+
+**Purpose**: Continuous improvement based on real usage
+
+**Iteration workflow**:
+1. **Use** the skill on real tasks
+2. **Notice** struggles or inefficiencies
+3. **Identify** how SKILL.md or bundled resources should be updated
+4. **Implement** changes and test again
+
+Users often request improvements right after using the skill, when they have fresh context about how it performed.
+
+## Best Practices Summary
+
+Based on analyzing skill-creator, here are the key principles for effective skill development:
+
+### 1. Progressive Disclosure
+
+<Callout type="info">
+  Use the three-level loading system: Metadata → SKILL.md → Bundled resources. This manages context efficiently while providing access to detailed information when needed.
+</Callout>
+
+### 2. Avoid Duplication
+
+Information should live in **either** SKILL.md **or** references files, **not both**.
+
+- Keep SKILL.md lean with essential procedural instructions
+- Move detailed examples, schemas, and reference material to `references/`
+- This keeps core workflow discoverable without context window bloat
+
+### 3. Imperative Writing Style
+
+Always use verb-first instructions:
+
+❌ **Avoid**: "You should analyze the user's request"
+✅ **Use**: "Analyze the user's request"
+
+This maintains consistency and clarity for AI consumption.
+
+### 4. Concrete Examples
+
+Before creating a skill, always gather specific examples:
+
+- "Show me 3 real queries users would ask"
+- "What does success look like for each example?"
+- "What resources would make repeated execution easier?"
+
+Examples transform abstract requirements into actionable skill contents.
+
+### 5. Test and Iterate
+
+No skill is perfect on first release:
+
+- Use the skill on real tasks immediately
+- Pay attention to where Claude struggles
+- Update SKILL.md or resources based on actual usage
+- Package and redistribute improved versions
+
+The best skills evolve through real-world testing.
+
+## Conclusion
+
+skill-creator embodies the best practices for Claude skill development. By studying its structure and following its 6-step process, you can create skills that:
+
+- ✅ Extend Claude's capabilities systematically
+- ✅ Manage context efficiently through progressive disclosure
+- ✅ Provide reusable resources for repeated tasks
+- ✅ Maintain high quality through validation and iteration
+- ✅ Transform Claude from general-purpose to specialized agent
+
+The key insight: **Skills are onboarding guides for specific domains**. They provide the procedural knowledge that no model can fully possess on its own.
+
+---
+
+## Next Steps
+
+Want to create your own skill? Follow these steps:
+
+1. **Clone the skill-creator repository** (github.com/anthropics/skills)
+2. **Run `./scripts/init_skill.py my-skill --path ./my-skills/`**
+3. **Follow the 6-step process** outlined in this article
+4. **Package with `./scripts/package_skill.py ./my-skills/my-skill/`**
+5. **Test and iterate** based on real usage
+
+### Additional Resources
+
+- **Anthropic Skills Repository**: github.com/anthropics/skills
+- **Creating Your First Skill**: /tutorials/creating-first-skill
+- **Skill Examples Gallery**: /development/skill-examples
+- **Advanced Skill Development**: /development/advanced-skills
+
+## ℹ️ Source Information
+
+**Original Article**: [skill-creator SKILL.md](https://github.com/anthropics/skills/blob/main/skill-creator/SKILL.md)
+
+- **Source**: Anthropic Skills Repository
+- **Author**: Anthropic
+- **Published**: 2025-10-16
+- **Imported**: 2025-11-17
+- **License**: Complete terms in LICENSE.txt
+
+*This article was automatically processed and translated using Claude AI with defensive content safety measures to prevent MDX syntax errors.*

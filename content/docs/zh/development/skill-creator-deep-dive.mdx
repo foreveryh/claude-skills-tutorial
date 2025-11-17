@@ -1,0 +1,459 @@
+---
+title: "Claude Skills 深度解析：从 skill-creator 看技能创建最佳实践"
+description: "通过分析 skill-creator 工具学习如何创建有效的 Claude skills。了解 skill 解剖结构、捆绑资源和六步创建流程。"
+lang: zh
+category: development
+difficulty: intermediate
+tags:
+  - claude-skills
+  - skill-development
+  - claude-code
+  - workflows
+  - tutorial
+source_url: "https://github.com/anthropics/skills/blob/main/skill-creator/SKILL.md"
+published_date: "2025-10-16"
+author: "Anthropic"
+source:
+  url: "https://github.com/anthropics/skills/blob/main/skill-creator/SKILL.md"
+  name: "Anthropic Skills Repository"
+  author: "Anthropic"
+  published_date: "2025-10-16"
+  accessed_date: "2025-11-17"
+  license: "Complete terms in LICENSE.txt"
+import:
+  date: "2025-11-17"
+  slug: "skill-creator-deep-dive"
+  translator: "Claude AI"
+---
+
+import { SourceAttribution } from '@/components/SourceAttribution';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+
+<SourceAttribution
+  source={{
+    url: "https://github.com/anthropics/skills/blob/main/skill-creator/SKILL.md",
+    name: "Anthropic Skills Repository",
+    author: "Anthropic",
+    publishedDate: "2025-10-16",
+    accessedDate: "2025-11-17"
+  }}
+  languages={['en', 'zh', 'fr']}
+  currentLang="zh"
+/>
+
+# Claude Skills 深度解析：从 skill-creator 看技能创建最佳实践
+
+**skill-creator** 是 Anthropic 仓库中最重要的示例技能之一。它提供了创建、打包和迭代 Claude skills 的完整框架。本文将剖析其结构、分析其设计原则，并提取可应用于您自己技能开发的最佳实践。
+
+<Callout type="info">
+  这是一个用于创建其他 skills 的**真实、生产就绪的 skill**。通过了解其设计，您可以将相同的模式应用于构建自己的专业 skills。
+</Callout>
+
+## 什么是 skill-creator？
+
+skill-creator 是一个元技能（meta-skill）——一个帮助创建其他 skills 的技能。它将 Claude 从通用助手转变为专业的技能开发教练，配备：
+
+- **专业工作流程**：6 步技能创建流程
+- **工具集成**：初始化和打包脚本
+- **领域专业知识**：技能设计的最佳实践
+- **捆绑资源**：Python 脚本和验证工具
+
+### 核心价值主张
+
+无需手动编写 SKILL.md 文件和组织目录，skill-creator 提供了系统化的方法，确保所有技能的一致性、质量和效率。
+
+## Skill 的解剖结构
+
+skill-creator 展示了所有设计良好的 skills 应遵循的标准结构：
+
+```
+skill-creator/
+├── SKILL.md (required)
+│   ├── YAML frontmatter metadata
+│   └── Markdown instructions
+└── Bundled Resources (optional)
+    ├── scripts/
+    │   ├── init_skill.py
+    │   └── package_skill.py
+    └── LICENSE.txt
+```
+
+<Callout type="info">
+  <strong>SKILL.md 是唯一必需的文件。</strong>所有捆绑资源都是可选的，但强烈建议复杂技能使用。
+</Callout>
+
+### SKILL.md 结构
+
+每个技能都以 YAML frontmatter 中的元数据开始：
+
+```yaml
+---
+name: skill-creator
+description: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.
+license: Complete terms in LICENSE.txt
+---
+```
+
+<Callout type="tip">
+  **name** 和 **description** 决定 Claude 何时使用该技能。要具体并使用第三人称语言（"This skill should be used when..." 而不是 "Use this skill when..."）。
+</Callout>
+
+## 捆绑资源分析
+
+### Scripts 目录 (`scripts/`)
+
+skill-creator 包含两个基本的 Python 脚本，使技能创建高效可靠。
+
+#### init_skill.py
+
+**用途**：生成完整的技能模板和正确结构
+
+**用法**：
+```bash
+scripts/init_skill.py <skill-name> --path <output-directory>
+```
+
+**功能**：
+1. 在指定路径创建技能目录
+2. 生成 SKILL.md 模板，包含正确的 frontmatter 和 TODO 占位符
+3. 创建空的资源目录：`scripts/`、`references/` 和 `assets/`
+4. 添加可自定义或删除的示例文件
+
+**主要优势**：
+- **一致性**：每个技能都以相同的结构开始
+- **效率**：无需手动创建目录或文件模板
+- **可靠性**：自动遵循 Anthropic 的最佳实践
+
+<Callout type="tip">
+  从头创建新技能时，始终运行 init_skill.py。生成的模板包含技能规范要求的所有内容。
+</Callout>
+
+#### package_skill.py
+
+**用途**：验证技能并将其打包为可分发 zip 文件
+
+**用法**：
+```bash
+scripts/package_skill.py <path/to/skill-folder>
+
+# 可选：指定输出目录
+scripts/package_skill.py <path/to/skill-folder> ./dist
+```
+
+**验证检查**：
+1. **YAML frontmatter 格式**：必需字段（name, description）
+2. **技能命名约定**：正确的目录结构
+3. **描述质量**：完整性和具体性
+4. **文件组织**：正确的资源引用
+
+**打包流程**：
+- 创建以技能命名的 zip 文件（例如 `my-skill.zip`）
+- 保持正确的目录结构以进行分发
+- 仅当验证通过时才打包
+
+<Callout type="warn">
+  验证失败会阻止打包。脚本会报告必须在分发前修复的具体错误。
+</Callout>
+
+### 何时包含捆绑资源
+
+并非每个技能都需要所有三种资源类型。以下是使用每种资源的时间：
+
+<Cards>
+  <Card title="Scripts" icon="Code">
+    当代码被反复重写或需要确定性可靠性时包含。示例：`scripts/rotate_pdf.py`
+
+    **优势**：令牌高效、确定性强、无需上下文即可执行
+  </Card>
+
+  <Card title="References" icon="Book">
+    包含供 Claude 在工作时参考的文档。
+
+    **示例**：API 文档、数据库模式、公司政策、领域知识
+  </Card>
+
+  <Card title="Assets" icon="File">
+    包含用于最终输出的文件（模板、图片、字体）。
+
+    **示例**：Logo.png、演示模板、样板代码、示例文档
+  </Card>
+</Cards>
+
+<Callout type="info">
+  **最佳实践**：信息应存在于 SKILL.md 或 references 文件中，不能同时存在于两者。将详细的参考材料移至 `references/` 以保持 SKILL.md 精简，同时使信息可发现。
+</Callout>
+
+## 渐进式披露设计原则
+
+skill-creator 最重要的贡献之一是渐进式披露模式——一个有效管理上下文的三级加载系统：
+
+### 第 1 级：Metadata（始终在上下文中）
+
+**内容**：来自 YAML frontmatter 的 `name` 和 `description`
+
+**大小**：~100 个单词
+
+**加载时机**：始终在 Claude 的上下文窗口中
+
+**用途**：决定何时触发技能
+
+### 第 2 级：SKILL.md 主体（触发时）
+
+**内容**：完整的指令和工作流程
+
+**大小**：&lt;5k 个单词（推荐）
+
+**加载时机**：仅当技能被用户查询触发时
+
+**用途**：提供任务执行的程序性知识
+
+### 第 3 级：捆绑资源（按需）
+
+**内容**：Scripts、references、assets
+
+**大小**：无限制（脚本可以在不读取到上下文的情况下执行）
+
+**加载时机**：仅当 Claude 确定需要时
+
+**用途**：提供详细的参考材料而不占用上下文窗口
+
+<Callout type="tip">
+  **关键洞察**：脚本无需加载到上下文中即可执行。这使得它们在令牌角度上具有无限可扩展性。
+</Callout>
+
+## 6 步技能创建流程
+
+skill-creator 提供了将技能想法转化为生产就绪包的完整工作流程。
+
+### 第 1 步：通过具体示例理解技能
+
+**目的**：清楚了解技能在实践中将如何被使用
+
+**询问用户的问题**：
+- "此技能应支持哪些功能？"
+- "您能给出此技能如何使用的具体示例吗？"
+- "用户说什么应该触发此技能？"
+
+**示例**：对于图片编辑器技能，询问具体用例，如"去除红眼"或"旋转图片"。
+
+<Callout type="warn">
+  避免在单条消息中问太多问题。从最重要的问题开始，根据需要跟进。
+</Callout>
+
+**输出**：对技能应支持的功能有清晰认识
+
+### 第 2 步：规划可重用技能内容
+
+**目的**：识别哪些资源会使重复工作流程更高效
+
+**分析过程**：
+1. 考虑如何从零开始执行每个示例
+2. 识别重复这些工作流程时哪些脚本、references 和 assets 会有帮助
+
+**示例**：
+
+**PDF 编辑器技能**：
+- 示例查询：
+- 可重用资源：
+- 原因：没有脚本会反复重写代码
+
+**前端构建器技能**：
+- 示例查询：
+- 可重用资源：
+- 原因：每次都需相同样板 HTML/React
+
+**BigQuery 技能**：
+- 示例查询："今天有多少用户登录？"
+- 可重用资源：
+- 原因：每次都会重新发现表模式和关系
+
+**输出**：要包含的可重用资源列表（scripts、references、assets）
+
+### 第 3 步：初始化技能
+
+**目的**：使用自动化创建技能目录结构
+
+**何时跳过**：仅当技能已存在且需要迭代或打包时
+
+**命令**：
+```bash
+scripts/init_skill.py <skill-name> --path <output-directory>
+```
+
+**脚本创建内容**：
+- 在指定路径创建技能目录
+- 生成 SKILL.md 模板，包含正确的 frontmatter 和 TODO 占位符
+- 创建空资源目录：`scripts/`、`references/` 和 `assets/`
+- 添加可自定义或删除的示例文件
+
+<Callout type="tip">
+  初始化后，根据需要自定义或删除生成的文件。模板提供结构，但应适应您的具体技能。
+</Callout>
+
+### 第 4 步：编辑技能
+
+**目的**：将模板转化为生产就绪技能
+
+**关键心态**：为另一个 Claude 实例编写。专注于包含对 Claude 有益且非显而易见的信息。
+
+**从捆绑资源开始**：
+1. 实现第 2 步中识别的 scripts、references 和 assets
+2. 删除技能不需要的示例文件
+3. 如果资源需要用户内容（例如品牌资产），则获取用户输入
+
+#### 更新 SKILL.md
+
+**关键：写作风格**
+
+使用**指令式/不定式形式**（动词优先指令），而不是第二人称：
+
+❌ **错误**：
+✅ **正确**：
+
+这为 AI 消费保持一致性和清晰度。
+
+**在 SKILL.md 中回答的问题**：
+
+1. **目的是什么？**（几句话）
+   - 清晰、简洁地解释技能的作用
+
+2. **何时应使用该技能？**（触发条件）
+   - 应激活技能的具体用户查询
+   - 不应使用它的示例
+
+3. **Claude 在实践中应如何使用该技能？**（实际使用）
+   - 引用所有可重用资源（scripts、references、assets）
+   - 解释工作流程和决策过程
+   - 包含正确用法的示例
+
+<Callout type="tip">
+  保持 SKILL.md 精简。将详细参考材料移至 `references/` 文件。这使得核心指令可发现，而不会让上下文窗口不堪重负。
+</Callout>
+
+### 第 5 步：打包技能
+
+**目的**：验证并创建可分发 zip 文件
+
+**命令**：
+```bash
+scripts/package_skill.py <path/to/skill-folder> [output-directory]
+```
+
+**自动验证检查**：
+1. YAML frontmatter 格式和必需字段（name、description）
+2. 技能命名约定和目录结构
+3. 描述完整性和质量
+4. 文件组织和资源引用
+
+**输出**（如果验证通过）：
+- 以技能命名的 zip 文件（例如 `my-skill.zip`）
+- 保持正确的目录结构以进行分发
+- 准备分发
+
+<Callout type="warn">
+  如果验证失败，脚本会报告具体错误并在不打包的情况下退出。在重试前修复所有错误。
+</Callout>
+
+### 第 6 步：迭代
+
+**目的**：基于实际使用持续改进
+
+**迭代工作流程**：
+1. **使用**技能执行真实任务
+2. **注意**困难或低效之处
+3. **识别**应如何更新 SKILL.md 或资源
+4. **实施**更改并再次测试
+
+用户通常在使用技能后立即请求改进，此时他们对技能表现有全新认识。
+
+## 最佳实践总结
+
+基于分析 skill-creator，以下是有效技能开发的关键原则：
+
+### 1. 渐进式披露
+
+<Callout type="info">
+  使用三级加载系统：Metadata → SKILL.md → 捆绑资源。这在提供详细信息时有效管理上下文。
+</Callout>
+
+### 2. 避免重复
+
+信息应存在于**SKILL.md**或**references**文件中，**不能同时存在于两者**。
+
+- 保持 SKILL.md 精简，包含基本程序指令
+- 将详细示例、模式和参考材料移至 `references/`
+- 这使得核心工作流程可发现，而不会让上下文窗口臃肿
+
+### 3. 命令式写作风格
+
+始终使用动词优先指令：
+
+❌ **避免**：
+✅ **使用**：
+
+这为 AI 消费保持一致性和清晰度。
+
+### 4. 具体示例
+
+创建技能前，始终收集具体示例：
+
+- "向我展示用户会询问的 3 个真实查询"
+- "每个示例的成功是什么样子？"
+- "什么资源会使重复执行更容易？"
+
+示例将抽象需求转化为可操作技能内容。
+
+### 5. 测试和迭代
+
+没有任何技能在首次发布时是完美的：
+
+- 立即在真实任务上使用技能
+- 注意 Claude 遇到困难的地方
+- 根据实际使用更新 SKILL.md 或资源
+- 打包并重新分发改进版本
+
+最佳技能通过真实世界测试不断进化。
+
+## 结论
+
+skill-creator 体现了 Claude 技能开发的最佳实践。通过研究其结构并遵循其 6 步流程，您可以创建以下技能：
+
+- ✅ 系统地扩展 Claude 能力
+- ✅ 通过渐进式披露有效管理上下文
+- ✅ 为重复任务提供可重用资源
+- ✅ 通过验证和迭代保持高质量
+- ✅ 将 Claude 从通用转变为专业代理
+
+关键洞察：**Skills 是特定领域的入职指南**。它们提供任何模型无法完全拥有的程序性知识。
+
+---
+
+## 后续步骤
+
+想要创建自己的技能？请遵循以下步骤：
+
+1. **克隆 skill-creator 仓库** (github.com/anthropics/skills)
+2. **运行 `./scripts/init_skill.py my-skill --path ./my-skills/`**
+3. **遵循本文中概述的 6 步流程**
+4. **使用 `./scripts/package_skill.py ./my-skills/my-skill/` 打包**
+5. **根据实际使用进行测试和迭代**
+
+### 其他资源
+
+- **Anthropic Skills Repository**: github.com/anthropics/skills
+- **创建您的第一个 Skill**: /tutorials/creating-first-skill
+- **Skill 示例库**: /development/skill-examples
+- **高级 Skill 开发**: /development/advanced-skills
+
+## ℹ️ 源信息
+
+**原始文章**: [skill-creator SKILL.md](https://github.com/anthropics/skills/blob/main/skill-creator/SKILL.md)
+
+- **来源**: Anthropic Skills Repository
+- **作者**: Anthropic
+- **发布日期**: 2025-10-16
+- **导入日期**: 2025-11-17
+- **许可证**: Complete terms in LICENSE.txt
+
+*本文使用 Claude AI 自动处理和翻译，并采用防御性内容安全措施以防止 MDX 语法错误。*

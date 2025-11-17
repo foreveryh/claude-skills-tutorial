@@ -1,0 +1,360 @@
+---
+title: "Agent Skills 概述"
+description: "了解 Claude 的 Agent Skills 如何通过可重用的文件系统资源提供特定领域专业知识"
+lang: zh
+---
+
+# Agent Skills - Claude 文档
+
+## 为什么使用 Skills
+
+Skills 是可重用的、基于文件系统的资源，为 Claude 提供特定领域的专业知识：工作流程、上下文和最佳实践，将通用代理转变为专家。与提示（对话级别的指令，用于一次性任务）不同，Skills 按需加载，消除了在多次对话中重复提供相同指导的需要。
+
+<Callout type="default" emoji="✨">
+  **主要优势**：
+
+  * **专业化 Claude**：为特定领域的任务定制功能
+  * **减少重复**：创建一次，自动使用
+  * **组合功能**：组合 Skills 构建复杂工作流程
+</Callout>
+
+## 使用 Skills
+
+Anthropic 为常见文档任务（PowerPoint、Excel、Word、PDF）提供预构建的 Agent Skills，您可以创建自己的自定义 Skills。两者工作方式相同。Claude 在与您的请求相关时自动使用它们。
+
+<Callout type="info" emoji="🎯">
+**预构建的 Agent Skills** 在 claude.ai 和 Claude API 上对所有用户可用。有关完整列表，请参见下文的可用 Skills 部分。
+</Callout>
+
+<Callout type="default" emoji="🛠️">
+**自定义 Skills** 让您打包特定领域的专业知识和组织知识。它们在 Claude 的所有产品中可用：在 Claude Code 中创建它们，通过 API 上传它们，或在 claude.ai 设置中添加它们。
+</Callout>
+
+## Skills 如何工作
+
+Skills 利用 Claude 的 VM 环境提供超越仅凭提示所能实现的功能。Claude 在具有文件系统访问权限的虚拟机中运行，允许 Skills 作为包含指令、可执行代码和参考材料的目录存在，就像您为新团队成员创建的入职指南一样组织。
+
+这种基于文件系统的架构实现了**渐进式披露**：Claude 在需要时分阶段加载信息，而不是预先消耗上下文。
+
+### 三种 Skill 内容类型，三级加载
+
+Skills 可以包含三种类型的内容，每种在不同时间加载：
+
+#### 第一级：元数据（始终加载）
+
+**内容类型：指令**。Skill 的 YAML 前置元数据提供发现信息：
+
+```
+---
+name: pdf-processing
+description: 从 PDF 文件中提取文本和表格，填写表单，合并文档。在处理 PDF 文件或用户提及 PDF、表单或文档提取时使用。
+---
+```
+
+Claude 在启动时加载此元数据并将其包含在系统提示中。这种轻量级方法意味着您可以安装许多 Skills 而不会有上下文损失；Claude 只知道每个 Skills 存在以及何时使用它。
+
+#### 第二级：指令（触发时加载）
+
+**内容类型：指令**。SKILL.md 的主要主体包含程序性知识：工作流程、最佳实践和指导：
+
+```
+# PDF 处理
+
+## 快速开始
+
+使用 pdfplumber 从 PDF 中提取文本：
+
+```python
+import pdfplumber
+
+with pdfplumber.open("document.pdf") as pdf:
+    text = pdf.pages[0].extract_text()
+```
+
+有关高级表单填写，请参见 [FORMS.md](FORMS.md)。
+```
+
+当您请求与 Skill 描述匹配的内容时，Claude 通过 bash 从文件系统读取 SKILL.md。只有那时内容才会进入上下文窗口。
+
+#### 第三级：资源和代码（按需加载）
+
+**内容类型：指令、代码和资源**。Skills 可以打包其他材料：
+
+```
+pdf-skill/
+├── SKILL.md (主要指令)
+├── FORMS.md (表单填写指南)
+├── REFERENCE.md (详细 API 参考)
+└── scripts/
+    └── fill_form.py (实用脚本)
+```
+
+**指令**：其他 markdown 文件（FORMS.md、REFERENCE.md），包含专门指导和最佳实践
+
+**代码**：可执行脚本（fill_form.py、validate.py），Claude 通过 bash 运行；脚本提供确定性操作而不消耗上下文
+
+**资源**：参考材料，如数据库架构、API 文档、模板或示例
+
+Claude 仅在被引用时访问这些文件。文件系统模型意味着每种内容类型都有不同的优势：指令用于灵活指导，代码用于可靠性，资源用于事实查找。
+
+| 级别 | 何时加载 | Token 成本 | 内容 |
+| --- | --- | --- | --- |
+| **第一级：元数据** | 始终（启动时） | 每个 Skill 约 100 tokens | YAML 前置元数据中的 `name` 和 `description` |
+| **第二级：指令** | Skill 触发时 | 低于 5k tokens | SKILL.md 主体，包含指令和指导 |
+| **第三级+：资源** | 按需 | 实际无限制 | 通过 bash 执行的打包文件，不将内容加载到上下文中 |
+
+渐进式披露确保在任何给定时间只有相关内容占用上下文窗口。
+
+### Skills 架构
+
+Skills 在代码执行环境中运行，其中 Claude 具有文件系统访问、bash 命令和代码执行能力。可以这样理解：Skills 作为虚拟机上的目录存在，Claude 使用与您在计算机上导航文件相同的 bash 命令与它们交互。
+
+<img
+  src="/images/docs/agent-skills-overview/agent-skills-architecture.png"
+  alt="Agent Skills 架构 - 显示 Skills 如何与代理配置和虚拟机集成"
+  width="800"
+  height="auto"
+/>
+
+**Claude 如何访问 Skill 内容：**
+
+当 Skill 被触发时，Claude 使用 bash 从文件系统读取 SKILL.md，将其指令带入上下文窗口。如果这些指令引用其他文件（如 FORMS.md 或数据库架构），Claude 使用额外的 bash 命令读取这些文件。当指令提及可执行脚本时，Claude 通过 bash 运行它们并仅接收输出（脚本代码本身永不进入上下文）。
+
+**这种架构实现的功能：**
+
+**功能：**
+
+* **📁 按需文件访问**: Claude 只读取每个特定任务所需的文件。一个 Skill 可以包含数十个参考文件，但如果您的任务只需要销售架构，Claude 只加载那一个文件。其余文件保留在文件系统上，消耗零 tokens。
+
+* **⚡ 高效脚本执行**: 当 Claude 运行 `validate_form.py` 时，脚本的代码永远不会加载到上下文窗口中。只有脚本的输出（如"验证通过"或特定错误消息）消耗 tokens。这使得脚本比让 Claude 即时生成等效代码高效得多。
+
+* **∞ 打包内容无实际限制**: 因为文件在被访问前不消耗上下文，Skills 可以包含全面的 API 文档、大型数据集、大量示例或您需要的任何参考材料。对于未使用的打包内容，没有上下文损失。
+
+这种基于文件的模型是实现渐进式披露的原因。Claude 导航您的 Skill 就像您参考入职指南的特定部分，精确访问每个任务所需的内容。
+
+### 示例：加载 PDF 处理 Skill
+
+以下是 Claude 加载和使用 PDF 处理 Skill 的方式：
+
+1. **启动**：系统提示包括：`PDF 处理 - 从 PDF 文件中提取文本和表格，填写表单，合并文档`
+2. **用户请求**："提取此 PDF 中的文本并总结"
+3. **Claude 调用**：`bash: read pdf-skill/SKILL.md` → 指令加载到上下文中
+4. **Claude 确定**：不需要表单填写，因此不读取 FORMS.md
+5. **Claude 执行**：使用 SKILL.md 中的指令完成任务
+
+<img
+  src="/images/docs/agent-skills-overview/agent-skills-context-window.png"
+  alt="Skills 加载到上下文窗口 - 显示技能元数据和内容的渐进式加载"
+  width="800"
+  height="auto"
+/>
+
+该图显示：
+
+1. 具有系统提示和技能元数据预加载的默认状态
+2. Claude 通过 bash 读取 SKILL.md 触发技能
+3. Claude 根据需要选择性地读取其他打包文件，如 FORMS.md
+4. Claude 继续任务
+
+这种动态加载确保只有相关的技能内容占用上下文窗口。
+
+## Skills 在哪里工作
+
+Skills 在 Claude 的代理产品中可用：
+
+<Tabs items={['API', 'Code', 'SDK', 'Claude.ai']} defaultValue="API">
+
+<Tab value="API">
+  ### Claude API
+
+Claude API 支持预构建的 Agent Skills 和自定义 Skills。两者工作方式相同：在 `container` 参数中指定相关的 `skill_id` 以及代码执行工具。
+
+<Callout type="warning" emoji="⚠️">
+**先决条件**：通过 API 使用 Skills 需要三个 beta 标头：
+
+* `code-execution-2025-08-25` - Skills 在代码执行容器中运行
+* `skills-2025-10-02` - 启用 Skills 功能
+* `files-api-2025-04-14` - 向/从容器上传/下载文件所需
+</Callout>
+
+通过引用其 `skill_id`（例如 `pptx`、`xlsx`）使用预构建的 Agent Skills，或者通过 Skills API（`/v1/skills` 端点）创建和上传您自己的 Skills。自定义 Skills 在组织内共享。
+
+要了解更多，请参见"在 Claude API 中使用 Skills"。
+</Tab>
+
+<Tab value="Code">
+  ### Claude Code
+
+  Claude Code 仅支持自定义 Skills。
+
+  <Callout type="info" emoji="📁">
+  **自定义 Skills**：创建具有 SKILL.md 文件的目录作为 Skills。Claude 自动发现并使用它们。
+  </Callout>
+
+  Claude Code 中的自定义 Skills 基于文件系统，不需要 API 上传。
+
+  要了解更多，请参见"在 Claude Code 中使用 Skills"。
+</Tab>
+
+<Tab value="SDK">
+  ### Claude Agent SDK
+
+  Claude Agent SDK 通过基于文件系统的配置支持自定义 Skills。
+
+  <Callout type="info" emoji="⚙️">
+  **自定义 Skills**：在 `.claude/skills/` 中创建具有 SKILL.md 文件的目录作为 Skills。通过在 `allowed_tools` 配置中包含 `"Skill"` 来启用 Skills。
+  </Callout>
+
+  当 SDK 运行时，Agent SDK 中的 Skills 会自动被发现。
+
+  要了解更多，请参见 SDK 中的 Agent Skills。
+</Tab>
+
+<Tab value="Claude.ai">
+  ### Claude.ai
+
+  Claude.ai 支持预构建的 Agent Skills 和自定义 Skills。
+
+  **预构建的 Agent Skills**：当您创建文档时，这些 Skills 已经在幕后工作。Claude 无需任何设置即可使用它们。
+
+  <Callout type="default" emoji="📤">
+  **自定义 Skills**：通过设置 > 功能将您自己的 Skills 作为 zip 文件上传。在具有代码执行功能的 Pro、Max、Team 和 Enterprise 计划上可用。自定义 Skills 仅对每个用户个人使用；它们不在组织内共享，也不能由管理员集中管理。
+  </Callout>
+
+  要了解在 Claude.ai 中使用 Skills 的更多信息，请参见 Claude 帮助中心中的以下资源：
+
+  * 什么是 Skills？
+  * 在 Claude 中使用 Skills
+  * 如何创建自定义 Skills
+  * 使用 Skills 教导 Claude 您的工作方式
+</Tab>
+</Tabs>
+
+## Skill 结构
+
+每个 Skill 都需要具有 YAML 前置元数据的 `SKILL.md` 文件：
+
+```
+---
+name: your-skill-name
+description: 此 Skill 的作用以及何时使用的简要描述
+---
+
+# 您的 Skill 名称
+
+## 指令
+[供 Claude 遵循的清晰、分步指导]
+
+## 示例
+[使用此 Skill 的具体示例]
+```
+
+**必填字段**：`name` 和 `description`
+
+**字段要求**：
+
+`name`：
+
+* 最多 64 个字符
+* 必须只包含小写字母、数字和连字符
+* 不能包含 XML 标签
+* 不能包含保留字："anthropic"、"claude"
+
+`description`：
+
+* 必须非空
+* 最多 1024 个字符
+* 不能包含 XML 标签
+
+`description` 应该包含 Skill 的作用以及 Claude 何时应该使用它。有关完整的创作指导，请参见最佳实践指南。
+
+## 安全考虑
+
+<Callout type="warning" emoji="🔒">
+我们强烈建议仅使用来自受信任来源的 Skills：您自己创建的或从 Anthropic 获得的 Skills。Skills 通过指令和代码为 Claude 提供新功能，虽然这使它们强大，但也意味着恶意 Skill 可以指导 Claude 以不符合 Skill 既定目的的方式调用工具或执行代码。
+</Callout>
+
+**主要安全考虑**：
+
+* **彻底审核**：审查 Skill 中打包的所有文件：SKILL.md、脚本、图像和其他资源。寻找异常模式，如意外网络调用、文件访问模式或不符合 Skill 既定目的的操作
+* **外部来源有风险**：从外部 URL 获取数据的 Skills 构成特定风险，因为获取的内容可能包含恶意指令。即使是可信赖的 Skills，如果其外部依赖项随时间变化，也可能被破坏
+* **工具滥用**：恶意 Skills 可以以有害方式调用工具（文件操作、bash 命令、代码执行）
+* **数据泄露**：具有访问敏感数据权限的 Skills 可能被设计为向外部系统泄露信息
+* **像安装软件一样对待**：仅使用来自受信任来源的 Skills。在将 Skills 集成到具有敏感数据或关键操作访问权限的生产系统中时要特别小心
+
+## 可用 Skills
+
+### 预构建的 Agent Skills
+
+**可用 Skills：**
+
+* **📽️ PowerPoint (pptx)**: 创建演示文稿，编辑幻灯片，分析演示文稿内容
+
+* **📊 Excel (xlsx)**: 创建电子表格，分析数据，生成带图表的报告
+
+* **📝 Word (docx)**: 创建文档，编辑内容，格式化文本
+
+* **📄 PDF (pdf)**: 生成格式化的 PDF 文档和报告
+
+这些 Skills 在 Claude API 和 claude.ai 上可用。请参见快速入门教程，开始在 API 中使用它们。
+
+### 自定义 Skills 示例
+
+有关自定义 Skills 的完整示例，请参阅 Skills 食谱。
+
+## 限制和约束
+
+理解这些限制有助于您有效规划 Skills 部署。
+
+### 跨平台可用性
+
+**自定义 Skills 不会跨平台同步**。上传到一个平台的 Skills 不会自动在其他平台上可用：
+
+* 上传到 claude.ai 的 Skills 必须单独上传到 API
+* 通过 API 上传的 Skills 在 claude.ai 上不可用
+* Claude Code Skills 基于文件系统，与 claude.ai 和 API 都分开
+
+您需要在要使用它们的每个平台上单独管理和上传 Skills。
+
+### 共享范围
+
+Skills 根据您使用它们的地方有不同的共享模式：
+
+* **Claude.ai**：仅限个人用户；每个团队成员必须单独上传
+* **Claude API**：工作区范围内；所有工作区成员都可以访问上传的 Skills
+* **Claude Code**：个人（`~/.claude/skills/`）或基于项目（`.claude/skills/`）；也可以通过 Claude Code 插件共享
+
+Claude.ai 目前不支持自定义 Skills 的集中式管理员管理或组织级分发。
+
+### 运行时环境约束
+
+您的 skill 可用的确切运行时环境取决于您使用它的产品平台。
+
+* **Claude.ai**：
+  * **网络访问不同**：根据用户/管理员设置，Skills 可能具有完全、部分或无网络访问。有关更多详细信息，请参阅创建和编辑文件支持文章。
+
+* **Claude API**：
+  * **无网络访问**：Skills 无法进行外部 API 调用或访问互联网
+  * **无运行时包安装**：仅预装包可用。您无法在执行期间安装新包。
+  * **仅预配置依赖项**：查看代码执行工具文档以获取可用包列表
+
+* **Claude Code**：
+  * **完全网络访问**：Skills 具有与用户计算机上任何其他程序相同的网络访问权限
+  * **不鼓励全局包安装**：Skills 应该只在本地安装包，以避免干扰用户的计算机
+
+计划您的 Skills 在这些约束内工作。
+
+## 相关阅读
+
+本文提供了理解 Skills 如何工作的概念基础。有关实际实现示例，请参阅：
+
+- [通过 Skills 改进前端设计](/development/improving-frontend-design-through-skills) - Skills 如何转换前端开发工作流程的实际案例研究
+
+## 后续步骤
+
+开始使用 Skills：
+
+1. **尝试预构建的 Skills**：在您的下一个项目中使用 PowerPoint、Excel、Word 或 PDF Skills
+2. **创建自定义 Skills**：将您的领域专业知识打包成可重用的 Skills
+3. **探索高级模式**：组合多个 Skills 用于复杂工作流程
+4. **与您的团队共享**：在您的组织内分发 Skills 以获得一致的结果

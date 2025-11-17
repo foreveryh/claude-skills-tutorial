@@ -1,0 +1,26 @@
+{
+  "source_url": "https://claude.com/blog/improving-frontend-design-through-skills",
+  "download_date": "2025-11-17T00:00:00.000Z",
+  "title": "Improving frontend design through Skills",
+  "author": "Anthropic's Applied AI team: Prithvi Rajasekaran, Justin Wei, Alexander Bricken, Molly Vorwerck, Ryan Whitehead",
+  "languages": ["en", "zh", "fr"],
+  "category": "development",
+  "difficulty": "intermediate",
+  "tags": ["frontend", "design", "skills", "claude", "ui", "prompting", "javascript", "css", "html", "react"],
+  "published_date": "2025-11-13",
+  "published_files": {
+    "en": "content/docs/en/development/improving-frontend-design-through-skills.mdx",
+    "zh": "content/docs/zh/development/improving-frontend-design-through-skills.mdx",
+    "fr": "content/docs/fr/development/improving-frontend-design-through-skills.mdx"
+  },
+  "images": [],
+  "navigation": {
+    "category_created": true,
+    "root_meta_updated": true,
+    "category_meta_created": {
+      "en": "content/docs/en/development/meta.json",
+      "zh": "content/docs/zh/development/meta.json",
+      "fr": "content/docs/fr/development/meta.json"
+    }
+  }
+}

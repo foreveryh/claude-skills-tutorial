@@ -1,0 +1,16 @@
+{
+  "source_url": "https://docs.claude.com/en/docs/agent-sdk/skills",
+  "download_date": "2025-11-17T00:00:00Z",
+  "title": "Agent Skills in the SDK",
+  "author": "Anthropic",
+  "languages": ["en", "zh", "fr"],
+  "category": "development",
+  "difficulty": "intermediate",
+  "tags": ["agent-sdk", "skills", "claude-agent", "development"],
+  "published_files": {
+    "en": "content/docs/en/development/agent-skills-sdk.mdx",
+    "zh": "content/docs/zh/development/agent-skills-sdk.mdx",
+    "fr": "content/docs/fr/development/agent-skills-sdk.mdx"
+  },
+  "images": []
+}

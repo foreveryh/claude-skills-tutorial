@@ -1,0 +1,361 @@
+---
+title: "Aperçu des Agent Skills"
+description: "Découvrez comment les Agent Skills de Claude fournissent une expertise spécifique à un domaine grâce à des ressources réutilisables"
+lang: fr
+---
+
+# Agent Skills - Documentation Claude
+
+## Pourquoi utiliser les Skills
+
+Les Skills sont des ressources réutilisables et basées sur le système de fichiers qui fournissent à Claude une expertise spécifique à un domaine : flux de travail, contexte et meilleures pratiques qui transforment les agents généraux en spécialistes. Contrairement aux prompts (instructions au niveau de la conversation pour des tâches uniques), les Skills se chargent à la demande et éliminent le besoin de fournir répétitivement les mêmes instructions à travers plusieurs conversations.
+
+<Callout type="default" emoji="✨">
+  **Avantages clés** :
+
+  * **Spécialiser Claude** : Adapter les capacités pour des tâches spécifiques à un domaine
+  * **Réduire les répétitions** : Créer une fois, utiliser automatiquement
+  * **Composer les capacités** : Combiner les Skills pour construire des flux de travail complexes
+</Callout>
+
+## Utiliser les Skills
+
+Anthropic fournit des Agent Skills pré-construits pour les tâches de document courantes (PowerPoint, Excel, Word, PDF), et vous pouvez créer vos propres Skills personnalisés. Les deux fonctionnent de la même manière. Claude les utilise automatiquement lorsqu'ils sont pertinents pour votre demande.
+
+<Callout type="info" emoji="🎯">
+**Les Agent Skills pré-construits** sont disponibles pour tous les utilisateurs sur claude.ai et via l'API Claude. Voir la section Skills disponibles ci-dessous pour la liste complète.
+</Callout>
+
+<Callout type="default" emoji="🛠️">
+**Les Skills personnalisés** vous permettent d'emballer l'expertise de domaine et les connaissances organisationnelles. Ils sont disponibles sur tous les produits Claude : créez-les dans Claude Code, téléchargez-les via l'API, ou ajoutez-les dans les paramètres de claude.ai.
+</Callout>
+
+## Comment fonctionnent les Skills
+
+Les Skills exploitent l'environnement VM de Claude pour fournir des capacités au-delà de ce qui est possible avec les seuls prompts. Claude fonctionne dans une machine virtuelle avec accès au système de fichiers, permettant aux Skills d'exister comme des répertoires contenant des instructions, du code exécutable et des matériaux de référence, organisés comme un guide d'intégration que vous créeriez pour un nouvel employé.
+
+Cette architecture basée sur le système de fichiers permet une **divulgation progressive** : Claude charge les informations par étapes au besoin, plutôt que de consommer le contexte à l'avance.
+
+### Trois types de contenu de Skill, trois niveaux de chargement
+
+Les Skills peuvent contenir trois types de contenu, chacun chargé à des moments différents :
+
+#### Niveau 1 : Métadonnées (toujours chargées)
+
+**Type de contenu : Instructions**. Les métadonnées YAML avant le corps du Skill fournissent des informations de découverte :
+
+```yaml
+---
+name: pdf-processing
+description: Extraire le texte et les tableaux des fichiers PDF, remplir les formulaires, fusionner les documents. Utiliser lors du travail avec des fichiers PDF ou lorsque l'utilisateur mentionne des PDF, des formulaires ou l'extraction de documents.
+---
+```
+
+Claude charge ces métadonnées au démarrage et les inclut dans le prompt système. Cette approche légère signifie que vous pouvez installer de nombreux Skills sans pénalité de contexte ; Claude sait seulement que chaque Skill existe et quand l'utiliser.
+
+#### Niveau 2 : Instructions (chargées lorsque déclenché)
+
+**Type de contenu : Instructions**. Le corps principal de SKILL.md contient des connaissances procédurales : flux de travail, meilleures pratiques et guidage :
+
+```
+# Traitement PDF
+
+## Démarrage rapide
+
+Utilisez pdfplumber pour extraire le texte des PDF :
+
+```python
+import pdfplumber
+
+with pdfplumber.open("document.pdf") as pdf:
+    text = pdf.pages[0].extract_text()
+```
+
+Pour le remplissage avancé de formulaires, voir [FORMS.md](FORMS.md).
+```
+
+Lorsque vous demandez quelque chose qui correspond à la description d'un Skill, Claude lit SKILL.md depuis le système de fichiers via bash. Ce n'est qu'à ce moment que ce contenu entre dans la fenêtre de contexte.
+
+#### Niveau 3 : Ressources et code (chargés au besoin)
+
+**Types de contenu : Instructions, code et ressources**. Les Skills peuvent emballer des matériaux supplémentaires :
+
+```
+pdf-skill/
+├── SKILL.md (instructions principales)
+├── FORMS.md (guide de remplissage de formulaires)
+├── REFERENCE.md (référence API détaillée)
+└── scripts/
+    └── fill_form.py (script utilitaire)
+```
+
+**Instructions** : Fichiers markdown supplémentaires (FORMS.md, REFERENCE.md) contenant des guidages spécialisés et des flux de travail
+
+**Code** : Scripts exécutables (fill_form.py, validate.py) que Claude exécute via bash ; les scripts fournissent des opérations déterministes sans consommer de contexte
+
+**Ressources** : Matériaux de référence comme des schémas de base de données, de la documentation API, des modèles ou des exemples
+
+Claude accède à ces fichiers uniquement lorsqu'ils sont référencés. Le modèle de système de fichiers signifie que chaque type de contenu a des forces différentes : instructions pour un guidage flexible, code pour la fiabilité, ressources pour la consultation factuelle.
+
+| Niveau | Quand chargé | Coût en tokens | Contenu |
+| --- | --- | --- | --- |
+| **Niveau 1 : Métadonnées** | Toujours (au démarrage) | ~100 tokens par Skill | `name` et `description` des métadonnées YAML |
+| **Niveau 2 : Instructions** | Quand le Skill est déclenché | Moins de 5k tokens | Corps SKILL.md avec instructions et guidage |
+| **Niveau 3+ : Ressources** | Au besoin | Effectivement illimité | Fichiers emballés exécutés via bash sans charger le contenu dans le contexte |
+
+La divulgation progressive garantit que seul le contenu pertinent occupe la fenêtre de contexte à tout moment.
+
+### L'architecture des Skills
+
+Les Skills fonctionnent dans un environnement d'exécution de code où Claude a accès au système de fichiers, aux commandes bash et aux capacités d'exécution de code. Pensez-y comme ceci : les Skills existent comme des répertoires sur une machine virtuelle, et Claude interagit avec eux en utilisant les mêmes commandes bash que vous utiliseriez pour naviguer dans les fichiers sur votre ordinateur.
+
+<img
+  src="/images/docs/agent-skills-overview/agent-skills-architecture.png"
+  alt="Architecture des Agent Skills - montrant comment les Skills s'intègrent à la configuration de l'agent et à la machine virtuelle"
+  width="800"
+  height="auto"
+/>
+
+**Comment Claude accède au contenu du Skill :**
+
+Lorsqu'un Skill est déclenché, Claude utilise bash pour lire SKILL.md depuis le système de fichiers, apportant ses instructions dans la fenêtre de contexte. Si ces instructions font référence à d'autres fichiers (comme FORMS.md ou un schéma de base de données), Claude lit ces fichiers aussi en utilisant des commandes bash supplémentaires. Lorsque les instructions mentionnent des scripts exécutables, Claude les exécute via bash et ne reçoit que la sortie (le code du script n'entre jamais dans le contexte).
+
+**Ce que cette architecture permet :**
+
+**Fonctionnalités :**
+
+* **📁 Accès aux fichiers à la demande**: Claude lit uniquement les fichiers nécessaires pour chaque tâche spécifique. Un Skill peut inclure des dizaines de fichiers de référence, mais si votre tâche ne nécessite que le schéma de ventes, Claude charge uniquement ce fichier. Le reste reste sur le système de fichiers en consommant zéro tokens.
+
+* **⚡ Exécution efficace de scripts**: Lorsque Claude exécute `validate_form.py`, le code du script ne se charge jamais dans la fenêtre de contexte. Seule la sortie du script (comme "Validation réussie" ou des messages d'erreur spécifiques) consomme des tokens. Cela rend les scripts beaucoup plus efficaces que de faire générer un code équivalent par Claude à la volée.
+
+* **∞ Aucune limite pratique sur le contenu emballé**: Parce que les fichiers ne consomment pas de contexte jusqu'à ce qu'ils soient accédés, les Skills peuvent inclure une documentation API complète, de grands ensembles de données, des exemples étendus ou tous les matériaux de référence dont vous avez besoin. Il n'y a pas de pénalité de contexte pour le contenu emballé qui n'est pas utilisé.
+
+Ce modèle basé sur les fichiers est ce qui rend la divulgation progressive fonctionnelle. Claude navigue dans votre Skill comme vous référenceriez des sections spécifiques d'un guide d'intégration, accédant exactement à ce que chaque tâche nécessite.
+
+### Exemple : Chargement d'un Skill de traitement PDF
+
+Voici comment Claude charge et utilise un Skill de traitement PDF :
+
+1. **Démarrage** : Le prompt système inclut : `Traitement PDF - Extraire le texte et les tableaux des fichiers PDF, remplir les formulaires, fusionner les documents`
+2. **Demande utilisateur** : "Extraire le texte de ce PDF et le résumer"
+3. **Claude invoque** : `bash : read pdf-skill/SKILL.md` → Instructions chargées dans le contexte
+4. **Claude détermine** : Le remplissage de formulaires n'est pas nécessaire, donc FORMS.md n'est pas lu
+5. **Claude exécute** : Utilise les instructions de SKILL.md pour accomplir la tâche
+
+<img
+  src="/images/docs/agent-skills-overview/agent-skills-context-window.png"
+  alt="Chargement des Skills dans la fenêtre de contexte - montrant le chargement progressif des métadonnées et du contenu du skill"
+  width="800"
+  height="auto"
+/>
+
+Le diagramme montre :
+
+1. État par défaut avec le prompt système et les métadonnées de skill préchargées
+2. Claude déclenche le skill en lisant SKILL.md via bash
+3. Claude lit optionnellement des fichiers emballés supplémentaires comme FORMS.md au besoin
+4. Claude procède à la tâche
+
+Ce chargement dynamique garantit que seul le contenu pertinent du skill occupe la fenêtre de contexte.
+
+## Où fonctionnent les Skills
+
+Les Skills sont disponibles sur les produits agents de Claude :
+
+<Tabs items={["API", "Code", "SDK", "Claude.ai"]}>
+  <Tab value="API">
+    ### Claude API
+
+    L'API Claude prend en charge les Agent Skills pré-construits et les Skills personnalisés. Les deux fonctionnent de manière identique : spécifiez le `skill_id` pertinent dans le paramètre `container` avec l'outil d'exécution de code.
+
+    <Callout type="warning" emoji="⚠️">
+      **Prérequis** : Utiliser les Skills via l'API nécessite trois en-têtes bêta :
+
+      * `code-execution-2025-08-25` - Les Skills fonctionnent dans le conteneur d'exécution de code
+      * `skills-2025-10-02` - Active la fonctionnalité Skills
+      * `files-api-2025-04-14` - Requis pour télécharger/téléverser des fichiers vers/à partir du conteneur
+    </Callout>
+
+    Utilisez les Agent Skills pré-construits en référençant leur `skill_id` (par exemple `pptx`, `xlsx`), ou créez et téléversez les vôtres via l'API Skills (`/v1/skills` points de terminaison). Les Skills personnalisés sont partagés au niveau de l'organisation.
+
+    Pour en savoir plus, voir Utiliser les Skills avec l'API Claude.
+  </Tab>
+
+  <Tab value="Code">
+    ### Claude Code
+
+    Claude Code prend en charge uniquement les Skills personnalisés.
+
+    <Callout type="info" emoji="📁">
+    **Skills personnalisés** : Créez des Skills comme des répertoires avec des fichiers SKILL.md. Claude les découvre et les utilise automatiquement.
+    </Callout>
+
+    Les Skills personnalisés dans Claude Code sont basés sur le système de fichiers et ne nécessitent pas de téléversement API.
+
+    Pour en savoir plus, voir Utiliser les Skills dans Claude Code.
+  </Tab>
+
+  <Tab value="SDK">
+    ### Claude Agent SDK
+
+    Le Claude Agent SDK prend en charge les Skills personnalisés via une configuration basée sur le système de fichiers.
+
+    <Callout type="info" emoji="⚙️">
+    **Skills personnalisés** : Créez des Skills comme des répertoires avec des fichiers SKILL.md dans `.claude/skills/`. Activez les Skills en incluant `"Skill"` dans votre configuration `allowed_tools`.
+    </Callout>
+
+    Les Skills dans le SDK sont ensuite automatiquement découverts lorsque le SDK s'exécute.
+
+    Pour en savoir plus, voir Agent Skills dans le SDK.
+  </Tab>
+
+  <Tab value="Claude.ai">
+    ### Claude.ai
+
+    Claude.ai prend en charge les Agent Skills pré-construits et les Skills personnalisés.
+
+    **Agent Skills pré-construits** : Ces Skills fonctionnent déjà en arrière-plan lorsque vous créez des documents. Claude les utilise sans aucune configuration.
+
+    <Callout type="default" emoji="📤">
+    **Skills personnalisés** : Téléversez vos propres Skills comme des fichiers zip via Paramètres > Fonctionnalités. Disponible sur les plans Pro, Max, Team et Enterprise avec l'exécution de code activée. Les Skills personnalisés sont individuels à chaque utilisateur ; ils ne sont pas partagés au niveau de l'organisation et ne peuvent pas être gérés de manière centralisée par les administrateurs.
+    </Callout>
+
+    Pour en savoir plus sur l'utilisation des Skills dans Claude.ai, voir les ressources suivantes dans le centre d'aide Claude :
+
+    * Que sont les Skills ?
+    * Utiliser les Skills dans Claude
+    * Comment créer des Skills personnalisés
+    * Enseigner à Claude votre façon de travailler en utilisant des Skills
+  </Tab>
+</Tabs>
+
+## Structure du Skill
+
+Chaque Skill nécessite un fichier `SKILL.md` avec des métadonnées YAML :
+
+```yaml
+---
+name: your-skill-name
+description: Brève description de ce que fait ce Skill et quand l'utiliser
+---
+
+# Nom de votre Skill
+
+## Instructions
+[Conseils clairs et étape par étape pour que Claude suive]
+
+## Exemples
+[Exemples concrets d'utilisation de ce Skill]
+```
+
+**Champs obligatoires** : `name` et `description`
+
+**Exigences de champ** :
+
+`name` :
+
+* Maximum 64 caractères
+* Doit contenir uniquement des lettres minuscules, des chiffres et des traits d'union
+* Ne peut pas contenir de balises XML
+* Ne peut pas contenir de mots réservés : "anthropic", "claude"
+
+`description` :
+
+* Doit être non vide
+* Maximum 1024 caractères
+* Ne peut pas contenir de balises XML
+
+La `description` doit inclure à la fois ce que le Skill fait et quand Claude devrait l'utiliser. Pour des conseils de création complets, voir le guide des meilleures pratiques.
+
+## Considérations de sécurité
+
+<Callout type="warning" emoji="🔒">
+Nous recommandons fortement d'utiliser uniquement les Skills provenant de sources de confiance : ceux que vous avez créés vous-même ou obtenus d'Anthropic. Les Skills fournissent à Claude de nouvelles capacités grâce aux instructions et au code, et bien que cela les rende puissants, cela signifie également qu'un Skill malveillant peut diriger Claude à invoquer des outils ou exécuter du code d'une manière qui ne correspond pas à l'objectif déclaré du Skill.
+</Callout>
+
+**Considérations de sécurité clés** :
+
+* **Auditer soigneusement** : Examinez tous les fichiers emballés dans le Skill : SKILL.md, scripts, images et autres ressources. Recherchez des modèles inhabituels comme des appels réseau inattendus, des modèles d'accès aux fichiers ou des opérations qui ne correspondent pas à l'objectif déclaré du Skill
+* **Les sources externes sont risquées** : Les Skills qui récupèrent des données d'URL externes posent un risque particulier, car le contenu récupéré peut contenir des instructions malveillantes. Même les Skills de confiance peuvent être compromis si leurs dépendances externes changent avec le temps
+* **Mauvais usage des outils** : Les Skills malveillants peuvent invoquer des outils (opérations sur fichiers, commandes bash, exécution de code) de manière nuisible
+* **Exposition des données** : Les Skills avec accès à des données sensibles pourraient être conçus pour divulguer des informations à des systèmes externes
+* **Traiter comme l'installation de logiciels** : N'utilisez que des Skills provenant de sources de confiance. Soyez particulièrement prudent lors de l'intégration de Skills dans des systèmes de production avec accès à des données sensibles ou des opérations critiques
+
+## Skills disponibles
+
+### Agent Skills pré-construits
+
+Les Agent Skills pré-construits suivants sont disponibles pour une utilisation immédiate :
+
+**Skills disponibles :**
+
+* **📽️ PowerPoint (pptx)**: Créer des présentations, éditer des diapositives, analyser le contenu des présentations
+
+* **📊 Excel (xlsx)**: Créer des feuilles de calcul, analyser des données, générer des rapports avec des graphiques
+
+* **📝 Word (docx)**: Créer des documents, éditer le contenu, formater le texte
+
+* **📄 PDF (pdf)**: Générer des documents PDF formatés et des rapports
+
+Ces Skills sont disponibles sur l'API Claude et claude.ai. Voir le tutoriel de démarrage rapide pour commencer à les utiliser dans l'API.
+
+### Exemples de Skills personnalisés
+
+Pour des exemples complets de Skills personnalisés, voir le livre de cuisine des Skills.
+
+## Limitations et contraintes
+
+Comprendre ces limitations vous aide à planifier efficacement votre déploiement de Skills.
+
+### Disponibilité inter-surfaces
+
+**Les Skills personnalisés ne se synchronisent pas entre les surfaces**. Les Skills téléversés sur une surface ne sont pas automatiquement disponibles sur d'autres :
+
+* Les Skills téléversés sur Claude.ai doivent être téléversés séparément sur l'API
+* Les Skills téléversés via l'API ne sont pas disponibles sur Claude.ai
+* Les Skills Claude Code sont basés sur le système de fichiers et séparés de Claude.ai et de l'API
+
+Vous devrez gérer et téléverser les Skills séparément pour chaque surface où vous souhaitez les utiliser.
+
+### Portée de partage
+
+Les Skills ont des modèles de partage différents selon où vous les utilisez :
+
+* **Claude.ai** : Utilisateur individuel uniquement ; chaque membre de l'équipe doit téléverser séparément
+* **API Claude** : Étendue du workspace ; tous les membres du workspace peuvent accéder aux Skills téléversés
+* **Claude Code** : Personnel (`~/.claude/skills/`) ou basé sur le projet (`.claude/skills/`) ; peut également être partagé via les plugins Claude Code
+
+Claude.ai ne prend pas actuellement en charge la gestion centralisée par l'administrateur ou la distribution étendue des Skills personnalisés.
+
+### Contraintes d'environnement d'exécution
+
+L'environnement d'exécution exact disponible pour votre Skill dépend de la surface produit où vous l'utilisez.
+
+* **Claude.ai** :
+  * **Accès réseau variable** : Selon les paramètres de l'utilisateur/administrateur, les Skills peuvent avoir un accès réseau complet, partiel ou nul. Pour plus de détails, voir l'article de support Créer et éditer des fichiers.
+
+* **API Claude** :
+  * **Aucun accès réseau** : Les Skills ne peuvent pas faire d'appels API externes ou accéder à Internet
+  * **Aucune installation de package d'exécution** : Seuls les packages préinstallés sont disponibles. Vous ne pouvez pas installer de nouveaux packages pendant l'exécution.
+  * **Dépendances préconfigurées uniquement** : Consultez la documentation de l'outil d'exécution de code pour la liste des packages disponibles
+
+* **Claude Code** :
+  * **Accès réseau complet** : Les Skills ont le même accès réseau que tout autre programme sur l'ordinateur de l'utilisateur
+  * **Installation globale de packages découragée** : Les Skills ne devraient installer des packages que localement pour éviter d'interférer avec l'ordinateur de l'utilisateur
+
+Planifiez vos Skills pour fonctionner dans ces contraintes.
+
+## Lecture connexe
+
+Cet article fournit la base conceptuelle pour comprendre comment les Skills fonctionnent. Pour des exemples d'implémentation pratiques, voir :
+
+- [Améliorer le design frontend grâce aux Skills](/development/improving-frontend-design-through-skills) - Une étude de cas pratique montrant comment les Skills peuvent transformer les workflows de développement frontend
+
+## Prochaines étapes
+
+Pour commencer avec les Skills :
+
+1. **Essayer les Skills pré-construits** : Utilisez les Skills PowerPoint, Excel, Word ou PDF dans votre prochain projet
+2. **Créer des Skills personnalisés** : Emballez votre expertise de domaine dans des Skills réutilisables
+3. **Explorer les modèles avancés** : Combinez plusieurs Skills pour des flux de travail complexes
+4. **Partager avec votre équipe** : Distribuez les Skills dans toute votre organisation pour des résultats cohérents

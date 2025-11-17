@@ -1,0 +1,247 @@
+---
+title: "通过技能提升前端设计"
+description: "了解技能如何通过提供动态、特定上下文的指导来消除通用的AI生成美学，从而改变Claude的前端设计能力。"
+lang: zh
+category: development
+difficulty: intermediate
+tags:
+  - frontend
+  - design
+  - skills
+  - claude
+  - ui
+  - prompting
+  - javascript
+  - css
+  - html
+  - react
+source_url: "https://claude.com/blog/improving-frontend-design-through-skills"
+published_date: "2025-11-13"
+author: "Anthropic应用AI团队：Prithvi Rajasekaran、Justin Wei、Alexander Bricken，以及我们的营销合作伙伴Molly Vorwerck和Ryan Whitehead"
+---
+
+# 通过技能提升前端设计
+
+您可能注意到，当您要求LLM在没有指导的情况下构建登录页面时，它几乎总是符合Inter字体、白色背景上的紫色渐变和最少的动画。
+
+问题是什么？分布收敛。在采样过程中，模型基于训练数据中的统计模式来预测标记。安全的设计选择——那些普遍适用且不会冒犯任何人的选择——在网络训练数据中占主导地位。没有方向，Claude就会从这个高概率中心采样。
+
+对于构建面向客户产品的开发者来说，这种通用的美学破坏了品牌身份，使AI生成的界面立即变得可识别——且容易被忽视。
+
+### 可引导性的挑战
+
+好消息是，Claude在正确的提示下具有高度的可引导性。告诉Claude"避免Inter和Roboto"或"使用大气背景而不是纯色"，结果会立即改善。这种对指导的敏感性是一个特性；这意味着Claude可以适应不同的设计背景、约束和美学偏好。
+
+但这产生了一个实际的挑战：任务越专业化，您需要提供的上下文就越多。对于前端设计，有效的指导跨越字体排印原理、色彩理论、动画模式和背景处理。您需要在多个维度上指定要避免哪些默认值以及要偏好哪些替代方案。
+
+您可以将所有这些打包到系统提示中，但是每个请求——调试Python、分析数据、编写邮件——都会携带前端设计上下文。问题变成：您如何在不为不相关任务承担永久上下文开销的情况下，在需要时为Claude提供特定领域的指导？
+
+**技能：动态上下文加载**
+
+这正是技能被设计用来做的事情：按需提供专门的上下文，而没有永久开销。技能是一个文档（通常是markdown），包含指令、约束和领域知识，存储在Claude可以通过简单文件读取工具访问的指定目录中。Claude可以利用这些技能在运行时动态加载它需要的信息，逐步增强其上下文，而不是预先加载所有内容。
+
+当配备这些技能和阅读它们所需的必要工具时，Claude可以根据手头的任务自主识别和加载相关技能。例如，当被要求构建登录页面或创建React组件时，Claude可以加载前端设计技能并即时应用其指令。这是基本的心理模型：技能是按需激活的提示和上下文资源，为特定任务类型提供专门指导，而不产生永久上下文开销。
+
+这允许开发者在不过载上下文窗口的情况下获得Claude可引导性的好处，通过将不同任务的分散指令塞进系统提示中。正如我们之前解释的那样，上下文窗口中过多的令牌会导致性能下降，因此保持上下文窗口内容精简和专注对于从模型中获得最佳性能极其重要。技能通过使有效提示可重用和上下文化来解决这个问题。
+
+**为更好的前端输出提供提示**
+
+我们可以通过创建前端设计技能，在没有永久上下文开销的情况下，从Claude解锁明显更好的UI生成。核心见解是以前端工程师的方式思考前端设计。您能将美学改进映射到可实施的前端代码越多，Claude执行得越好。
+
+利用这一见解，我们确定了几个目标提示效果很好的领域：字体排印、动画、背景效果和主题。所有这些都能清晰地转换为Claude可以编写的代码。在您的提示中实施这不需要详细的技术指令，只需使用目标语言让模型更批判性地思考这些设计轴，就足以激发更强的输出。这与我们在上下文工程博客文章中提供的指导密切相关，关于在正确的高度提示模型，避免指定精确十六进制代码的低海拔硬编码逻辑和假设共享上下文的模糊高空指导的两个极端。
+
+### **字体排印**
+
+要看到这一点在实践中的表现，让我们开始将字体排印视为我们可以通过提示影响的一个维度。下面的提示特别引导Claude使用更有趣的字体：
+
+```
+<use_interesting_fonts>
+
+字体排印立即信号质量。避免使用无聊、通用的字体。
+
+永不使用：Inter、Roboto、Open Sans、Lato、默认系统字体
+
+这里是一些好的、有影响力的选择示例：
+
+- 代码美学：JetBrains Mono、Fira Code、Space Grotesk
+
+- 编辑风格：Playfair Display、Crimson Pro
+
+- 技术风格：IBM Plex系列、Source Sans 3
+
+- 独特风格：Bricolage Grotesque、Newsreader
+
+配对原则：高对比度 = 有趣。显示 + 等宽、serif + 几何无衬线、跨权重的可变字体。
+
+使用极端：100/200 权重 vs 800/900，而不是 400 vs 600。大小跳跃 3x+，而不是 1.5x。
+
+选择一个独特的字体，果断地使用它。从Google Fonts加载。
+
+</use_interesting_fonts>
+```
+
+**使用基本提示生成的输出：**
+
+![使用基本提示的字体排印示例](/images/docs/improving-frontend-design-through-skills/typography-base.png)
+
+**使用基本提示和字体排印部分生成的输出**
+
+![使用增强提示的字体排印示例](/images/docs/improving-frontend-design-through-skills/typography-enhanced.png)
+
+有趣的是，使用更有趣字体的要求似乎也鼓励模型改进设计的其他方面。
+
+仅字体排印就能带来显著改进，但字体只是一个维度。整个界面的连贯美学如何？
+
+### **主题**
+
+我们可以提示的另一个维度是受知名主题和美学启发的设计。Claude对流行主题有丰富的理解；我们可以利用这一点来传达我们希望前端体现的具体美学。这是一个例子：
+
+```
+<always_use_rpg_theme>
+
+始终使用RPG美学设计：
+
+- 丰富的戏剧性色调的奇幻启发调色板
+
+- 华丽的边框和装饰框架元素
+
+- 羊皮纸纹理、皮革装订风格和风化材料
+
+- 戏剧性照明的史诗、冒险氛围
+
+- 带有装饰标题的中世纪启发serif字体排印
+
+</always_use_rpg_theme>
+```
+
+这会产生以下RPG主题的UI：
+
+![RPG主题UI示例](/images/docs/improving-frontend-design-through-skills/rpg-theme-ui.png)
+
+字体排印和主题显示目标提示有效。但手动指定每个维度是乏味的。如果我们将所有这些改进组合到一个可重用的资产中会怎样？
+
+### **通用提示**
+
+相同的原则扩展到其他设计维度：提示运动（动画和微交互）添加静态设计所缺乏的抛光，同时引导模型向更有趣的背景选择创建深度和视觉趣味。这是综合技能闪光的地方。
+
+将所有这些汇集在一起，我们开发了一个约400个令牌的提示——足够紧凑而不会使上下文膨胀（即使作为技能加载）——在字体排印、颜色、运动和背景方面显著改善前端输出：
+
+```
+<frontend_aesthetics>
+
+您倾向于收敛到通用的、"分布上"的输出。在前端设计中，这创造了用户称为"AI垃圾"的美学。避免这一点：制作创造性的、独特的前端，令人惊喜和愉悦。
+
+专注于：
+
+- 字体排印：选择美丽、独特和有趣的字体。避免像Arial和Inter这样的通用字体；选择能够提升前端美学的独特选择。
+
+- 颜色和主题：坚持连贯的美学。使用CSS变量保持一致性。主导颜色与鲜明对比色胜过胆小的、均匀分布的调色板。从IDE主题和文化美学中汲取灵感。
+
+- 运动：为效果和微交互使用动画。对于HTML优先使用仅CSS解决方案。对于React，在可用时使用Motion库。专注于高影响力时刻：一个精心编排的页面加载，带有交错显示（animation-delay）比分散的微交互创造更多愉悦。
+
+- 背景：创造氛围和深度，而不是默认为纯色。分层CSS渐变，使用几何图案，或添加与整体美学匹配的上下文效果。
+
+避免通用的AI生成美学：
+
+- 过度使用的字体系列（Inter、Roboto、Arial、系统字体）
+
+- 陈词滥调的配色方案（特别是白色背景上的紫色渐变）
+
+- 可预测的布局和组件模式
+
+- 缺乏上下文特定特征的千篇一律设计
+
+创造性解释并做出感觉真正为上下文设计的意外选择。在明暗主题、不同字体、不同美学之间变化。您仍然倾向于在代际间收敛到常见选择（例如Space Grotesk）。避免这一点：跳出框框思考至关重要！
+
+</frontend_aesthetics>
+```
+
+在上面的例子中，我们首先给Claude问题和我们试图解决的事情的一般上下文。我们发现给模型这种类型的高级上下文是校准输出的有用提示策略。然后我们确定我们之前讨论的改进设计向量，并提供目标建议，鼓励模型在所有这些维度上更有创造力地思考。
+
+我们还在末尾包含额外的指导，以防止Claude收敛到不同的局部最大值。即使有明确的指令来避免某些模式，模型也可能默认到其他常见选择（比如字体排印的Space Grotesk）。最后的"跳出框框思考"提醒加强了创造性变化。
+
+### **对前端设计的影响**
+
+激活此技能后，Claude的输出在几种类型的前端设计中都有改善，包括：
+
+**示例1：SaaS登录页面**
+
+![使用基本提示的SaaS登录页面](/images/docs/improving-frontend-design-through-skills/saas-base.png)
+
+**标题：** AI生成的SaaS登录页面，具有通用Inter字体、紫色渐变和标准布局。没有使用技能。
+
+![使用前端技能的SaaS登录页面](/images/docs/improving-frontend-design-through-skills/saas-enhanced.png)
+
+**标题：** 使用与上述渲染相同的提示以及前端技能生成的AI生成前端，现在具有独特的字体排印、连贯的配色方案和分层背景。
+
+**示例2：博客布局**
+
+![使用基本提示的博客布局](/images/docs/improving-frontend-design-through-skills/blog-base.png)
+
+AI生成的博客布局，具有默认系统字体和平坦白色背景。没有使用技能。
+
+![使用前端技能的博客布局](/images/docs/improving-frontend-design-through-skills/blog-enhanced.png)
+
+AI生成的博客布局，使用相同的提示以及前端技能，具有编辑风格字体、大气深度和精致间距。
+
+**示例3：管理仪表板**
+
+![使用基本提示的管理仪表板](/images/docs/improving-frontend-design-through-skills/dashboard-base.png)
+
+AI生成的管理仪表板，具有标准UI组件和最小视觉层次。没有使用技能。
+
+![使用前端技能的管理仪表板](/images/docs/improving-frontend-design-through-skills/dashboard-enhanced.png)
+
+AI生成的管理仪表板，具有大胆字体排印、连贯深色主题和有目的的运动，使用相同的提示以及前端技能。
+
+**通过技能改善claude.ai中的工件质量**
+
+设计品味不是唯一的限制。Claude在构建工件时也面临架构约束。工件是Claude创建并在您的聊天旁边显示的交互式、可编辑内容（如代码或文档）。
+
+除了上面探讨的设计品味问题外，Claude还有另一个默认行为限制了它在claude.ai中生成优秀前端工件的能力。目前，当被要求创建前端时，Claude只构建一个带有CSS和JS的HTML文件。这是因为Claude理解前端必须是单个HTML文件才能作为工件正确渲染。
+
+正如您期望人类开发人员如果只能编写单个文件中的HTML/CSS/JS就只能创建非常基本的前端一样，我们假设如果我们给Claude使用更丰富工具的指令，Claude将能够生成更令人印象深刻的前端工件。
+
+这导致我们创建了一个web-artifacts-builder技能，它利用Claude使用计算机的能力，并指导Claude使用多个文件和现代网络技术（如React、Tailwind CSS和shadcn/ui）构建工件。在幕后，该技能暴露了（1）帮助Claude高效设置基本React仓库和（2）在编辑完成后使用Parcel将所有内容捆绑到单个文件中以满足单个HTML文件要求的脚本。这是技能的核心好处之一——通过给Claude访问执行样板操作的脚本，Claude能够最小化令牌使用，同时提高可靠性和性能。
+
+使用web-artifacts-builder技能，Claude可以利用shadcn/ui的表单组件和Tailwind的响应式网格系统创建更全面的工件。
+
+**示例1：白板应用**
+
+例如，当被提示创建没有web-artifacts-builder技能的白板应用时，Claude输出了一个非常基本的界面：
+
+![使用基本提示的白板应用](/images/docs/improving-frontend-design-through-skills/whiteboard-base.png)
+
+另一方面，当使用新的web-artifacts-builder技能时，Claude生成了一个更清晰、功能更丰富的开箱即用应用程序，包括绘制不同的形状和文本：
+
+![使用web-artifacts-builder技能的白板应用](/images/docs/improving-frontend-design-through-skills/whiteboard-enhanced.png)
+
+**示例2：任务管理器应用**
+
+同样，当被要求创建任务管理应用时，没有技能，Claude生成了一个功能非常最少的应用程序：
+
+![使用基本提示的任务管理器应用](/images/docs/improving-frontend-design-through-skills/taskmanager-base.png)
+
+使用技能，Claude生成了一个开箱即用功能更丰富的应用程序。例如，Claude包含了一个"创建新任务"表单组件，允许用户为任务设置相关类别和截止日期：
+
+![使用web-artifacts-builder技能的任务管理器应用](/images/docs/improving-frontend-design-through-skills/taskmanager-enhanced.png)
+
+![任务管理器表单组件](/images/docs/improving-frontend-design-through-skills/taskmanager-form.png)
+
+要在claude.ai中尝试这个新技能，只需启用技能，然后在构建工件时要求Claude"使用web-artifacts-builder技能"。
+
+**通过技能优化Claude的前端设计能力**
+
+这个前端设计技能展示了关于语言模型能力的更广泛原则：模型通常有能力做比默认表达更多的事情。Claude有强大的设计理解，但没有指导时分布收敛掩盖了这一点。虽然您可以将这些指令添加到系统提示中，但这意味着每个请求都携带前端设计上下文，即使这些知识与手头的任务无关。相反，使用技能将Claude从一个需要持续指导的工具转变为一个为每个任务带来领域专业知识的工具。
+
+技能也是高度可定制的——您可以创建适合您特定需求的自己的技能。这允许您定义要烘焙到技能中的确切原语，无论是您公司的设计系统、特定组件模式还是行业特定的UI约定。通过将这些决策编码到技能中，您将代理思考的组件部分转换为您的整个开发团队可以利用的可重用资产。技能成为持久化和扩展的组织知识，确保跨项目的一致质量。
+
+这种模式扩展到前端工作之外。任何Claude尽管有更广泛理解但仍产生通用输出的领域都是技能开发的候选者。方法是一致的：识别收敛默认值，提供具体替代方案，在正确高度构建指导，并通过技能使其可重用。
+
+对于前端开发，这意味着Claude可以生成独特的界面，而无需每次请求的提示工程。要开始，探索我们的前端设计食谱或在Claude Code中尝试我们新的前端设计插件。
+
+**受到启发？要创建自己的前端技能，请查看我们的skill-creator。**
+
+**致谢**
+
+由Anthropic应用AI团队撰写：Prithvi Rajasekaran、Justin Wei和Alexander Bricken，以及我们的营销合作伙伴Molly Vorwerck和Ryan Whitehead。
