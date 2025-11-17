@@ -2,14 +2,14 @@
 name: fumadocs-article-importer
 description: >
   Import external articles into a Fumadocs project with automatic multi-language
-  translation (en, zh, fr, ko), AI-powered classification into 8 categories,
+  translation (en, zh, fr), AI-powered classification into 8 categories,
   image processing, and MDX conversion. Use this skill when the user wants to
   import an article from a URL into their Fumadocs documentation site.
 ---
 
 # Fumadocs Article Importer
 
-Automate importing external articles into a Fumadocs project with multi-language support, auto-classification, and proper MDX formatting.
+Automate importing external articles into a Fumadocs project with tri-language support (English, Chinese, French), auto-classification, and proper MDX formatting.
 
 ## Prerequisites
 
@@ -214,7 +214,7 @@ The translator skill provides:
 
 Ask the user for the following information:
 1. "What is the URL of the article you want to import?"
-2. "What languages should I translate to? (Press Enter for default: en, zh, fr, ko)"
+2. "What languages should I translate to? (Press Enter for default: en, zh, fr)"
 3. "How should I handle images? (Press Enter for default: auto)\n   - auto: Check CORS and use external URLs if possible, else download\n   - external: Always use original image URLs (no download)\n   - download: Always download to local storage"
 
 ### Step 2: Download Article Content
@@ -986,7 +986,7 @@ English: "Use the React component with Node.js"
 French: "Utilisez le composant React avec Node.js" (NOT: "Utilisez le composant Réagir avec Noeud.js")
 ```
 
-For each target language (en, zh, fr, ko):
+For each target language (en, zh, fr):
 
 1. **Prepare content for translation**:
    - Combine title, description, and main content
@@ -1039,8 +1039,6 @@ For each target language (en, zh, fr, ko):
      - Format: English term with normal text (e.g., "Skills 功能" not "技能功能")
      - No extra spaces needed around English terms
    - **French (fr)**: Standard French technical terminology, formal tone
-     - English terms remain in original form
-   - **Korean (ko)**: Formal style (합니다), technical terms mixed with Korean
      - English terms remain in original form
    - **English (en)**: Clear, professional US English
 
@@ -1112,7 +1110,7 @@ For each language, create the MDX file:
        publishedDate: "2025-01-20",
        accessedDate: "2025-11-16"
      }}
-     languages={['en', 'zh', 'fr', 'ko']}
+     languages={['en', 'zh', 'fr']}
      currentLang={language_code}
    />
 
@@ -1473,16 +1471,6 @@ For **each language** (en, zh, fr, ko):
      }
      ```
 
-   - **Korean** (`content/docs/ko/ai-ml/meta.json`):
-     ```json
-     {
-       "title": "AI 및 머신러닝",
-       "icon": "Brain",
-       "pages": ["{article-slug}", "..."],
-       "defaultOpen": false
-     }
-     ```
-
 2. **Handling existing meta.json:**
    - If file exists, read current `pages` array
    - Ask user: "Where to add new article? (1: top, 2: bottom, 3: alphabetical)"
@@ -1513,16 +1501,16 @@ For **each language** (en, zh, fr, ko):
 
 4. **Translation mapping for all 8 categories:**
 
-   | Category | English | Chinese | French | Korean |
-   |----------|---------|---------|--------|--------|
-   | ai-ml | AI & Machine Learning | AI 与机器学习 | IA et Apprentissage Automatique | AI 및 머신러닝 |
-   | development | Development | 开发 | Développement | 개발 |
-   | data | Data | 数据 | Données | 데이터 |
-   | design | Design | 设计 | Design | 디자인 |
-   | content | Content | 内容 | Contenu | 콘텐츠 |
-   | business | Business | 商业 | Affaires | 비즈니스 |
-   | devops | DevOps | DevOps | DevOps | DevOps |
-   | security | Security | 安全 | Sécurité | 보안 |
+   | Category | English | Chinese | French |
+   |----------|---------|---------|--------|
+   | ai-ml | AI & Machine Learning | AI 与机器学习 | IA et Apprentissage Automatique |
+   | development | Development | 开发 | Développement |
+   | data | Data | 数据 | Données |
+   | design | Design | 设计 | Design |
+   | content | Content | 内容 | Contenu |
+   | business | Business | 商业 | Affaires |
+   | devops | DevOps | DevOps | DevOps |
+   | security | Security | 安全 | Sécurité |
 
 5. **Icon mapping for categories:**
 
@@ -1538,7 +1526,7 @@ For **each language** (en, zh, fr, ko):
    | security | Shield | Lock, ShieldCheck, Key |
 
 **Important Notes:**
-- Always create meta.json for ALL 4 languages, not just English
+- Always create meta.json for ALL 3 languages (en, zh, fr), not just English
 - Use localized titles from the translation mapping
 - Use the `...` syntax to auto-include other pages: `["featured-article", "..."]`
 - Never hardcode English titles in non-English meta.json files
@@ -1561,15 +1549,14 @@ Save the following files:
      "download_date": "{ISO_8601_timestamp}",
      "title": "{original_title}",
      "author": "{author}",
-     "languages": ["en", "zh", "fr", "ko"],
+     "languages": ["en", "zh", "fr"],
      "category": "{category}",
      "difficulty": "{difficulty}",
      "tags": ["{tag1}", "{tag2}", "{tag3}"],
      "published_files": {
        "en": "content/docs/en/{category}/{slug}.mdx",
        "zh": "content/docs/zh/{category}/{slug}.mdx",
-       "fr": "content/docs/fr/{category}/{slug}.mdx",
-       "ko": "content/docs/ko/{category}/{slug}.mdx"
+       "fr": "content/docs/fr/{category}/{slug}.mdx"
      },
      "images": [
        {
@@ -1599,13 +1586,11 @@ Provide a comprehensive summary to the user:
   ✅ en: content/docs/en/{category}/{slug}.mdx
   ✅ zh: content/docs/zh/{category}/{slug}.mdx
   ✅ fr: content/docs/fr/{category}/{slug}.mdx
-  ✅ ko: content/docs/ko/{category}/{slug}.mdx
 
 📂 Navigation (meta.json):
   ✅ en: content/docs/en/{category}/meta.json ("{English Category Name}")
   ✅ zh: content/docs/zh/{category}/meta.json ("{Chinese Category Name}")
   ✅ fr: content/docs/fr/{category}/meta.json ("{French Category Name}")
-  ✅ ko: content/docs/ko/{category}/meta.json ("{Korean Category Name}")
   📌 Article added to sidebar navigation
   🎨 Icon: {category_icon}
 
@@ -1858,13 +1843,10 @@ Available components include:
 - French (fr): Maintain formal tone, keep English terms as-is
   - Example: "La fonctionnalité Skills de Claude" (NOT translated)
   - Example: "Utilisez le composant React" (NOT: "Réagir")
-- Korean (ko): Formal style (합니다), keep English terms
-  - Example: "Claude의 Skills 기능" (English terms preserved)
-  - Example: "React 컴포넌트" (English term preserved)
 
 ### File Organization
 Follow Fumadocs conventions:
-- Language-specific directories: `content/docs/{lang}/`
+- Language-specific directories: `content/docs/{lang}/` (en, zh, fr)
 - Category subdirectories: `content/docs/{lang}/{category}/`
 - Images in public: `public/images/docs/{slug}/`
 - Archive by month: `archive/{YYYY-MM}/{slug}/`
@@ -1895,6 +1877,12 @@ Follow Fumadocs conventions:
 - Use simpler translation prompts for faster processing
 
 ## Version History
+
+- v2.2.0 (2025-11-17): Removed Korean Language Support
+  - **Language Support Reduced**: Removed Korean (ko) from supported languages
+  - **Updated**: All workflow steps, examples, and mappings to reflect 3-language system (en, zh, fr)
+  - **Rationale**: Focus on core language markets (English, Chinese, French)
+  - **Migration**: Existing Korean content remains in archive but no new imports supported
 
 - v2.1.0 (2025-11-17): AI-Powered Article Association System
   - **AI-Powered Concept Extraction** (Step 3.6):
