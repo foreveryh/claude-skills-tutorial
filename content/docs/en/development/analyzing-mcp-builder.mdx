@@ -1,0 +1,732 @@
+---
+title: "Analyzing mcp-builder: A Complete Guide to MCP Server Development"
+description: "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. This comprehensive analysis covers the mcp-builder skill's 4-phase workflow, Python implementation patterns, and practical evaluation strategies."
+lang: en
+category: development
+difficulty: intermediate
+tags:
+  - claude-skills
+  - mcp-builder
+  - mcp-server
+  - model-context-protocol
+  - tutorial
+image: /images/docs/analyzing-mcp-builder/mcp-architecture-overview.jpg
+source_url: "https://github.com/anthropics/skills/tree/main/mcp-builder"
+published_date: "2025-01-17"
+author: Anthropic
+source:
+  url: "https://github.com/anthropics/skills/tree/main/mcp-builder"
+  name: "Anthropic Skills Repository"
+  author: "Anthropic"
+  published_date: "2025-01-17"
+  accessed_date: "2025-11-17"
+  license: "See LICENSE.txt for full terms"
+import:
+  date: "2025-11-17"
+  slug: "analyzing-mcp-builder"
+  translator: "Claude AI"
+---
+
+import { SourceAttribution } from '@/components/SourceAttribution';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+<SourceAttribution
+  source={{
+    url: "https://github.com/anthropics/skills/tree/main/mcp-builder",
+    name: "Anthropic Skills Repository",
+    author: "Anthropic",
+    published_date: "2025-01-17",
+    license: "See LICENSE.txt"
+  }}
+  languages={['en', 'zh', 'fr']}
+  currentLang="en"
+/>
+
+# Analyzing mcp-builder: A Complete Guide to MCP Server Development
+
+**mcp-builder** is a Claude skill that provides comprehensive guidance for creating high-quality MCP (Model Context Protocol) servers. This skill enables LLMs to interact with external services through well-designed tools, supporting both Python (FastMCP) and Node/TypeScript (MCP SDK) implementations.
+
+<Callout type="info">
+  This is a production-ready skill from the Anthropic skills repository, designed to guide developers through the complete MCP server development lifecycle from planning to evaluation.
+</Callout>
+
+## Overview
+
+### What is mcp-builder?
+
+<Callout type="question">
+  Based on the description: Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK).
+</Callout>
+
+### Core Purpose
+
+The mcp-builder skill aims to:
+
+- Guide developers through agent-centric MCP server design
+- Provide comprehensive implementation patterns for Python and TypeScript
+- Establish evaluation-driven development practices
+- Create tools optimized for LLM context limitations
+- Enable systematic external service integration
+
+### Target Audience
+
+This skill is designed for:
+
+- Developers building MCP servers for external API integration
+- Teams creating reusable tools for Claude and other LLMs
+- Engineers implementing Model Context Protocol specifications
+- Anyone interested in LLM-external service communication patterns
+
+## Skill Anatomy
+
+### Directory Structure
+
+<Files>
+  <Folder name="mcp-builder" defaultOpen>
+    <File name="SKILL.md" />
+    <Folder name="scripts">
+      <File name="connections.py" />
+      <File name="evaluation.py" />
+    </Folder>
+  </Folder>
+</Files>
+
+### SKILL.md Structure
+
+Every skill begins with metadata in YAML frontmatter:
+
+```yaml
+---
+name: mcp-builder
+description: "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK)."
+license: Complete terms in LICENSE.txt
+---
+```
+
+### Key Components
+
+### Scripts
+
+<Callout type="info">
+  Scripts provide deterministic, reusable code that Claude can execute. mcp-builder includes sophisticated Python scripts for MCP server connection handling and evaluation.
+</Callout>
+
+The mcp-builder includes two powerful scripts:
+
+<Steps>
+  <Step>
+    **connections.py**: Abstract MCP connection handling across different transport protocols (stdio, SSE, HTTP)
+  </Step>
+  <Step>
+    **evaluation.py**: Comprehensive evaluation harness for testing MCP server effectiveness with Claude
+  </Step>
+</Steps>
+
+## Technical Deep Dive
+
+### 4-Phase MCP Server Development Workflow
+
+The skill follows a structured workflow with four major phases:
+
+<Steps>
+  <Step>
+    **Phase 1: Deep Research and Planning** - Understand agent-centric design principles, study MCP protocol and API documentation, create comprehensive implementation plan
+  </Step>
+  <Step>
+    **Phase 2: Implementation** - Set up project structure, implement core infrastructure, build tools systematically following language-specific best practices
+  </Step>
+  <Step>
+    **Phase 3: Review and Refine** - Code quality review, test and build verification, quality checklist validation
+  </Step>
+  <Step>
+    **Phase 4: Create Evaluations** - Design comprehensive evaluation scenarios, create 10 complex questions, generate evaluation XML
+  </Step>
+</Steps>
+
+### How It Works
+
+<Callout type="info">
+  mcp-builder demonstrates sophisticated skill design with progressive disclosure, extensive reference documentation, and practical tooling.
+</Callout>
+
+<Steps>
+  <Step>
+    **Trigger Detection**: Claude identifies when this skill should be used based on MCP server development queries and the detailed description
+  </Step>
+  <Step>
+    **Context Loading**: SKILL.md content (13KB, 329 lines) loads into Claude's context window with comprehensive workflow documentation
+  </Step>
+  <Step>
+    **Resource Access**: Reference documentation loaded on-demand during implementation phases for Python, TypeScript, and evaluation patterns
+  </Step>
+  <Step>
+    **Execution**: Claude follows the 4-phase process, using bundled scripts for connection handling and evaluation as needed
+  </Step>
+</Steps>
+
+### Phase 1: Deep Research and Planning
+
+This phase establishes the foundation for agent-centric MCP server design:
+
+#### 1.1 Understand Agent-Centric Design Principles
+
+<Cards>
+  <Card title="Build for Workflows" icon="Zap">
+    Don't simply wrap API endpoints—build thoughtful, high-impact workflow tools that consolidate related operations and enable complete tasks
+  </Card>
+
+  <Card title="Optimize for Limited Context" icon="Eye">
+    Agents have constrained context windows—return high-signal information, provide concise/detailed options, and treat context budget as a scarce resource
+  </Card>
+
+  <Card title="Design Actionable Error Messages" icon="MessageSquare">
+    Error messages should guide agents toward correct usage patterns with specific next steps and educational feedback
+  </Card>
+
+  <Card title="Follow Natural Task Subdivisions" icon="GitBranch">
+    Tool names should reflect human task thinking with consistent prefixes for discoverability around natural workflows
+  </Card>
+
+  <Card title="Use Evaluation-Driven Development" icon="TestTube">
+    Create realistic evaluation scenarios early and let agent feedback drive tool improvements through rapid prototyping and iteration
+  </Card>
+</Cards>
+
+#### 1.3-1.6 Research and Planning Activities
+
+The skill guides developers through:
+
+- **MCP Protocol Documentation**: Fetch from `https://modelcontextprotocol.io/llms-full.txt`
+- **Framework Documentation**: Load SDK-specific guides for Python or TypeScript
+- **API Documentation**: Exhaustively study target service API documentation
+- **Implementation Plan**: Create detailed plans for tool selection, shared utilities, input/output design, and error handling
+
+### Phase 2: Implementation
+
+This phase focuses on systematic MCP server construction:
+
+#### 2.1 Set Up Project Structure
+
+<Tabs items={['Python', 'TypeScript']}>
+  <Tab value="Python">
+    - Create single `.py` file or organize into modules
+    - Use MCP Python SDK for tool registration
+    - Define Pydantic models for input validation
+  </Tab>
+  <Tab value="TypeScript">
+    - Create proper project structure with `package.json` and `tsconfig.json`
+    - Use MCP TypeScript SDK
+    - Define Zod schemas for input validation
+  </Tab>
+</Tabs>
+
+#### 2.3 Implement Tools Systematically
+
+<Callout type="tip">
+  Each tool requires careful design of input schemas, comprehensive documentation, and proper error handling
+</Callout>
+
+For each tool, developers should:
+
+- **Define Input Schema**: Use Pydantic (Python) or Zod (TypeScript) with proper constraints and examples
+- **Write Comprehensive Docstrings**: Include one-line summary, detailed explanation, parameter types with examples, return schema, usage examples, and error handling
+- **Implement Tool Logic**: Use shared utilities, follow async/await patterns, support multiple response formats, respect pagination, and check character limits
+- **Add Tool Annotations**: Include `readOnlyHint`, `destructiveHint`, `idempotentHint`, and `openWorldHint` as appropriate
+
+### Phase 3: Review and Refine
+
+<Callout type="warn">
+  MCP servers are long-running processes that wait for requests over stdio/stdin or SSE/HTTP. Running them directly will cause the process to hang indefinitely.
+</Callout>
+
+#### 3.2 Test and Build - Critical Considerations
+
+**Safe Testing Approaches**:
+- Use the evaluation harness (recommended)
+- Run the server in tmux to keep it outside the main process
+- Use timeout when testing: `timeout 5s python server.py`
+
+**Python Verification**:
+```bash
+python -m py_compile your_server.py
+```
+
+**TypeScript Build**:
+```bash
+npm run build  # Verify dist/index.js is created
+```
+
+### Phase 4: Create Evaluations
+
+The most sophisticated aspect of mcp-builder is its evaluation framework:
+
+#### 4.2 Create 10 Evaluation Questions
+
+Each question must meet six strict requirements:
+
+1. **Independent**: Not dependent on other questions
+2. **Read-only**: Only non-destructive operations required
+3. **Complex**: Requiring multiple tool calls and deep exploration
+4. **Realistic**: Based on real use cases humans would care about
+5. **Verifiable**: Single, clear answer that can be verified by string comparison
+6. **Stable**: Answer won't change over time
+
+#### 4.4 Output Format
+
+Evaluations create XML files with this structure:
+
+```xml
+<evaluation>
+  <qa_pair>
+    <question>Find discussions about AI model launches with animal codenames...</question>
+    <answer>3</answer>
+  </qa_pair>
+  <!-- More qa_pairs... -->
+</evaluation>
+```
+
+## Script Analysis
+
+### connections.py - Multi-Transport MCP Connection Handler
+
+This 152-line Python module provides sophisticated connection abstraction:
+
+```python
+class MCPConnection(ABC):
+    """Base class for MCP server connections."""
+
+    async def __aenter__(self):
+        """Initialize MCP server connection."""
+        # Handles AsyncExitStack, session initialization, and error cleanup
+```
+
+**Key Features**:
+- Abstract base class pattern for consistent interface
+- Support for three transport protocols: stdio, SSE, HTTP
+- Async context manager for resource cleanup
+- Automatic session initialization and error handling
+- Factory function `create_connection()` for transport-agnostic instantiation
+
+**Transport Classes**:
+- `MCPConnectionStdio`: Standard input/output for local servers
+- `MCPConnectionSSE`: Server-Sent Events for streaming connections
+- `MCPConnectionHTTP`: Streamable HTTP for web-based MCP servers
+
+### evaluation.py - Comprehensive MCP Server Evaluation Harness
+
+This 374-line module provides end-to-end evaluation capabilities:
+
+<Callout type="info">
+  The evaluation harness tests whether LLMs can effectively use MCP servers to answer realistic, complex questions.
+</Callout>
+
+**Core Components**:
+
+1. **Evaluation Prompt**: Sophisticated system prompt requiring:
+   - Tool usage with step-by-step summaries
+   - Constructive feedback on tool design
+   - Properly formatted XML responses
+
+2. **XML Parsing**: Robust parsing of evaluation files with error handling
+
+3. **Agent Loop**: Async interaction with Claude API and MCP server tools
+
+4. **Metrics Collection**: Comprehensive tracking of:
+   - Accuracy rates
+   - Task durations
+   - Tool call counts and performance
+   - Feedback quality
+
+**Usage Example**:
+
+```bash
+# Evaluate a local stdio MCP server
+python evaluation.py -t stdio -c python -a my_server.py eval.xml
+
+# Evaluate an SSE MCP server with authentication
+python evaluation.py -t sse -u https://example.com/mcp \
+  -H "Authorization: Bearer token" eval.xml
+```
+
+## Usage Examples
+
+### Basic Usage - Creating an MCP Server
+
+<Callout type="info">
+  mcp-builder guides you through the complete MCP server development process
+</Callout>
+
+<Steps>
+  <Step>
+    **Start with Research**: Study MCP protocol documentation and your target API
+  </Step>
+  <Step>
+    **Design Agent-Centric Tools**: Focus on workflows, not just API endpoint mapping
+  </Step>
+  <Step>
+    **Implement Systematically**: Follow language-specific best practices with proper validation
+  </Step>
+  <Step>
+    **Evaluate Thoroughly**: Create 10+ complex evaluation scenarios and test with the harness
+  </Step>
+</Steps>
+
+### Advanced Scenario - Complex API Integration
+
+<Callout type="tip">
+  When integrating complex APIs, mcp-builder emphasizes consolidation and workflow thinking
+</Callout>
+
+**Example: Calendar Integration**
+
+Instead of separate tools:
+- ❌ `check_availability`, `create_event`, `send_invitation`
+
+Create workflow-oriented tools:
+- ✅ `schedule_meeting`: Checks availability, creates event, and sends invitations in one operation
+
+This approach:
+- Reduces context window usage
+- Minimizes agent decision points
+- Provides better error handling
+- Enables complete task accomplishment
+
+## Best Practices
+
+Based on the design of mcp-builder, here are key principles for MCP server development:
+
+### Agent-Centric Design Principles
+
+<Cards>
+  <Card title="Context Budget Awareness" icon="Gauge">
+    Treat the agent's context window as a scarce resource. Return only essential information and provide concise/detailed options
+  </Card>
+
+  <Card title="Workflow Consolidation" icon="Combine">
+    Combine related operations into single tools that enable complete tasks rather than exposing raw API endpoints
+  </Card>
+
+  <Card title="Educational Error Messages" icon="GraduationCap">
+    Make errors actionable with specific guidance: "Try using filter='active_only' to reduce results"
+  </Card>
+
+  <Card title="Progressive Disclosure" icon="Layers">
+    Provide summary information by default with options for detailed exploration when needed
+  </Card>
+
+  <Card title="Idempotent Operations" icon="Repeat">
+    Design tools that can be safely retried without side effects when appropriate
+  </Card>
+</Cards>
+
+### Implementation Best Practices
+
+<Steps>
+  <Step>
+    **Input Validation**: Use Pydantic (Python) or Zod (TypeScript) with proper constraints, examples, and descriptive field documentation
+  </Step>
+  <Step>
+    **Comprehensive Documentation**: Every tool needs one-line summary, detailed explanation, parameter types with examples, return schema, usage examples, and error handling guidance
+  </Step>
+  <Step>
+    **Async Patterns**: Use async/await for all I/O operations to prevent blocking
+  </Step>
+  <Step>
+    **Error Handling**: Implement graceful failure modes with clear, LLM-friendly error messages that prompt further action
+  </Step>
+  <Step>
+    **Response Formatting**: Support both JSON and Markdown formats with configurable detail levels
+  </Step>
+</Steps>
+
+## Common Pitfalls
+
+<Callout type="warn">
+  Common mistakes developers make when building MCP servers
+</Callout>
+
+### API-First Design (Wrong Approach)
+
+**Symptom**: Tools map 1:1 to API endpoints
+
+**Problem**: Forces agents to understand API structure and make multiple calls for simple workflows
+
+**Solution**: Design tools around workflows and tasks, not API endpoints
+
+### Excessive Information Return
+
+**Symptom**: Tools return complete API responses with all fields
+
+**Problem**: Wastes context window on irrelevant data
+
+**Solution**: Return high-signal information only, provide detailed/concise options
+
+### Poor Error Messages
+
+**Symptom**: "Error 404: Not Found"
+
+**Problem**: Agents don't know how to recover
+
+**Solution**: "Resource not found. Try using list_resources() to see available options"
+
+### Missing Tool Annotations
+
+**Symptom**: Tools lack `readOnlyHint`, `destructiveHint`, etc.
+
+**Problem**: Claude cannot optimize tool usage patterns
+
+**Solution**: Add appropriate annotations to all tools
+
+### Insufficient Testing
+
+**Symptom**: No evaluation harness, manual testing only
+
+**Problem**: Cannot measure tool effectiveness or iterate based on feedback
+
+**Solution**: Create comprehensive evaluations using mcp-builder's evaluation.py
+
+## Integration with Other Skills
+
+mcp-builder works well with:
+
+1. **skill-creator** - For creating new skills based on MCP patterns
+2. **skill-article-writer** - For documenting MCP server implementations
+3. **api-contract-manager** - For API specification management
+4. **testing-frameworks** - For comprehensive MCP server testing
+
+## Real-World Applications
+
+### Use Case 1: Enterprise API Integration
+
+**Scenario**: A company wants to enable Claude to interact with their internal CRM system
+
+**mcp-builder Workflow**:
+
+1. **Research**: Study CRM API documentation and identify common workflows (create lead, update contact, query opportunities)
+2. **Design**: Create workflow-oriented tools like `qualify_lead` (combines data enrichment, scoring, and CRM updates)
+3. **Implement**: Build Python MCP server with Pydantic validation and comprehensive error handling
+4. **Evaluate**: Create 10+ scenarios testing lead qualification, opportunity tracking, and reporting capabilities
+
+**Outcome**: Agents can accomplish complex CRM tasks through natural conversation without understanding API details
+
+### Use Case 2: Data Analysis Platform
+
+**Scenario**: Building an MCP server for a business intelligence platform
+
+**mcp-builder Workflow**:
+
+1. **Research**: Understand data schemas, query capabilities, and common analysis patterns
+2. **Design**: Tools like `analyze_trend` (combines data extraction, statistical analysis, and visualization)
+3. **Implement**: Async Python server handling large dataset queries with pagination and truncation
+4. **Evaluate**: Test complex analytical questions requiring multi-step data processing
+
+**Outcome**: Claude can perform sophisticated data analysis through conversational interfaces
+
+### Use Case 3: DevOps Automation
+
+**Scenario**: Creating MCP server for infrastructure management
+
+**mcp-builder Workflow**:
+
+1. **Research**: Study cloud provider APIs and common DevOps workflows
+2. **Design**: Safety-focused tools with confirmation prompts for destructive operations
+3. **Implement**: TypeScript server with strict validation and comprehensive logging
+4. **Evaluate**: Create tests for deployment, scaling, and monitoring scenarios
+
+**Outcome**: Safe, auditable infrastructure management through natural language
+
+## Troubleshooting
+
+### MCP Server Hanging on Startup
+
+**Symptom**: Server starts but process hangs indefinitely
+
+**Cause**: MCP servers are long-running processes waiting for requests
+
+**Solution**: Run in tmux or use timeout for testing:
+```bash
+timeout 5s python server.py
+```
+
+### Evaluation Harness Connection Failures
+
+**Symptom**: evaluation.py cannot connect to MCP server
+
+**Cause**: Transport protocol mismatch or authentication issues
+
+**Solution**:
+- Verify correct transport type (stdio/SSE/HTTP)
+- Check authentication credentials for remote servers
+- Ensure server is running before starting evaluation
+
+### Tool Call Failures in Evaluation
+
+**Symptom**: Tools execute but return errors
+
+**Cause**: Input validation failures or API changes
+
+**Solution**:
+- Review tool input schemas for proper validation
+- Check that API endpoints are accessible and unchanged
+- Verify error handling provides actionable feedback
+
+### Poor Evaluation Scores
+
+**Symptom**: Low accuracy on evaluation questions
+
+**Cause**: Tools not designed for agent workflows or poor documentation
+
+**Solution**:
+- Review agent-centric design principles
+- Improve tool descriptions with better examples
+- Consolidate related operations into workflow tools
+- Add comprehensive error handling and guidance
+
+### Context Overflow Issues
+
+**Symptom**: Tools return too much data, exceeding context limits
+
+**Cause**: No pagination or truncation strategy
+
+**Solution**:
+- Implement pagination parameters
+- Add character limit checks
+- Provide concise/detailed response options
+- Use `25,000` token ceiling as guidance
+
+## Next Steps
+
+To use mcp-builder effectively:
+
+1. **Clone the repository**: `git clone https://github.com/anthropics/skills`
+2. **Study the skill**: Read SKILL.md thoroughly to understand the 4-phase process
+3. **Examine the scripts**: Review connections.py and evaluation.py for implementation patterns
+4. **Start building**: Choose a target API and begin Phase 1 research
+5. **Follow the workflow**: Complete all 4 phases systematically
+6. **Evaluate thoroughly**: Create and run comprehensive evaluations
+7. **Iterate based on feedback**: Use evaluation results to improve tool design
+
+### Related Resources
+
+- **Anthropic Skills Repository**: github.com/anthropics/skills
+- **Model Context Protocol**: modelcontextprotocol.io
+- **Python MCP SDK**: github.com/modelcontextprotocol/python-sdk
+- **TypeScript MCP SDK**: github.com/modelcontextprotocol/typescript-sdk
+- **MCP Builder Skill**: /development/analyzing-mcp-builder
+
+## Conclusion
+
+mcp-builder demonstrates exceptional Claude skill design through:
+
+✅ **Comprehensive Workflow**: 4-phase process covering research, implementation, review, and evaluation
+✅ **Agent-Centric Design**: Principles focused on LLM context limitations and workflow optimization
+✅ **Practical Tooling**: Production-ready Python scripts for connection handling and evaluation
+✅ **Language Support**: Detailed guidance for both Python and TypeScript implementations
+✅ **Quality Assurance**: Systematic evaluation framework with rigorous testing requirements
+✅ **Progressive Disclosure**: Structured SKILL.md with clear phases and actionable steps
+
+The key insights from this skill can transform how developers approach MCP server development, leading to tools that truly enable LLMs to accomplish complex tasks through natural interaction with external services.
+
+---
+
+## Summary
+
+This comprehensive analysis covered:
+
+- ✅ Skill structure and anatomy (4-phase workflow)
+- ✅ Agent-centric design principles and best practices
+- ✅ Python implementation patterns with Pydantic validation
+- ✅ TypeScript implementation patterns with Zod schemas
+- ✅ Sophisticated connection handling across transport protocols
+- ✅ Comprehensive evaluation framework and harness
+- ✅ Real-world applications and use cases
+- ✅ Troubleshooting guide for common issues
+- ✅ Integration strategies with related skills
+
+## Next Steps
+
+Ready to build your first MCP server?
+
+1. **Study the complete SKILL.md**: Understand all 4 phases in detail
+2. **Choose a target API**: Start with a well-documented external service
+3. **Follow Phase 1**: Conduct thorough research and create an implementation plan
+4. **Implement systematically**: Use language-specific best practices
+5. **Evaluate thoroughly**: Create 10+ complex scenarios and test with evaluation.py
+6. **Iterate and improve**: Refine based on evaluation feedback
+7. **Share with the community**: Contribute your MCP server to the ecosystem
+
+## ℹ️ Source Information
+
+**Original Skill**: [mcp-builder](https://github.com/anthropics/skills/tree/main/mcp-builder)
+
+- **Source**: Anthropic Skills Repository
+- **Author**: Anthropic
+- **Accessed**: 2025-11-17
+- **License**: See LICENSE.txt for full terms
+
+*This article was generated based on comprehensive analysis of the mcp-builder skill structure, scripts, and documentation patterns.*
+
+---
+
+## Appendix
+
+### Directory Structure Details
+
+The mcp-builder skill includes:
+
+**Required Files**:
+- **SKILL.md**: 13KB, 329 lines of comprehensive MCP server development guidance
+
+**Scripts** (2 files, 526 lines total):
+- **connections.py**: 152 lines - Multi-transport MCP connection handling
+- **evaluation.py**: 374 lines - Complete evaluation harness with metrics
+
+**References** (not bundled, loaded on-demand):
+- MCP Best Practices
+- Python Implementation Guide
+- TypeScript Implementation Guide
+- Evaluation Guide
+
+### Complete Script Inventory
+
+**connections.py** features:
+- Abstract base class `MCPConnection` with async context management
+- Three transport implementations (stdio, SSE, HTTP)
+- Factory pattern for transport-agnostic instantiation
+- Automatic session initialization and cleanup
+- Comprehensive error handling
+
+**evaluation.py** features:
+- XML evaluation file parsing
+- Anthropic Claude API integration
+- Asynchronous agent loop with tool execution
+- Comprehensive metrics collection (accuracy, duration, tool calls)
+- Multi-format evaluation reports
+- Support for all transport protocols
+
+### MCP Protocol Fundamentals
+
+MCP (Model Context Protocol) enables LLMs to interact with external services through:
+
+- **Tools**: Functions that LLMs can call with structured input
+- **Resources**: Data that can be loaded into context
+- **Prompts**: Reusable prompt templates
+- **Transport**: Communication mechanism (stdio, SSE, HTTP)
+
+### Quality Metrics from Evaluation
+
+The evaluation harness tracks:
+
+- **Accuracy**: Correct answers / total questions
+- **Performance**: Average task duration and tool call efficiency
+- **Tool Usage**: Number and duration of tool calls per task
+- **Feedback Quality**: Agent-reported issues and improvement suggestions
+
+Typical benchmarks:
+- **Good**: >80% accuracy, <30s average duration
+- **Excellent**: >90% accuracy, <20s average duration
+- **Outstanding**: >95% accuracy, <15s average duration
