@@ -1379,7 +1379,9 @@ For each language, create the MDX file:
    - **CRITICAL**: Never implement custom components. Only use built-in Fumadocs components
    - Keep standard Markdown for paragraphs, lists, headings, code blocks
 
-4. **Validate and Fix MDX Syntax**:
+4. **Validate and Fix MDX Syntax** (MANDATORY - Must run even for manual content):
+   - **This validation is critical even for manually written content**
+   - <Callout type="warn">Common MDX pitfalls like `<5k` patterns break builds even in manually written articles. Always validate.</Callout>
    - Ensure all JSX components are properly closed
    - Check that code blocks use correct syntax (triple backticks)
    - Verify frontmatter YAML is valid
