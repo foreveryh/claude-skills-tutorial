@@ -17,10 +17,6 @@ const { provider } = defineI18nUI(i18n, {
       displayName: 'Français',
       search: 'Rechercher dans la documentation',
     },
-    ko: {
-      displayName: '한국어',
-      search: '문서 검색',
-    },
     zh: {
       displayName: '中文',
       search: '搜索文档',

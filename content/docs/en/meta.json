@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "test",
+    "development",
     "ai-ml"
   ]
 }
