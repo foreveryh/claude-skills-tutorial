@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand Colors */
+  --color-dark: #141413;
+  --color-light: #faf9f5;
+  --color-mid-gray: #b0aea5;
+  --color-light-gray: #e8e6dc;
+  --color-orange: #d97757;
+  --color-blue: #6a9bcc;
+  --color-green: #788c5d;
+
+  /* Typography */
+  --font-heading: 'Poppins', Arial, sans-serif;
+  --font-body: 'Lora', Georgia, serif;
+}
+
+body {
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+.bg-brand-dark {
+  background-color: var(--color-dark);
+}
+
+.bg-brand-light {
+  background-color: var(--color-light);
+}
+
+.bg-brand-mid-gray {
+  background-color: var(--color-mid-gray);
+}
+
+.bg-brand-light-gray {
+  background-color: var(--color-light-gray);
+}
+
+.bg-brand-orange {
+  background-color: var(--color-orange);
+}
+
+.bg-brand-blue {
+  background-color: var(--color-blue);
+}
+
+.bg-brand-green {
+  background-color: var(--color-green);
+}
+
+.text-brand-dark {
+  color: var(--color-dark);
+}
+
+.text-brand-light {
+  color: var(--color-light);
+}
+
+.text-brand-mid-gray {
+  color: var(--color-mid-gray);
+}
+
+.text-brand-orange {
+  color: var(--color-orange);
+}
+
+.text-brand-blue {
+  color: var(--color-blue);
+}
+
+.text-brand-green {
+  color: var(--color-green);
+}
+
+.border-brand-mid-gray {
+  border-color: var(--color-mid-gray);
+}
+
+.border-brand-light-gray {
+  border-color: var(--color-light-gray);
+}
