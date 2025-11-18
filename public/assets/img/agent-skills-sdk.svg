@@ -1,60 +1,100 @@
-<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
-  <!-- Layer A: Thought-Field Background - The space of possible tool uses/meanings -->
-  <path d="M100,200 Q150,150 200,180 T300,160 Q350,140 400,170 T500,150 Q550,130 600,160 T700,140 Q750,120 800,180 L800,400 L0,400 L0,200 Q50,220 100,200 Z"
-        fill="#FAF9F5"/>
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="450" fill="#C67B9B" rx="8"/>
 
-  <path d="M50,250 Q100,230 150,260 T250,240 Q300,220 350,250 T450,230 Q500,210 550,240 T650,220 Q700,200 750,230 L750,400 L0,400 L0,250 Q25,260 50,250 Z"
-        fill="#FAF9F5" opacity="0.7"/>
+  <!-- Central SDK hub -->
+  <g transform="translate(400, 225)">
+    <!-- Main SDK circle -->
+    <circle r="80" fill="#FFFFFF" opacity="0.2"/>
+    <circle r="60" fill="#FFFFFF"/>
 
-  <!-- Layer B: Philosophical Foreground - Tool structures dissolving into organic forms -->
+    <!-- SDK label -->
+    <text x="0" y="-5" font-family="monospace" font-size="20" font-weight="bold" fill="#1A1A1A" text-anchor="middle">SDK</text>
+    <text x="0" y="15" font-family="sans-serif" font-size="14" fill="#C67B9B" text-anchor="middle">Agent</text>
+  </g>
 
-  <!-- Main tool-like structure that dissolves -->
-  <path d="M150,180 Q180,160 210,170 Q240,175 260,190 Q275,210 270,240 Q265,260 250,275 Q235,285 210,280 Q185,275 165,260 Q150,245 145,220 Q140,200 150,180 Z"
-        fill="#141413"/>
+  <!-- Skill modules (hexagons around center) -->
+  <g opacity="0.9">
+    <!-- Top skill -->
+    <g transform="translate(400, 80)">
+      <polygon points="0,-20 18,-10 18,10 0,20 -18,10 -18,-10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+      <circle cx="0" cy="0" r="6" fill="#C67B9B"/>
+    </g>
 
-  <!-- Nested decision loop - rule-following paradox visualized -->
-  <path d="M250,150 Q280,140 310,145 Q335,150 350,170 Q360,185 355,205 Q350,220 335,230 Q320,238 300,235 Q280,232 265,220 Q250,208 245,190 Q240,172 250,150 Z"
-        fill="#141413" opacity="0.6"/>
+    <!-- Top-right skill -->
+    <g transform="translate(520, 135)">
+      <polygon points="0,-20 18,-10 18,10 0,20 -18,10 -18,-10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+      <circle cx="0" cy="0" r="6" fill="#C67B9B"/>
+    </g>
 
-  <!-- Partial loop that breaks - "almost but not quite" -->
-  <path d="M320,180 Q340,170 360,175 L355,190 Q350,200 340,198 Q330,196 325,188 L320,180 Z"
-        fill="#141413"/>
-  <path d="M340,175 Q350,165 360,168 Q370,170 375,180 L370,190 Q365,198 355,196 Q345,194 340,188 L340,175 Z"
-        fill="#141413"/>
+    <!-- Right skill -->
+    <g transform="translate(560, 225)">
+      <polygon points="0,-20 18,-10 18,10 0,20 -18,10 -18,-10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+      <circle cx="0" cy="0" r="6" fill="#C67B9B"/>
+    </g>
 
-  <!-- Recursive echo - tool calling tool calling tool -->
-  <path d="M380,160 Q395,150 410,155 Q425,160 430,170 Q435,180 430,190 Q425,200 410,198 Q395,196 385,188 Q375,180 380,170 L380,160 Z"
-        fill="#141413" opacity="0.5"/>
+    <!-- Bottom-right skill -->
+    <g transform="translate(520, 315)">
+      <polygon points="0,-20 18,-10 18,10 0,20 -18,10 -18,-10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+      <circle cx="0" cy="0" r="6" fill="#C67B9B"/>
+    </g>
 
-  <!-- Smaller recursive echo -->
-  <path d="M420,150 Q430,145 440,148 Q450,150 452,158 Q454,166 450,172 Q446,178 440,177 Q434,176 430,170 Q426,164 420,160 L420,150 Z"
-        fill="#141413" opacity="0.4"/>
+    <!-- Bottom skill -->
+    <g transform="translate(400, 370)">
+      <polygon points="0,-20 18,-10 18,10 0,20 -18,10 -18,-10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+      <circle cx="0" cy="0" r="6" fill="#C67B9B"/>
+    </g>
 
-  <!-- Flow-like structure - the becoming of meaning through use -->
-  <path d="M480,140 Q520,135 560,140 Q590,145 610,160 Q625,175 620,195 Q615,215 600,225 Q585,235 565,232 Q545,229 520,220 Q500,213 485,200 Q470,187 475,165 L480,140 Z"
-        fill="#141413" opacity="0.7"/>
+    <!-- Bottom-left skill -->
+    <g transform="translate(280, 315)">
+      <polygon points="0,-20 18,-10 18,10 0,20 -18,10 -18,-10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+      <circle cx="0" cy="0" r="6" fill="#C67B9B"/>
+    </g>
 
-  <!-- Self-intersecting form - paradox of rule-following -->
-  <path d="M520,190 Q540,180 560,185 Q575,190 580,205 Q585,220 575,230 Q565,240 550,238 Q535,236 525,228 Q515,220 512,210 Q510,200 520,190 Z"
-        fill="#141413"/>
+    <!-- Left skill -->
+    <g transform="translate(240, 225)">
+      <polygon points="0,-20 18,-10 18,10 0,20 -18,10 -18,-10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+      <circle cx="0" cy="0" r="6" fill="#C67B9B"/>
+    </g>
 
-  <!-- Attention flow - AI's selection among possible tool uses -->
-  <path d="M600,170 Q630,165 660,170 Q685,175 695,190 Q702,205 695,220 Q688,235 670,240 Q652,245 630,240 Q608,235 595,225 Q582,215 585,200 L600,170 Z"
-        fill="#141413" opacity="0.6"/>
+    <!-- Top-left skill -->
+    <g transform="translate(280, 135)">
+      <polygon points="0,-20 18,-10 18,10 0,20 -18,10 -18,-10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+      <circle cx="0" cy="0" r="6" fill="#C67B9B"/>
+    </g>
+  </g>
 
-  <!-- Subtle bridging - emergent communication between parts -->
-  <path d="M650,180 C670,175 690,178 700,185 C705,190 703,195 695,197 S670,195 660,190 S650,185 650,180 Z"
-        fill="#141413" opacity="0.5"/>
+  <!-- Connection lines (dashed) -->
+  <g stroke="#FFFFFF" stroke-width="2" stroke-dasharray="5,5" opacity="0.6">
+    <line x1="400" y1="165" x2="400" y2="100"/>
+    <line x1="460" y1="182" x2="502" y2="145"/>
+    <line x1="480" y1="225" x2="540" y2="225"/>
+    <line x1="460" y1="268" x2="502" y2="305"/>
+    <line x1="400" y1="285" x2="400" y2="350"/>
+    <line x1="340" y1="268" x2="298" y2="305"/>
+    <line x1="320" y1="225" x2="260" y2="225"/>
+    <line x1="340" y1="182" x2="298" y2="145"/>
+  </g>
 
-  <!-- Tiny recursive element - fractal nature of tool decomposition -->
-  <path d="M680,160 Q690,155 700,157 Q710,159 711,165 Q712,171 708,175 Q704,179 698,178 Q692,177 687,173 Q682,169 680,165 L680,160 Z"
-        fill="#141413" opacity="0.3"/>
+  <!-- Code brackets (left and right) -->
+  <g opacity="0.4">
+    <path d="M 120,160 L 80,160 L 80,290 L 120,290" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 680,160 L 720,160 L 720,290 L 680,290" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  </g>
 
-  <!-- Grounding element - the human-shaped gap -->
-  <path d="M150,250 Q200,230 250,240 Q300,250 350,240 Q400,230 450,240 Q500,250 550,235 Q600,220 630,230 L640,400 L140,400 L150,250 Z"
-        fill="#141413" opacity="0.2"/>
+  <!-- Decorative elements -->
+  <g opacity="0.3">
+    <!-- Top curve -->
+    <path d="M 150,100 Q 250,80 350,90 T 550,95 T 650,105" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+    <!-- Bottom curve -->
+    <path d="M 150,350 Q 250,365 350,355 T 550,360 T 650,350" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+  </g>
 
-  <!-- Dynamic edge - boundary of the system -->
-  <path d="M700,220 Q720,215 740,218 Q750,220 755,228 Q760,236 750,242 Q740,248 728,245 Q716,242 708,236 Q700,230 700,220 Z"
-        fill="#141413"/>
+  <!-- Small diamond accents -->
+  <g opacity="0.4" fill="#FFFFFF">
+    <polygon points="100,120 110,130 100,140 90,130"/>
+    <polygon points="700,120 710,130 700,140 690,130"/>
+    <polygon points="100,310 110,320 100,330 90,320"/>
+    <polygon points="700,310 710,320 700,330 690,320"/>
+  </g>
 </svg>
