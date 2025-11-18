@@ -1,0 +1,105 @@
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="450" fill="#C67B9B" rx="8"/>
+
+  <!-- Central gear representing systematic workflows -->
+  <circle cx="400" cy="225" r="90" fill="#FFFFFF" opacity="0.15"/>
+  <g transform="translate(400, 225)">
+    <!-- Gear teeth (8 teeth for 8 workflow areas) -->
+    <path d="M 0,-80 L 15,-95 L 25,-95 L 10,-80 Z M 56.5,-56.5 L 67,-67 L 77,-57 L 66.5,-46.5 Z M 80,0 L 95,-15 L 95,15 L 80,0 Z M 56.5,56.5 L 67,67 L 57,77 L 46.5,66.5 Z M 0,80 L 15,95 L -15,95 L 0,80 Z M -56.5,56.5 L -67,67 L -77,57 L -66.5,46.5 Z M -80,0 L -95,15 L -95,-15 L -80,0 Z M -56.5,-56.5 L -67,-67 L -57,-77 L -46.5,-66.5 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+    <!-- Inner gear circle -->
+    <circle r="55" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+    <circle r="35" fill="#C67B9B"/>
+  </g>
+
+  <!-- Code brackets (left side - representing skills) -->
+  <g transform="translate(150, 225)">
+    <path d="M 25,0 L 0,0 L 0,60 L 25,60" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+    <text x="15" y="35" font-family="monospace" font-size="24" fill="#FFFFFF" text-anchor="middle">S</text>
+  </g>
+
+  <!-- Closing brackets (right side) -->
+  <g transform="translate(625, 225)">
+    <path d="M 0,0 L 25,0 L 25,60 L 0,60" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+    <text x="10" y="35" font-family="monospace" font-size="24" fill="#FFFFFF" text-anchor="middle">P</text>
+  </g>
+
+  <!-- Workflow nodes (surrounding the central gear) -->
+  <!-- TDD node (top) -->
+  <g transform="translate(400, 80)">
+    <rect x="-30" y="-20" width="60" height="40" rx="8" fill="#FFFFFF"/>
+    <text x="0" y="5" font-family="sans-serif" font-size="14" font-weight="bold" fill="#1A1A1A" text-anchor="middle">TDD</text>
+  </g>
+
+  <!-- Debug node (top-right) -->
+  <g transform="translate(550, 120)">
+    <circle r="25" fill="#FFFFFF"/>
+    <path d="M -8,-8 L 8,8 M -8,8 L 8,-8" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Collab node (right) -->
+  <g transform="translate(600, 225)">
+    <rect x="-25" y="-25" width="50" height="50" rx="8" fill="#FFFFFF"/>
+    <circle cx="-8" cy="-5" r="6" fill="#1A1A1A"/>
+    <circle cx="8" cy="-5" r="6" fill="#1A1A1A"/>
+    <path d="M -15,10 Q 0,20 15,10" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Review node (bottom-right) -->
+  <g transform="translate(550, 330)">
+    <polygon points="0,-25 22,13 -22,13" fill="#FFFFFF"/>
+    <circle cx="0" cy="0" r="5" fill="#1A1A1A"/>
+  </g>
+
+  <!-- Git node (bottom) -->
+  <g transform="translate(400, 370)">
+    <rect x="-30" y="-20" width="60" height="40" rx="8" fill="#FFFFFF"/>
+    <text x="0" y="5" font-family="sans-serif" font-size="14" font-weight="bold" fill="#1A1A1A" text-anchor="middle">GIT</text>
+  </g>
+
+  <!-- Workflow node (bottom-left) -->
+  <g transform="translate(250, 330)">
+    <circle r="25" fill="#FFFFFF"/>
+    <path d="M -10,-5 L 0,5 L 10,-5" fill="none" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Automation node (left) -->
+  <g transform="translate(200, 225)">
+    <rect x="-25" y="-25" width="50" height="50" rx="8" fill="#FFFFFF"/>
+    <rect x="-12" y="-15" width="24" height="10" rx="2" fill="#1A1A1A"/>
+    <rect x="-10" y="-3" width="20" height="18" rx="2" fill="#1A1A1A"/>
+  </g>
+
+  <!-- Agent node (top-left) -->
+  <g transform="translate(250, 120)">
+    <polygon points="0,-25 22,13 -22,13" fill="#FFFFFF"/>
+    <circle cx="0" cy="-5" r="5" fill="#1A1A1A"/>
+    <path d="M -8,5 L 8,5" stroke="#1A1A1A" stroke-width="2"/>
+  </g>
+
+  <!-- Connecting lines (flowing from center) -->
+  <g opacity="0.6">
+    <line x1="400" y1="135" x2="400" y2="100" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="5,5"/>
+    <line x1="470" y1="165" x2="525" y2="135" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="5,5"/>
+    <line x1="490" y1="225" x2="570" y2="225" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="5,5"/>
+    <line x1="470" y1="285" x2="525" y2="315" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="5,5"/>
+    <line x1="400" y1="315" x2="400" y2="350" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="5,5"/>
+    <line x1="330" y1="285" x2="275" y2="315" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="5,5"/>
+    <line x1="310" y1="225" x2="230" y2="225" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="5,5"/>
+    <line x1="330" y1="165" x2="275" y2="135" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="5,5"/>
+  </g>
+
+  <!-- Hand-drawn accent curve (top) -->
+  <path d="M 100,80 Q 200,60 300,70 T 500,75 T 700,85" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.4" stroke-linecap="round"/>
+
+  <!-- Hand-drawn accent curve (bottom) -->
+  <path d="M 100,370 Q 200,385 300,375 T 500,380 T 700,370" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.4" stroke-linecap="round"/>
+
+  <!-- Decorative diamond accents -->
+  <g opacity="0.3">
+    <polygon points="80,180 90,190 80,200 70,190" fill="#FFFFFF"/>
+    <polygon points="720,180 730,190 720,200 710,190" fill="#FFFFFF"/>
+    <polygon points="80,260 90,270 80,280 70,270" fill="#FFFFFF"/>
+    <polygon points="720,260 730,270 720,280 710,270" fill="#FFFFFF"/>
+  </g>
+</svg>

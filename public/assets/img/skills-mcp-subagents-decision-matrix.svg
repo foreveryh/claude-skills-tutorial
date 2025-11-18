@@ -1,0 +1,118 @@
+<svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="450" fill="#CA8760" rx="12"/>
+
+  <!-- Decorative background patterns -->
+  <path d="M100 80 Q200 60 300 80" stroke="#B87A5D" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+  <path d="M500 370 Q650 350 750 370" stroke="#B87A5D" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Main decision matrix grid/table structure -->
+  <rect x="100" y="140" width="600" height="220" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="5,5" rx="8"/>
+
+  <!-- Table header background -->
+  <rect x="100" y="140" width="600" height="50" fill="#FFFFFF" opacity="0.2"/>
+
+  <!-- Vertical dividers -->
+  <line x1="220" y1="140" x2="220" y2="360" stroke="#FFFFFF" stroke-width="2"/>
+  <line x1="400" y1="140" x2="400" y2="360" stroke="#FFFFFF" stroke-width="2"/>
+  <line x1="580" y1="140" x2="580" y2="360" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- Horizontal dividers -->
+  <line x1="100" y1="190" x2="700" y2="190" stroke="#FFFFFF" stroke-width="2"/>
+  <line x1="100" y1="240" x2="700" y2="240" stroke="#FFFFFF" stroke-width="2"/>
+  <line x1="100" y1="290" x2="700" y2="290" stroke="#FFFFFF" stroke-width="2"/>
+  <line x1="100" y1="340" x2="700" y2="340" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- Column headers -->
+  <text x="160" y="172" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Skills</text>
+  <text x="310" y="172" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">MCP</text>
+  <text x="490" y="172" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Subagents</text>
+  <text x="640" y="172" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Prompts</text>
+
+  <!-- Row labels -->
+  <text x="50" y="220" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="end">Purpose</text>
+  <text x="50" y="270" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="end">Portability</text>
+  <text x="50" y="320" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="end">Code Execution</text>
+
+  <!-- Purpose row content -->
+  <text x="160" y="225" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">Task-specific workflows</text>
+  <text x="310" y="225" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">External data/API integration</text>
+  <text x="490" y="225" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">Independent task execution</text>
+  <text x="640" y="225" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">One-time instructions</text>
+
+  <!-- Icons in cells to visualize the concepts -->
+  <!-- Skills cell: folder/gear icon -->
+  <g transform="translate(160, 280)">
+    <rect x="-12" y="-8" width="24" height="20" fill="#FFFFFF" rx="3" stroke="#1A1A1A" stroke-width="2"/>
+    <line x1="-8" y1="-2" x2="8" y2="-2" stroke="#1A1A1A" stroke-width="1"/>
+    <circle cx="0" cy="8" r="6" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+    <path d="M0 2 L0 6 M-3 6 L3 6" stroke="#1A1A1A" stroke-width="1.5"/>
+  </g>
+
+  <!-- MCP cell: server with connection -->
+  <g transform="translate(310, 280)">
+    <rect x="-15" y="-12" width="30" height="24" fill="#FFFFFF" rx="3" stroke="#1A1A1A" stroke-width="2"/>
+    <circle cx="-8" cy="-2" r="2" fill="#1A1A1A"/>
+    <circle cx="0" cy="-2" r="2" fill="#1A1A1A"/>
+    <circle cx="8" cy="-2" r="2" fill="#1A1A1A"/>
+    <line x1="-15" y1="8" x2="15" y2="8" stroke="#1A1A1A" stroke-width="1"/>
+    <path d="M0 6 L0 -18" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="3,3"/>
+  </g>
+
+  <!-- Subagents cell: agent icon -->
+  <g transform="translate(490, 280)">
+    <circle cx="0" cy="0" r="14" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+    <circle cx="-4" cy="-4" r="2.5" fill="#1A1A1A"/>
+    <circle cx="4" cy="-4" r="2.5" fill="#1A1A1A"/>
+    <path d="M-6 4 Q0 8 6 4" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"/>
+    <rect x="-8" y="-18" width="16" height="8" fill="#1A1A1A" rx="2"/>
+  </g>
+
+  <!-- Prompts cell: chat bubble -->
+  <g transform="translate(640, 280)">
+    <path d="M-12 -8 Q-15 -15 -10 -15 L10 -15 Q15 -15 12 -8 L15 0 Q18 8 12 8 L-12 8 Q-18 8 -15 0 L-12 -8 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+    <line x1="-8" y1="-5" x2="8" y2="-5" stroke="#1A1A1A" stroke-width="1"/>
+    <line x1="-8" y1="0" x2="6" y2="0" stroke="#1A1A1A" stroke-width="1"/>
+  </g>
+
+  <!-- Code Execution row icons -->
+  <!-- Skills: script icon -->
+  <g transform="translate(160, 330)">
+    <path d="M-8 -10 L-8 10 L12 10 L12 0 L2 0 L2 -10 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+    <text x="2" y="3" font-family="monospace" font-size="10" font-weight="bold" fill="#1A1A1A" text-anchor="middle">.py</text>
+  </g>
+
+  <!-- Flow arrows showing relationships between tools -->
+  <g stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.7">
+    <path d="M70 200 Q150 180 230 200" fill="none"/>
+    <path d="M70 250 Q150 230 230 250" fill="none"/>
+    <path d="M70 300 Q150 280 230 300" fill="none"/>
+
+    <path d="M700 200 Q680 200 660 200" fill="none" stroke-dasharray="5,3"/>
+    <path d="M700 250 Q680 250 660 250" fill="none" stroke-dasharray="5,3"/>
+    <path d="M700 300 Q680 300 660 300" fill="none" stroke-dasharray="5,3"/>
+  </g>
+
+  <!-- Decision flow indicators at top -->
+  <circle cx="150" cy="115" r="18" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="3"/>
+  <text x="150" y="122" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1A1A1A" text-anchor="middle">?</text>
+
+  <!-- Flow lines to matrix -->
+  <path d="M150 133 L150 140" stroke="#FFFFFF" stroke-width="2"/>
+  <path d="M310 133 L310 140" stroke="#FFFFFF" stroke-width="2"/>
+  <path d="M490 133 L490 140" stroke="#FFFFFF" stroke-width="2"/>
+  <path d="M640 133 L640 140" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- Decorative accent elements -->
+  <path d="M120 380 Q200 360 280 380" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <path d="M520 380 Q600 360 680 380" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Floating accent shapes -->
+  <circle cx="80" cy="80" r="10" fill="#FFFFFF" opacity="0.3"/>
+  <circle cx="720" cy="70" r="8" fill="#FFFFFF" opacity="0.3"/>
+  <circle cx="760" cy="400" r="12" fill="#FFFFFF" opacity="0.3"/>
+
+  <!-- Title -->
+  <text x="400" y="50" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Tools Decision Matrix</text>
+  <text x="400" y="72" font-family="Arial, sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle" opacity="0.8">Skills vs MCP vs Subagents vs Prompts</text>
+</svg>
