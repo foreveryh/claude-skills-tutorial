@@ -1,0 +1,26 @@
+[
+  {
+    "name": "RAG Platform",
+    "description": "AI-powered Retrieval Augmented Generation platform for intelligent knowledge base",
+    "url": "https://rag.deeptoai.com",
+    "tags": ["RAG", "AI", "Knowledge Base"]
+  },
+  {
+    "name": "Claude Code Platform",
+    "description": "Advanced Claude Code development and testing environment",
+    "url": "https://cc.deeptoai.com",
+    "tags": ["Claude", "Development", "Platform"]
+  },
+  {
+    "name": "claude-code-switch",
+    "description": "CLI tool for switching Claude Code configurations",
+    "url": "https://github.com/foreveryh/claude-code-switch",
+    "tags": ["CLI", "Configuration", "Productivity"]
+  },
+  {
+    "name": "claude-skills",
+    "description": "Comprehensive documentation exploring Claude Skills architecture and patterns",
+    "url": "https://github.com/foreveryh/claude-skills",
+    "tags": ["Documentation", "Skills", "Tutorial"]
+  }
+]

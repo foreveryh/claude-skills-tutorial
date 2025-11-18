@@ -1,0 +1,59 @@
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="450" fill="#6B9BC4"/>
+
+  <!-- Central comparison chart -->
+  <rect x="200" y="80" width="400" height="280" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="3"/>
+
+  <!-- Title bar -->
+  <rect x="200" y="80" width="400" height="40" rx="8" fill="#1A1A1A"/>
+  <text x="330" y="107" font-size="18" font-weight="bold" fill="#FFFFFF">Skills vs Others</text>
+
+  <!-- Comparison items -->
+  <g transform="translate(240, 150)">
+    <rect x="0" y="0" width="100" height="35" rx="5" fill="#6B9BC4" opacity="0.3"/>
+    <text x="10" y="22" font-size="14" font-weight="bold" fill="#1A1A1A">Skills</text>
+  </g>
+
+  <g transform="translate(380, 150)">
+    <rect x="0" y="0" width="100" height="35" rx="5" fill="#FFFFFF" stroke="#6B9BC4" stroke-width="2"/>
+    <text x="10" y="22" font-size="14" fill="#1A1A1A">Prompts</text>
+  </g>
+
+  <g transform="translate(240, 200)">
+    <rect x="0" y="0" width="100" height="35" rx="5" fill="#FFFFFF" stroke="#6B9BC4" stroke-width="2"/>
+    <text x="10" y="22" font-size="14" fill="#1A1A1A">Projects</text>
+  </g>
+
+  <g transform="translate(380, 200)">
+    <rect x="0" y="0" width="100" height="35" rx="5" fill="#FFFFFF" stroke="#6B9BC4" stroke-width="2"/>
+    <text x="10" y="22" font-size="14" fill="#1A1A1A">MCP</text>
+  </g>
+
+  <g transform="translate(240, 250)">
+    <rect x="0" y="0" width="100" height="35" rx="5" fill="#FFFFFF" stroke="#6B9BC4" stroke-width="2"/>
+    <text x="10" y="22" font-size="14" fill="#1A1A1A">Subagents</text>
+  </g>
+
+  <!--Comparison arrows -->
+  <path d="M 350 167 L 370 167" stroke="#6B9BC4" stroke-width="2"/>
+  <path d="M 350 217 L 370 217" stroke="#6B9BC4" stroke-width="2"/>
+  <path d="M 350 267 L 370 267" stroke="#6B9BC4" stroke-width="2"/>
+
+  <!-- Decorative elements -->
+  <g transform="translate(150, 200)">
+    <circle cx="0" cy="0" r="25" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <path d="M -8 -3 L -3 3 L 8 -8" stroke="#1A1A1A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(650, 220)">
+    <rect x="-20" y="-20" width="40" height="40" rx="5" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <text x="-8" y="8" font-size="24" fill="#1A1A1A">?</text>
+  </g>
+
+  <!-- Wavy line -->
+  <path d="M 300 380 Q 320 370 340 380 Q 360 390 380 380" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+
+  <circle cx="700" cy="120" r="10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+  <rect x="90" y="110" width="20" height="20" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+</svg>

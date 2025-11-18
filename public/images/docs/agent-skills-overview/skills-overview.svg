@@ -1,0 +1,46 @@
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="450" fill="#C67B9B"/>
+
+  <!-- Central hub/node -->
+  <circle cx="400" cy="225" r="60" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="3"/>
+  <text x="385" y="235" font-size="30" font-weight="bold" fill="#1A1A1A">AI</text>
+
+  <!-- Skill nodes around center -->
+  <g transform="translate(280, 100)">
+    <rect x="0" y="0" width="70" height="70" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <path d="M 15 25 L 15 45 L 30 45 L 30 35 L 45 35 L 45 25 Z" fill="#1A1A1A"/>
+    <path d="M 15 25 L 15 45 L 30 45 L 30 35 L 45 35 L 45 25 Z" fill="#1A1A1A"/>
+    <line x1="35" y1="175" x2="35" y2="125" stroke="#1A1A1A" stroke-width="2.5"/>
+  </g>
+
+  <g transform="translate(550, 180)">
+    <circle cx="0" cy="0" r="35" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <path d="M -15 0 L 0 -12 L 15 0 L 0 12 Z" fill="#1A1A1A"/>
+    <line x1="-100" y1="0" x2="-50" y2="0" stroke="#1A1A1A" stroke-width="2.5"/>
+  </g>
+
+  <g transform="translate(150, 225)">
+    <rect x="0" y="-30" width="60" height="60" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <circle cx="30" cy="0" r="15" fill="#1A1A1A"/>
+    <line x1="110" y1="0" x2="180" y2="0" stroke="#1A1A1A" stroke-width="2.5"/>
+  </g>
+
+  <g transform="translate(480, 330)">
+    <polygon points="0,-30 26,0 0,30 -26,0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <rect x="-10" y="-10" width="20" height="20" fill="#1A1A1A"/>
+    <line x1="-60" y1="-60" x2="-30" y2="-25" stroke="#1A1A1A" stroke-width="2.5"/>
+  </g>
+
+  <!-- Connection lines with arrows -->
+  <path d="M 330 155 L 375 195" stroke="#1A1A1A" stroke-width="2.5" stroke-dasharray="5,5"/>
+  <path d="M 470 210 L 515 210" stroke="#1A1A1A" stroke-width="2.5" stroke-dasharray="5,5"/>
+  <path d="M 240 240 L 335 235" stroke="#1A1A1A" stroke-width="2.5" stroke-dasharray="5,5"/>
+  <path d="M 455 285 L 420 265" stroke="#1A1A1A" stroke-width="2.5" stroke-dasharray="5,5"/>
+
+  <!-- Decorative elements -->
+  <path d="M 350 400 Q 370 390 390 400 Q 410 410 430 400" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <circle cx="700" cy="100" r="12" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+  <rect x="90" y="90" width="22" height="22" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+</svg>
