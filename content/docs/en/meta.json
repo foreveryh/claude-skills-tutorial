@@ -2,7 +2,8 @@
   "title": "Documentation",
   "pages": [
     "index",
-    "test",
+    "automated-workflows",
+    "about",
     "development",
     "ai-ml"
   ]

@@ -1,13 +1,220 @@
 ---
-title: Bonjour le monde
-description: Votre premier document
+title: "Claude Skills Explorer"
+description: "Une plateforme de documentation complète explorant l'architecture, les patterns et les applications pratiques de Claude Skills. Découvrez comment les skills étendent les capacités de Claude et permettent des workflows automatisés."
 ---
 
-Bienvenue dans la documentation ! Vous pouvez commencer à écrire des documents dans `/content/docs`.
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
 
-## Et ensuite ?
+# Claude Skills Explorer
+
+**Claude Skills Explorer** est une plateforme de documentation qui démystifie l'architecture et les applications pratiques de Claude Skills - des workflows exécutables qui étendent les capacités de Claude et permettent des patterns d'automatisation sophistiqués.
+
+<Callout type="info">
+  Ce projet sert à la fois **les développeurs** qui construisent des skills et **les utilisateurs de skills** qui veulent comprendre comment les utiliser efficacement. Notre objectif est de créer une base de connaissances complète qui relie la théorie et la pratique.
+</Callout>
+
+## Pourquoi Nous Avons Construit Ce Projet
+
+### Le Défi : Découverte Et Compréhension Des Skills
+
+Alors que Claude Skills sont passés d'outils expérimentaux à des systèmes prêts pour la production, nous avons identifié un écart critique : alors que les skills devenaient plus puissants et sophistiqués, comprendre comment les utiliser efficacement restait difficile. Les développeurs ont lutté avec :
+
+- **Pauvre Documentation** : De nombreux skills manquaient de guides complets expliquant leur architecture
+- **Problèmes De Découverte** : Trouver des skills pertinents pour des tâches spécifiques était difficile
+- **Courbe D'Apprentissage** : Comprendre les patterns et les meilleures pratiques des skills nécessitait des essais et des erreurs importants
+- **Lacunes De Validation** : Aucun moyen standardisé de vérifier la qualité ou l'efficacité d'un skill
+
+### Notre Solution : Un Écosystème Piloté Par La Connaissance
+
+Nous avons créé Claude Skills Explorer pour résoudre ces défis grâce à :
+
+1. **Analyse Approfondie Des Skills** : Chaque skill est analysé systématiquement, en documentant son :
+   - Architecture et patterns de conception
+   - Stratégies d'implémentation
+   - Cas d'utilisation pratiques et applications
+   - Meilleures pratiques et pièges communs
+
+2. **Documentation Multilingue** : Contenu disponible en anglais, chinois et français, rendant les skills accessibles mondialement
+
+3. **Framework D'Automatisation** : Nous avons construit des skills qui écrivent sur des skills, créant un écosystème auto-documentant
+
+4. **Pipeline De Validation** : La validation MDX automatisée et la publication sémantique garantissent la qualité du contenu
+
+## Comment Les Skills Alimentent Ce Projet
+
+<Callout type="tip">
+  Cette plateforme de documentation est elle-même alimentée par Claude Skills que nous avons développés. C'est une démonstration du monde réel de l'automatisation des skills en action.
+</Callout>
+
+### L'Écosystème En Action
+
+Notre projet utilise trois skills interconnectés qui fonctionnent ensemble pour créer un workflow de documentation entièrement automatisé :
+
+#### 1. **skill-article-writer** : Le Générateur De Contenu
+
+Ce méta-skill analyse les Claude Skills existants et génère des articles de tutoriel complets. Ce n'est pas seulement de la documentation - c'est une création de contenu intelligente qui :
+
+- **Analyse la structure des skills** pour comprendre l'architecture et les patterns
+- **Extrait des insights** du code, de la documentation et des exemples
+- **Génère des articles structurés** avec un formatage MDX approprié
+- **Crée des versions multilingues** automatiquement
+
+**Workflow d'exemple** :
+```bash
+# Claude utilise skill-article-writer pour comprendre mcp-builder
+→ Analyse SKILL.md, les scripts et les exemples
+→ Génère un guide complet de 7 300+ mots
+→ Crée des versions anglaises, chinoises et françaises
+→ Met à jour la navigation automatiquement
+```
+
+#### 2. **skill-article-publisher** : Le Gardien De La Qualité
+
+Avant que tout article ne soit publié, ce skill assure la qualité grâce à :
+
+- **Validation De Syntaxe MDX** : Détecte et corrige les problèmes courants comme les opérateurs de comparaison non échappés
+- **Vérification De Build** : Exécute `npm run build` pour détecter les erreurs de compilation
+- **Génération De Commit Sémantique** : Crée des messages de commit significatifs basés sur les types de changements
+- **Publication Automatisée** : Indexe, valide et pousse vers le dépôt distant
+
+**Innovation Clé** : La validation détecte des problèmes MDX subtils qui casseraient le build, comme :
+- `>` converti en `&gt;` (évite les erreurs d'analyse XML)
+- `<` converti en `&lt;`
+- Structure de frontmatter appropriée
+- Équilibre des balises de composants
+
+#### 3. **Analyses Complètes De Skills** : La Base De Connaissances
+
+Nous avons créé des analyses détaillées de skills de production du dépôt d'Anthropic :
+
+<Callout type="info">
+  Ce ne sont pas des aperçus superficiels - ce sont des plongées techniques approfondies moyennant 7 000+ mots, avec analyse d'architecture, exemples de code et applications pratiques.
+</Callout>
+
+- **[analyzing-mcp-builder](/development/analyzing-mcp-builder)** : Guide complet du développement de serveurs MCP, couvrant le workflow en 4 phases, les patterns Python/TypeScript et les frameworks d'évaluation
+
+- **[analyzing-webapp-testing](/development/analyzing-webapp-testing)** : Guide complet de test Playwright avec des arbres de décision, des patterns de reconnaissance et une gestion multi-serveurs
+
+## Ce Que Vous Trouverez Ici
+
+<Callout type="question">
+  Que vous soyez un développeur construisant des skills ou un utilisateur les utilisant, cette plateforme a des ressources pour vous.
+</Callout>
+
+### Pour Les Développeurs
+
+**Patterns D'Architecture** :
+- Patterns de conception à divulgation progressive
+- Stratégies de gestion des ressources
+- Organisation du contenu multilingue
+- Workflows de validation automatisés
+
+**Guides D'Implémentation** :
+- [Développement De Serveurs MCP](/development/analyzing-mcp-builder) - Workflow complet en 4 phases
+- [Test D'Applications Web](/development/analyzing-webapp-testing) - Patterns d'automatisation Playwright
+- [Plongée Approfondie Dans La Création De Skills](/development/skill-creator-deep-dive) - Construction de méta-skills
+
+**Meilleures Pratiques** :
+- Conventions de style d'écriture des commandes
+- Listes de contrôle de qualité et validation
+- Gestion de version sémantique et publication
+- Gestion du contenu multilingue
+
+### Pour Les Utilisateurs De Skills
+
+**Comprendre Les Capacités** :
+- Comment les skills étendent les capacités de Claude
+- Applications du monde réel et cas d'utilisation
+- Patterns d'intégration et workflows
+- Critères d'évaluation de la qualité
+
+**Exemples Pratiques** :
+- Voir les skills en action grâce à notre vitrine d'automatisation
+- Apprendre quels skills utiliser pour des tâches spécifiques
+- Comprendre le processus de prise de décision
+- Évaluer l'efficacité des skills
+
+## La Stack Technique
+
+<Callout type="info">
+  Comprendre la base technique aide les développeurs et les utilisateurs à apprécier les capacités de la plateforme.
+</Callout>
+
+### Technologies De Base
+
+- **Next.js** : Framework React pour le rendu côté serveur et la génération statique
+- **Fumadocs** : Framework de documentation avec support MDX et composants magnifiques
+- **MDX** : Markdown + JSX pour une documentation riche et interactive
+- **TypeScript** : Développement sécurisé par les types
+- **Tailwind CSS** : Styling orienté utilitaires
+
+### Couche D'Automatisation
+
+C'est là que les skills brillent vraiment - notre couche d'automatisation comprend :
+
+```bash
+# Workflow de publication automatisé
+1. skill-article-writer génère l'article
+2. skill-article-publisher valide la syntaxe MDX
+3. La vérification de build s'exécute (npm run build)
+4. Les commits sémantiques sont générés
+5. Les changements sont poussés vers le dépôt
+
+# Résultat : Entièrement automatisé de l'analyse à la publication
+```
+
+## Rejoindre L'Écosystème
+
+<Callout type="tip">
+  Ce projet démontre ce qui est possible lorsque les skills sont conçus avec l'automatisation à l'esprit. Vous pouvez construire des écosystèmes similaires pour vos propres besoins.
+</Callout>
+
+### Pour Les Développeurs
+
+Prêt à construire vos propres skills ? Commencez par :
+
+1. **[Guide De Développement De Serveurs MCP](/development/analyzing-mcp-builder)** - Apprenez le workflow en 4 phases
+2. **Analyser Les Skills Existantes** - Étudiez les patterns des skills de production
+3. **Construire Et Valider** - Utilisez nos outils d'automatisation pour garantir la qualité
+4. **Contribuer En Retour** - Partagez vos skills avec la communauté
+
+### Pour Les Organisations
+
+Transformez vos workflows avec l'automatisation propulsée par les skills :
+
+- **Outils Internes** : Construisez des skills pour vos workflows spécifiques
+- **Assurance Qualité** : Implémentez des pipelines de validation
+- **Gestion Des Connaissances** : Créez des systèmes auto-documentants
+- **Collaboration D'Équipe** : Standardisez les pratiques de développement des skills
+
+## Prêt À Explorer ?
+
+Commencez par nos analyses complètes de skills pour voir ce qui est possible :
 
 <Cards>
-  <Card title="En savoir plus sur Next.js" href="https://nextjs.org/docs" />
-  <Card title="En savoir plus sur Fumadocs" href="https://fumadocs.dev" />
+  <Card
+    title="MCP Builder"
+    description="Créer des serveurs MCP qui intègrent Claude avec des services externes"
+    href="/development/analyzing-mcp-builder"
+    icon="Server"
+  />
+  <Card
+    title="WebApp Testing"
+    description="Automatiser les tests de navigateur avec des patterns Playwright"
+    href="/development/analyzing-webapp-testing"
+    icon="TestTube"
+  />
+  <Card
+    title="Skill Architecture"
+    description="Plongée profonde dans les patterns de conception de skills et les meilleures pratiques"
+    href="/development/skill-creator-deep-dive"
+    icon="Code"
+  />
 </Cards>
+
+---
+
+<Callout type="info">
+  Cette plateforme est elle-même une démonstration de Claude Skills en action. Chaque article, chaque validation, chaque déploiement - automatisé par les skills. Bienvenue dans l'avenir de la documentation.
+</Callout>

@@ -1,13 +1,220 @@
 ---
-title: Hello World
-description: Your first document
+title: "Claude Skills Explorer"
+description: "A comprehensive documentation platform exploring the architecture, patterns, and practical applications of Claude Skills. Learn how skills extend Claude's capabilities and enable automated workflows."
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
 
-## What is Next?
+# Claude Skills Explorer
+
+**Claude Skills Explorer** is a documentation platform that demystifies the architecture and practical applications of Claude Skills - executable workflows that extend Claude's capabilities and enable sophisticated automation patterns.
+
+<Callout type="info">
+  This project serves both **developers** building skills and **skill users** who want to understand how to leverage skills effectively. Our goal is to create a comprehensive knowledge base that bridges theory and practice.
+</Callout>
+
+## Why We Built This Project
+
+### The Challenge: Skill Discovery and Understanding
+
+As Claude Skills evolved from experimental tools to production-ready systems, we identified a critical gap: while skills were becoming more powerful and sophisticated, understanding how to use them effectively remained difficult. Developers struggled with:
+
+- **Poor Documentation**: Many skills lacked comprehensive guides explaining their architecture
+- **Discovery Problems**: Finding relevant skills for specific tasks was challenging
+- **Learning Curve**: Understanding skill patterns and best practices required significant trial and error
+- **Validation Gaps**: No standardized way to verify skill quality or effectiveness
+
+### Our Solution: A Knowledge-Driven Ecosystem
+
+We created Claude Skills Explorer to solve these challenges through:
+
+1. **Deep Skill Analysis**: Each skill is systematically analyzed, documenting its:
+   - Architecture and design patterns
+   - Implementation strategies
+   - Practical use cases and applications
+   - Best practices and common pitfalls
+
+2. **Multi-Language Documentation**: Content available in English, Chinese, and French, making skills accessible globally
+
+3. **Automation Framework**: We've built skills that write about skills, creating a self-documenting ecosystem
+
+4. **Validation Pipeline**: Automated MDX validation and semantic publishing ensures content quality
+
+## How Skills Power This Project
+
+<Callout type="tip">
+  This documentation platform is itself powered by Claude Skills that we've developed. It's a real-world demonstration of skill automation in action.
+</Callout>
+
+### The Ecosystem in Action
+
+Our project uses three interconnected skills that work together to create a fully automated documentation workflow:
+
+#### 1. **skill-article-writer**: The Content Generator
+
+This meta-skill analyzes existing Claude skills and generates comprehensive tutorial articles. It's not just documentation - it's intelligent content creation that:
+
+- **Analyzes skill structure** to understand architecture and patterns
+- **Extracts insights** from code, documentation, and examples
+- **Generates structured articles** with proper MDX formatting
+- **Creates multi-language versions** automatically
+
+**Example workflow**:
+```bash
+# Claude uses skill-article-writer to understand mcp-builder
+→ Analyzes SKILL.md, scripts, and examples
+→ Generates 7,300+ word comprehensive guide
+→ Creates English, Chinese, and French versions
+→ Updates navigation automatically
+```
+
+#### 2. **skill-article-publisher**: The Quality Gatekeeper
+
+Before any article goes live, this skill ensures quality through:
+
+- **MDX Syntax Validation**: Detects and fixes common issues like unescaped comparison operators
+- **Build Verification**: Runs `npm run build` to catch compilation errors
+- **Semantic Commit Generation**: Creates meaningful commit messages based on change types
+- **Automated Publishing**: Stages, commits, and pushes to remote repository
+
+**Key Innovation**: The validation catches subtle MDX issues that would break the build, like:
+- `>` converted to `&gt;` (prevents XML parsing errors)
+- `<` converted to `&lt;`
+- Proper frontmatter structure
+- Component tag balance
+
+#### 3. **Comprehensive Skill Analyses**: The Knowledge Base
+
+We've created detailed analyses of production skills from Anthropic's repository:
+
+<Callout type="info">
+  These aren't superficial overviews - they're deep technical dives averaging 7,000+ words, complete with architecture analysis, code examples, and practical applications.
+</Callout>
+
+- **[analyzing-mcp-builder](/development/analyzing-mcp-builder)**: Complete guide to MCP server development, covering the 4-phase workflow, Python/TypeScript patterns, and evaluation frameworks
+
+- **[analyzing-webapp-testing](/development/analyzing-webapp-testing)**: Comprehensive Playwright testing guide with decision trees, reconnaissance patterns, and multi-server management
+
+## What You'll Find Here
+
+<Callout type="question">
+  Whether you're a developer building skills or a user leveraging them, this platform has resources for you.
+</Callout>
+
+### For Developers
+
+**Architecture Patterns**:
+- Progressive disclosure design patterns
+- Resource management strategies
+- Multi-language content organization
+- Automated validation workflows
+
+**Implementation Guides**:
+- [MCP Server Development](/development/analyzing-mcp-builder) - Complete 4-phase workflow
+- [Web Application Testing](/development/analyzing-webapp-testing) - Playwright automation patterns
+- [Skill Creation Deep Dive](/development/skill-creator-deep-dive) - Building meta-skills
+
+**Best Practices**:
+- Command writing style conventions
+- Quality checklists and validation
+- Semantic versioning and publishing
+- Multi-language content management
+
+### For Skill Users
+
+**Understanding Capabilities**:
+- How skills extend Claude's abilities
+- Real-world applications and use cases
+- Integration patterns and workflows
+- Quality assessment criteria
+
+**Practical Examples**:
+- See skills in action through our automation showcase
+- Learn which skills to use for specific tasks
+- Understand the decision-making process
+- Evaluate skill effectiveness
+
+## The Technical Stack
+
+<Callout type="info">
+  Understanding the technical foundation helps both developers and users appreciate the platform's capabilities.
+</Callout>
+
+### Core Technologies
+
+- **Next.js**: React framework for server-side rendering and static generation
+- **Fumadocs**: Documentation framework with MDX support and beautiful components
+- **MDX**: Markdown + JSX for rich, interactive documentation
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first styling
+
+### Automation Layer
+
+This is where skills truly shine - our automation layer includes:
+
+```bash
+# Automated publishing workflow
+1. skill-article-writer generates article
+2. skill-article-publisher validates MDX syntax
+3. Build verification runs (npm run build)
+4. Semantic commits generated
+5. Changes pushed to repository
+
+# Result: Fully automated from analysis to publication
+```
+
+## Join the Ecosystem
+
+<Callout type="tip">
+  This project demonstrates what's possible when skills are designed with automation in mind. You can build similar ecosystems for your own needs.
+</Callout>
+
+### For Developers
+
+Ready to build your own skills? Start with:
+
+1. **[MCP Server Development Guide](/development/analyzing-mcp-builder)** - Learn the 4-phase workflow
+2. **Analyze Existing Skills** - Study patterns from production skills
+3. **Build and Validate** - Use our automation tools to ensure quality
+4. **Contribute Back** - Share your skills with the community
+
+### For Organizations
+
+Transform your workflows with skill-powered automation:
+
+- **Internal Tools**: Build skills for your specific workflows
+- **Quality Assurance**: Implement validation pipelines
+- **Knowledge Management**: Create self-documenting systems
+- **Team Collaboration**: Standardize skill development practices
+
+## Ready to Explore?
+
+Start with our comprehensive skill analyses to see what's possible:
 
 <Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card
+    title="MCP Builder"
+    description="Create MCP servers that integrate Claude with external services"
+    href="/development/analyzing-mcp-builder"
+    icon="Server"
+  />
+  <Card
+    title="WebApp Testing"
+    description="Automate browser testing with Playwright patterns"
+    href="/development/analyzing-webapp-testing"
+    icon="TestTube"
+  />
+  <Card
+    title="Skill Architecture"
+    description="Deep dive into skill design patterns and best practices"
+    href="/development/skill-creator-deep-dive"
+    icon="Code"
+  />
 </Cards>
+
+---
+
+<Callout type="info">
+  This platform is itself a demonstration of Claude Skills in action. Every article, every validation, every deployment - automated by skills. Welcome to the future of documentation.
+</Callout>

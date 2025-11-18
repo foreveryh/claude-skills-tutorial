@@ -3,6 +3,7 @@ import { defineI18nUI } from 'fumadocs-ui/i18n';
 import { i18n } from '@/lib/i18n';
 import '../global.css';
 import { Inter } from 'next/font/google';
+import { ContactFloat } from '@/components/contact-float';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -37,6 +38,7 @@ export default async function RootLayout({
     <html lang={lang} className={inter.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
         <RootProvider i18n={provider(lang)}>{children}</RootProvider>
+        <ContactFloat />
       </body>
     </html>
   );

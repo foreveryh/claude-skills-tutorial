@@ -1,13 +1,220 @@
 ---
-title: 你好世界
-description: 你的第一个文档
+title: "Claude Skills Explorer"
+description: "一个全面探索 Claude Skills 架构、模式和实际应用的文档平台。了解 skills 如何扩展 Claude 的功能并启用自动化工作流。"
 ---
 
-欢迎来到文档！你可以在 `/content/docs` 中开始编写文档。
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
 
-## 下一步是什么？
+# Claude Skills Explorer
+
+**Claude Skills Explorer** 是一个文档平台，旨在揭示 Claude Skills 的架构和实际应用 - 可执行的工作流，可扩展 Claude 的功能并实现复杂的自动化模式。
+
+<Callout type="info">
+  本项目同时服务于 **开发者**（构建 skills）和 **skill 使用者**（希望有效利用 skills 的人）。我们的目标是创建一个全面的知识库，连接理论与实践。
+</Callout>
+
+## 我们为什么要构建这个项目
+
+### 挑战：Skill 发现和理解
+
+随着 Claude Skills 从实验性工具发展为生产级系统，我们发现了关键差距：虽然 skills 变得更强大和复杂，但如何有效使用它们仍然很困难。开发者苦于：
+
+- **文档不足**：许多 skills 缺乏解释其架构的综合指南
+- **发现问题**：难以找到适合特定任务的相关 skills
+- **学习曲线**：理解 skill 模式和最佳实践需要大量试错
+- **验证缺失**：没有标准化的方法来验证 skill 质量或有效性
+
+### 解决方案：知识驱动的生态系统
+
+我们创建 Claude Skills Explorer 来解决这些挑战：
+
+1. **深入的 Skill 分析**：系统地分析每个 skill，记录其：
+   - 架构和设计模式
+   - 实现策略
+   - 实际应用案例
+   - 最佳实践和常见陷阱
+
+2. **多语言文档**：提供英文、中文和法文内容，让全球用户都能访问 skills
+
+3. **自动化框架**：我们构建了编写关于 skils 的技能的 skills，创建了一个自文档化的生态系统
+
+4. **验证流程**：自动化的 MDX 验证和语义化发布确保内容质量
+
+## Skills 如何驱动这个项目
+
+<Callout type="tip">
+  该文档平台本身由我们开发的 Claude Skills 提供支持。它是 skill 自动化实际应用的展示。
+</Callout>
+
+### 生态系统的运作
+
+我们的项目使用三个相互关联的 skills，共同创建完全自动化的文档工作流：
+
+#### 1. **skill-article-writer**：内容生成器
+
+这个 meta-skill 分析现有的 Claude skills 并生成全面的教程文章。它不仅仅是文档 - 它是智能内容创建：
+
+- **分析 skill 结构**以理解架构和模式
+- **提取见解**从代码、文档和示例中
+- **生成结构化文章**使用正确的 MDX 格式
+- **自动创建多语言版本**
+
+**示例工作流**：
+```bash
+# Claude 使用 skill-article-writer 理解 mcp-builder
+→ 分析 SKILL.md、scripts 和 examples
+→ 生成 7,300+ 字的综合指南
+→ 创建英文、中文和法文版本
+→ 自动更新导航
+```
+
+#### 2. **skill-article-publisher**：质量守门员
+
+在任何文章上线之前，此 skill 通过以下方式确保质量：
+
+- **MDX 语法验证**：检测并修复常见问题，如未转义的比较运算符
+- **构建验证**：运行 `npm run build` 捕获编译错误
+- **语义提交生成**：基于变更类型创建有意义的提交消息
+- **自动发布**：暂存、提交并推送到远程仓库
+
+**关键创新**：验证捕获了会破坏构建的微妙 MDX 问题，例如：
+- `>` 转换为 `&gt;`（防止 XML 解析错误）
+- `<` 转换为 `&lt;`
+- 正确的前置结构
+- 组件标签平衡
+
+#### 3. **综合 Skill 分析**：知识库
+
+我们已创建来自 Anthropic 仓库的生产级 skills 的详细分析：
+
+<Callout type="info">
+  这些不是肤浅的概述 - 它们是平均 7,000+ 字的深度技术深入探讨，包含架构分析、代码示例和实际应用。
+</Callout>
+
+- **[analyzing-mcp-builder](/development/analyzing-mcp-builder)**：MCP 服务器开发完整指南，涵盖 4 阶段工作流、Python/TypeScript 模式和评估框架
+
+- **[analyzing-webapp-testing](/development/analyzing-webapp-testing)**：综合 Playwright 测试指南，包含决策树、侦察模式和多服务器管理
+
+## 您会在这里找到什么
+
+<Callout type="question">
+  无论您是构建 skills 的开发者还是利用它们的 skill 用户，本平台都有适合您的资源。
+</Callout>
+
+### 针对开发者
+
+**架构模式**：
+- 渐进式披露设计模式
+- 资源管理策略
+- 多语言内容组织
+- 自动验证工作流
+
+**实现指南**：
+- [MCP 服务器开发](/development/analyzing-mcp-builder) - 完整的 4 阶段工作流
+- [Web 应用测试](/development/analyzing-webapp-testing) - Playwright 自动化模式
+- [Skill 创建深入探讨](/development/skill-creator-deep-dive) - 构建 meta-skills
+
+**最佳实践**：
+- 命令编写风格约定
+- 质量检查和验证
+- 语义版本控制和发布
+- 多语言内容管理
+
+### 针对 Skill 用户
+
+**理解能力**：
+- Skills 如何扩展 Claude 的能力
+- 实际应用和用例
+- 集成模式和工作流
+- 质量评估标准
+
+**实际示例**：
+- 通过我们的自动化展示查看 skills 的实际应用
+- 了解针对特定任务应使用哪些 skills
+- 理解决策过程
+- 评估 skill 有效性
+
+## 技术栈
+
+<Callout type="info">
+  了解技术基础有助于开发者和用户欣赏平台的能力。
+</Callout>
+
+### 核心技术
+
+- **Next.js**：用于服务端渲染和静态生成的 React 框架
+- **Fumadocs**：支持 MDX 的文档框架，具有精美的组件
+- **MDX**：Markdown + JSX，用于丰富的交互式文档
+- **TypeScript**：类型安全的开发
+- **Tailwind CSS**：实用优先的样式
+
+### 自动化层
+
+这是 skills 真正闪耀的地方 - 我们的自动化层包括：
+
+```bash
+# 自动发布工作流
+1. skill-article-writer 生成文章
+2. skill-article-publisher 验证 MDX 语法
+3. 构建验证运行 (npm run build)
+4. 语义提交生成
+5. 更改推送到仓库
+
+# 结果：从分析到发布完全自动化
+```
+
+## 加入生态系统
+
+<Callout type="tip">
+  该项目展示了在 skill 设计考虑自动化时可能实现的目标。您可以为自身需求构建类似的生态系统。
+</Callout>
+
+### 针对开发者
+
+准备构建自己的 skills？从以下开始：
+
+1. **[MCP 服务器开发指南](/development/analyzing-mcp-builder)** - 了解 4 阶段工作流
+2. **分析现有 Skills** - 研究生产级 skills 的模式
+3. **构建和验证** - 使用我们的自动化工具确保质量
+4. **贡献回馈** - 与社区分享您的 skills
+
+### 针对组织
+
+通过 skill 驱动的自动化转变您的工作流：
+
+- **内部工具**：为您的特定工作流构建 skills
+- **质量保证**：实施验证流程
+- **知识管理**：创建自文档化系统
+- **团队协作**：标准化 skill 开发实践
+
+## 准备探索？
+
+从我们的综合 skill 分析开始，了解可能实现的目标：
 
 <Cards>
-  <Card title="了解更多关于 Next.js" href="https://nextjs.org/docs" />
-  <Card title="了解更多关于 Fumadocs" href="https://fumadocs.dev" />
+  <Card
+    title="MCP Builder"
+    description="创建将 Claude 与外部服务集成的 MCP 服务器"
+    href="/development/analyzing-mcp-builder"
+    icon="Server"
+  />
+  <Card
+    title="WebApp Testing"
+    description="使用 Playwright 模式自动化浏览器测试"
+    href="/development/analyzing-webapp-testing"
+    icon="TestTube"
+  />
+  <Card
+    title="Skill Architecture"
+    description="深入探讨 skill 设计模式和最佳实践"
+    href="/development/skill-creator-deep-dive"
+    icon="Code"
+  />
 </Cards>
+
+---
+
+<Callout type="info">
+  本平台本身是 Claude Skills 实际应用的展示。每篇文章、每次验证、每次部署 - 都由 skills 自动化。欢迎来到文档的未来。
+</Callout>
