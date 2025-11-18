@@ -98,23 +98,18 @@ export function SourceAttribution({ source, languages, currentLang, className }:
               <span className="text-xs text-muted-foreground">🌐 Available in:</span>
               {languages.map(lang => {
                 const isActive = lang === currentLang;
-                const langUrl = `/${lang === 'en' ? '' : lang}/docs/`;
 
-                return isActive ? (
+                return (
                   <span
                     key={lang}
-                    className="text-xs rounded-full bg-primary px-2 py-1 text-primary-foreground"
+                    className={`text-xs rounded-full px-2 py-1 ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground'
+                    }`}
                   >
                     {langNames[lang]}
                   </span>
-                ) : (
-                  <a
-                    key={lang}
-                    href={langUrl}
-                    className="text-xs rounded-full bg-muted px-2 py-1 text-muted-foreground hover:bg-muted/80"
-                  >
-                    {langNames[lang]}
-                  </a>
                 );
               })}
             </div>
