@@ -1,0 +1,181 @@
+<svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="450" fill="#5B8FB9" rx="12"/>
+
+  <!-- Background decorative waves -->
+  <path d="M80 90 Q180 70 280 90" stroke="#4A7BA3" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+  <path d="M520 360 Q620 340 720 360" stroke="#4A7BA3" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Main title area -->
+  <text x="400" y="45" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Progressive Disclosure Architecture</text>
+
+  <!-- Layer 1: Metadata Scan - Large base showing 100 skills -->
+  <g transform="translate(150, 120)">
+    <!-- Base layer representing all 100 skills metadata -->
+    <rect x="-60" y="-25" width="120" height="50" fill="#FFFFFF" rx="6" stroke="#1A1A1A" stroke-width="3"/>
+    <text x="0" y="-8" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#1A1A1A" text-anchor="middle">Metadata Scan</text>
+    <text x="0" y="8" font-family="Arial, sans-serif" font-size="10" fill="#5B8FB9" text-anchor="middle">100 Skills</text>
+    <text x="0" y="22" font-family="Arial, sans-serif" font-size="10" fill="#5B8FB9" text-anchor="middle">10,000 tokens</text>
+  </g>
+
+  <!-- Layer 2: Relevance Assessment stage -->
+  <g transform="translate(400, 120)">
+    <rect x="-80" y="-25" width="160" height="50" fill="#FFFFFF" rx="6" stroke="#1A1A1A" stroke-width="3"/>
+    <text x="0" y="-8" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#1A1A1A" text-anchor="middle">Relevance Assessment</text>
+    <text x="0" y="8" font-family="Arial, sans-serif" font-size="10" fill="#5B8FB9" text-anchor="middle">Query Analysis</text>
+    <text x="0" y="22" font-family="Arial, sans-serif" font-size="10" fill="#5B8FB9" text-anchor="middle">150ms</text>
+  </g>
+
+  <!-- Layer 3: Conditional Loading - Only 3 skills loaded fully -->
+  <g transform="translate(650, 120)">
+    <rect x="-80" y="-25" width="160" height="50" fill="#FFFFFF" rx="6" stroke="#1A1A1A" stroke-width="3"/>
+    <text x="0" y="-8" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#1A1A1A" text-anchor="middle">Conditional Loading</text>
+    <text x="0" y="8" font-family="Arial, sans-serif" font-size="10" fill="#5B8FB9" text-anchor="middle">3 Active Skills</text>
+    <text x="0" y="22" font-family="Arial, sans-serif" font-size="10" fill="#5B8FB9" text-anchor="middle">15,000 tokens</text>
+  </g>
+
+  <!-- Connection arrows between stages with flow animation feel -->
+  <g stroke="#FFFFFF" stroke-width="3" stroke-linecap="round">
+    <path d="M210 120 L300 120" fill="none"/>
+    <polygon points="295,118 305,120 295,122" fill="#FFFFFF"/>
+
+    <path d="M460 120 L550 120" fill="none"/>
+    <polygon points="545,118 555,120 545,122" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Visual representation of 100 skills as small icons at bottom -->
+  <g transform="translate(150, 220)">
+    <!-- Grid of 10x10 representing 100 skills metadata -->
+    <g opacity="0.7">
+      <rect x="-50" y="-30" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="-35" y="-30" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="-20" y="-30" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="-5" y="-30" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="10" y="-30" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="25" y="-30" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="40" y="-30" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="55" y="-30" width="10" height="8" fill="#FFFFFF" rx="1"/>
+
+      <rect x="-50" y="-20" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="-35" y="-20" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="-20" y="-20" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="-5" y="-20" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="10" y="-20" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="25" y="-20" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="40" y="-20" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="55" y="-20" width="10" height="8" fill="#FFFFFF" rx="1"/>
+
+      <rect x="-50" y="-10" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="-35" y="-10" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="-20" y="-10" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="-5" y="-10" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="10" y="-10" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="25" y="-10" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="40" y="-10" width="10" height="8" fill="#FFFFFF" rx="1"/>
+      <rect x="55" y="-10" width="10" height="8" fill="#FFFFFF" rx="1"/>
+    </g>
+    <text x="5" y="15" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">100 Skills Metadata</text>
+  </g>
+
+  <!-- Visual representation of selected 3 skills at top right -->
+  <g transform="translate(650, 220)">
+    <!-- 3 active skills shown larger -->
+    <rect x="-60" y="-30" width="40" height="25" fill="#FFFFFF" rx="4" opacity="0.9"/>
+    <rect x="-15" y="-30" width="40" height="25" fill="#FFFFFF" rx="4" opacity="0.9"/>
+    <rect x="30" y="-30" width="40" height="25" fill="#FFFFFF" rx="4" opacity="0.9"/>
+
+    <text x="-40" y="-15" font-family="Arial, sans-serif" font-size="8" fill="#1A1A1A" text-anchor="middle">Content</text>
+    <text x="5" y="-15" font-family="Arial, sans-serif" font-size="8" fill="#1A1A1A" text-anchor="middle">Brand</text>
+    <text x="50" y="-15" font-family="Arial, sans-serif" font-size="8" fill="#1A1A1A" text-anchor="middle">Internal</text>
+
+    <path d="M-40 -8 L-40 8" stroke="#5B8FB9" stroke-width="1" opacity="0.5"/>
+    <path d="M5 -8 L5 8" stroke="#5B8FB9" stroke-width="1" opacity="0.5"/>
+    <path d="M50 -8 L50 8" stroke="#5B8FB9" stroke-width="1" opacity="0.5"/>
+
+    <text x="5" y="15" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">3 Active Skills (Full Content)</text>
+  </g>
+
+  <!-- Efficiency ratio visualization -->
+  <g transform="translate(400, 320)">
+    <!-- Before (traditional) -->
+    <rect x="-180" y="-25" width="80" height="40" fill="#FFFFFF" rx="5" opacity="0.15"/>
+    <text x="-140" y="-5" font-family="Arial, sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle" font-weight="bold">Traditional</text>
+    <text x="-140" y="10" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">500,000 tokens</text>
+    <text x="-140" y="25" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">(100 skills × 5k)</text>
+
+    <!-- Arrow showing reduction -->
+    <path d="M-95 0 L-65 0" stroke="#FFFFFF" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+    <!-- After (progressive) -->
+    <rect x="20" y="-25" width="80" height="40" fill="#FFFFFF" rx="5" opacity="0.25"/>
+    <text x="60" y="-5" font-family="Arial, sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle" font-weight="bold">Progressive</text>
+    <text x="60" y="10" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">18,400 tokens</text>
+    <text x="60" y="25" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">(96.3% reduction)</text>
+
+    <!-- Percentage label -->
+    <text x="0" y="-30" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">94% Token Savings</text>
+  </g>
+
+  <!-- Flow visualization -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#FFFFFF"/>
+    </marker>
+  </defs>
+
+  <!-- Three layer visualization on left --
+
+  ><g transform="translate(150, 300)">
+    <!-- Token count bars -->
+    <text x="0" y="-45" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">Token Usage per Stage:</text>
+
+    <!-- Layer 1 bar (small) -->
+    <rect x="-40" y="-35" width="20" height="25" fill="#FFFFFF" rx="2"/>
+    <text x="-30" y="5" font-family="Arial, sans-serif" font-size="9" fill="#FFFFFF" text-anchor="middle">100</text>
+    <text x="-30" y="-40" font-family="Arial, sans-serif" font-size="9" fill="#FFFFFF" text-anchor="middle">Meta</text>
+
+    <!-- Layer 2 bar (medium) -->
+    <rect x="-15" y="-35" width="20" height="25" fill="#FFFFFF" rx="2"/>
+    <text x="-5" y="5" font-family="Arial, sans-serif" font-size="9" fill="#FFFFFF" text-anchor="middle">150</text>
+    <text x="-5" y="-40" font-family="Arial, sans-serif" font-size="9" fill="#FFFFFF" text-anchor="middle">Analysis</text>
+
+    <!-- Layer 3 bar (larger) -->
+    <rect x="10" y="-35" width="20" height="55" fill="#FFFFFF" rx="2"/>
+    <text x="20" y="25" font-family="Arial, sans-serif" font-size="9" fill="#FFFFFF" text-anchor="middle">5000</text>
+    <text x="20" y="-40" font-family="Arial, sans-serif" font-size="9" fill="#FFFFFF" text-anchor="middle">Full</text>
+  </g>
+
+  <!-- Composability illustration -->
+  <g transform="translate(650, 320)">
+    <text x="0" y="-45" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">Automatic Stacking:</text>
+
+    <!-- Three skills stacking -->
+    <rect x="-45" y="-35" width="40" height="22" fill="#FFFFFF" rx="3"/>
+    <text x="-25" y="-20" font-family="Arial, sans-serif" font-size="8" fill="#1A1A1A" text-anchor="middle">Skill 1</text>
+
+    <rect x="-45" y="-10" width="40" height="22" fill="#FFFFFF" rx="3" opacity="0.85"/>
+    <text x="-25" y="5" font-family="Arial, sans-serif" font-size="8" fill="#1A1A1A" text-anchor="middle">Skill 2</text>
+
+    <rect x="-45" y="15" width="40" height="22" fill="#FFFFFF" rx="3" opacity="0.75"/>
+    <text x="-25" y="30" font-family="Arial, sans-serif" font-size="8" fill="#1A1A1A" text-anchor="middle">Skill 3</text>
+
+    <text x="0" y="-55" font-family="Arial, sans-serif" font-size="10" fill="#FFFFFF" text-anchor="middle">Zero Performance Cost</text>
+  </g>
+
+  <!-- Decorative accent elements -->
+  <g stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.5">
+    <path d="M100 380 Q150 360 200 380" fill="none"/>
+    <path d="M600 380 Q650 360 700 380" fill="none"/>
+  </g>
+
+  <!-- Floating accent circles -->
+  <circle cx="90" cy="70" r="8" fill="#FFFFFF" opacity="0.3"/>
+  <circle cx="710" cy="60" r="10" fill="#FFFFFF" opacity="0.3"/>
+  <circle cx="740" cy="400" r="6" fill="#FFFFFF" opacity="0.3"/>
+
+  <!-- Key metrics callout -->
+  <g transform="translate(400, 390)">
+    <rect x="-80" y="-15" width="160" height="20" fill="#FFFFFF" rx="4" opacity="0.15"/>
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#FFFFFF" text-anchor="middle">500+ Skills Supported with No Performance Impact</text>
+  </g>
+</svg>
