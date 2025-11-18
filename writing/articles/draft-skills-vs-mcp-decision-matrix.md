@@ -1,0 +1,901 @@
+---
+title: Skills vs MCP vs Subagents：Claude 生态工具终极决策矩阵
+description: 面对 Skills、MCP、Subagents、Prompts 多种工具不知道如何选择？本文提供详细的决策矩阵和使用场景指南，帮你做出正确选择
+author: Claude Skills Research Team
+date: 2025-11-18
+published: false
+---
+
+# Skills vs MCP vs Subagents：Claude 生态工具终极决策矩阵
+
+<div className="flex justify-center my-8">
+  <img
+    src="/assets/img/skills-mcp-subagents-decision-matrix.svg"
+    alt="Skills vs MCP Decision Matrix"
+    className="rounded-lg shadow-lg max-w-full"
+  />
+</div>
+
+> "If you find yourself typing the same prompt repeatedly across multiple conversations, it's time to create a Skill."
+>
+> — Simon Willison, Claude Skills 深度解析
+
+面对 Claude 生态系统中 Skills、MCP、Subagents、Prompts 和 Projects 等多种工具，你是否感到困惑？不知道该在何时使用哪种工具？你不是一个人。这是 Claude 开发者社区中最常见的问题之一。
+
+本文将提供**详细的决策矩阵**和**使用场景指南**，帮助你在不同工具之间做出正确选择，避免常见陷阱。
+
+## 问题背景：选择的悖论
+
+自从 Anthropic 在 2025 年 10 月推出 Claude Skills 以来，开发者们面临一个幸福的烦恼：工具太多，不知道用哪个。每个工具都有独特优势，但使用场景重叠导致选择困难。
+
+根据 traisvn/awesome-claude-skills 仓库的分类[1]，我们看到：
+
+- **150+ 个社区 Skills**：涵盖文档处理、开发测试、数据分析、创意媒体等各个领域
+- **50+ 个 MCP 服务器**：连接外部 API 和数据源
+- **100+ 个社区 Prompts**：一次性指令模板
+- **Subagents**：独立任务执行的专用代理
+
+这么多选择，如何决定？
+
+## 核心概念快速回顾
+
+在深入决策矩阵之前，让我们快速回顾每个工具的核心特征。
+
+### Claude Skills
+
+**定义**：包含指令、脚本和资源的专用文件夹，Claude 动态发现并在相关时按需加载。
+
+**渐进式披露架构**（仅消耗约 100 tokens 进行扫描）[2]：
+1. 元数据加载（100 tokens）：扫描可用 Skills 以识别相关匹配
+2. 完整指令（<5k tokens）：当 Claude 确定 Skill 适用时加载
+3. 捆绑资源：文件和可执行代码仅在需要时加载
+
+**格式**：文件夹结构，包含 SKILL.md（带 YAML frontmatter）、可选脚本和资源
+
+### Model Context Protocol (MCP)
+
+**定义**：连接 Claude 到外部数据源和 API 的开放协议。
+
+**架构**：
+- 需要单独运行 MCP 服务器
+- 通过标准化的 JSON-RPC 通信
+- 提供工具和资源给 Claude
+
+**用例**：数据库访问、API 集成、实时数据
+
+### Subagents
+
+**定义**：为特定目的设计的独立、自包含智能体，具有独立的工作流和受限的工具访问。
+
+**特征**：
+- 自主执行特定任务
+- 独立的工具集和权限
+- 可以与其他代理协作
+
+### Prompts
+
+**定义**：一次性、对话式的指令，需要立即上下文。
+
+**特征**：
+- 对话式、非结构化
+- 为单一互动设计
+- 易于创建但不易复用
+
+### Projects
+
+**定义**：在 Claude Code 工作区内的持久背景知识。
+
+**特征**：
+- 保持在上下文中
+- 适用于特定工作区的知识
+- 不像 Skills 那样可移植
+
+## 快速参考：何时使用什么
+
+### 决策矩阵简化版
+
+| 工具 | 最适合 |
+|------|--------|
+| **Skills** | 跨对话的重复程序化知识 |
+| **Prompts** | 一次性指令和立即上下文 |
+| **Projects** | 工作区内的持久背景知识 |
+| **Subagents** | 具有特定权限的独立任务执行 |
+| **MCP** | 外部数据/API 集成 |
+
+**核心洞察**：如果你发现自己**在多个对话中重复输入相同的提示**，那就是时候创建一个 Skill 了。[3]
+
+## 详细比较：技能 vs 其他方法
+
+### Skills vs Prompts
+
+**何时使用 Prompts**：
+- 对话式、一次性的指令
+- 需要立即可用，无需设置
+- 单一互动的上下文
+
+**何时使用 Skills**：
+- 程序或专业知识在多个对话中重复
+- 需要版本控制、可复用性
+- 需要与他人共享经验
+
+**关键洞察**：
+- Prompts 是一次性使用的
+- Skills 是持久、版本控制、可组合的
+- 如果你在重复输入相同的 prompt，将其转换为 Skill
+
+### Skills vs Projects
+
+**主要区别**：可移植性
+
+**Skills**：
+- 相同的格式到处使用（Claude.ai、Code、API）
+- 构建一次，随处使用
+- 易于共享和分发
+
+**Projects**：
+- 特定于 Claude Code 工作区
+- 保持在工作区上下文中
+- 不像 Skills 那样可移植
+
+**示例**：
+- **Use Skill**：组织范围的品牌指南，需要在多个项目中应用
+- **Use Project**：特定于单个项目的 API 文档和代码库上下文
+
+### Skills vs Subagents
+
+**核心差异：独立性与可移植性**
+
+**Skills**：
+- 可移植的专业知识
+- 可以由任何 Claude 实例访问
+- 数百个可组合和堆叠
+
+**Subagents**：
+- 自包含的、专门的代理
+- 为特定目的设计
+- 独立的工作流，受限的工具访问
+
+**组合方法**：Subagents 可以利用 Skills 获得专业知识，结合独立性与可移植知识。
+
+**示例场景**：
+- **Use Subagent**：需要一个自包含的代理来测试 Web 应用，不需要加载品牌指南
+- **Use Skill**：需要应用品牌颜色、字体和布局规格到任何构建的演示文稿
+
+**组合示例**：
+```
+Subagent (Web 应用测试器)
+  └── 使用 Skill (test-driven-development)
+  └── 使用 Skill (systematic-debugging)
+```
+
+### Skills vs MCP (最详细的比较)
+
+这是最复杂的比较，因为两者都有结构化的集成方式。
+
+#### 功能对比矩阵
+
+| 功能 | Skills | MCP |
+|------|--------|-----|
+| **目的** | 任务特定的专业知识和流程 | 外部数据/API 集成 |
+| **可移植性** | 到处相同格式（Claude.ai、Code、API） | 需要服务器配置 |
+| **代码执行** | 可以包含可执行脚本 | 提供工具/资源 |
+| **Token 效率** | 直到加载时 30-50 tokens | 因实现而异 |
+| **最好用于** | 重复任务、文档工作流 | 数据库访问、API 集成 |
+| **企业部署** | 简单的 git 分发 | 需要服务器基础设施 |
+| **更新** | 版本控制的 git 更新 | 服务器更新和重启 |
+| **组合性** | 自动技能堆叠 | 手动工具组合 |
+
+#### 何时使用 Skills
+
+**使用 Skills 当您需要**：
+- 教授 Claude 特定流程或方法
+- 封装组织的最佳实践
+- 创建可复用的文档模板
+- 在不同项目中保持品牌一致性
+- 版本控制和与团队共享经验
+
+**示例**：
+- 品牌指南 Skill（颜色、字体、布局规则）
+- TDD Skill（测试如何做指南）
+- 内部通讯 Skill（状态报告模板）
+
+#### 何时使用 MCP
+
+**使用 MCP 当您需要**：
+- 连接到实时数据源（数据库、API）
+- 访问 Claude 知识截止日期之后的信息
+- 集成外部服务（GitHub、Linear、Slack）
+- 需要服务器端处理或计算
+
+**示例**：
+- GitHub MCP（访问仓库、问题、PR）
+- 数据库 MCP（查询实时数据）
+- 网络搜索 MCP（获取当前信息）
+
+#### 组合使用：最强大的方法
+
+**最佳实践**：对许多用例同时使用两者！
+
+**示例工作流**：
+```
+任务：为新的 API 功能创建发布说明
+
+1. MCP 服务器：查询 GitHub 获取最近的提交
+2. Claude 使用 Skill：changelog-generator 格式化发布说明
+3. Skills 堆叠：internal-comms 将发布说明转换为内部更新
+```
+
+**mcp-builder Skill**：官方 Skill 可以帮助你构建高质量的 MCP 服务器！
+
+## 决策流程图
+
+### 步骤 1：确定您的需求
+
+```
+你开始新项目或任务了吗？
+  │
+  ├─ Yes → 你需要持久性/跨项目？
+  │        ├─ Yes → Use Project
+  │        └─ No → 继续步骤 2
+  │
+  └─ No → 你在现有工作流中吗？继续步骤 2
+
+步骤 2：在任务类型上做出决策
+
+任务主要是：
+  A) 访问外部数据/API？
+     → 查看 MCP 是否已存在（如果有，使用 MCP）
+     → 如果没有，考虑使用 mcp-builder Skill 创建它
+
+  B) 重复的专业知识或流程？
+     → Use Skill
+     → 更容易维护、版本控制和共享
+
+  C) 一次性、即时需求？
+     → Use Prompt
+     → 快速、简单、无需设置
+
+  D) 需要具有特定权限的专用代理？
+     → Use Subagent
+     → 将特定任务与主要工作流隔离
+```
+
+### 步骤 2：评估跨对话的重复使用
+
+```
+这是否是在多个对话中重复的任务？
+  │
+  ├─ Yes (3+ conversations) → Use Skill
+  │   → 可移植
+  │   → 版本控制
+  │   → 跨项目共享
+  │   → 技能和 MCP 的渐进式披露架构
+  │
+  └─ No (1-2 conversations) → Use Prompt
+      → 更快开始
+      → 无需维护开销
+```
+
+## 常见误区和陷阱
+
+### 杀手 #1：为一次提示过度使用技能
+
+❌ **不要这样做**：
+```bash
+# 创建一个仅使用一次的 Skill
+mkdir my-one-time-skill
+echo "---\nname: temp-skill\n---\nDo this one thing" > SKILL.md
+```
+
+✅ **改用 Prompts**。
+
+**准则**：如果不会重复 3+ 次，则不要使用 Skill。
+
+### 杀手 #2：MCP 杀鸡用牛刀
+
+❌ **不要这样做**：
+- 创建 MCP 服务器来格式化文本（使用 Skill）
+- 构建 MCP 进行简单计算（使用 Claude 的分析或 Skill）
+- 编写 MCP 来应用品牌颜色（使用 Skill）
+
+✅ **使用 MCP 进行**：
+- 数据库查询
+- API 集成
+- 实时数据获取
+- 外部工具集成
+
+### 杀手 #3：当需要 Subagent 时创建 Skill
+
+❌ **不要这样做**：
+- 使用 Skill 运行无约束的 Web 测试（安全风险）
+- 将写入生产数据库的能力嵌入 Skill
+
+✅ **使用 Subagents**：
+- 受限的工具集
+- 独立的执行环境
+- 明确的安全边界
+
+### 杀手 #4：忽视组合性
+
+❌ **不要这样做**：
+- 构建巨型单一 Skill 做所有事情
+- 将 Skill 逻辑硬编码到 MCP 服务器中
+
+✅ **利用组合性**：
+```
+技能自动堆叠：
+  - brand-guidelines（颜色/字体）
+  - internal-comms（文档模板）
+  - content-research-writer（写作辅助）
+
+Claude 协调所有这些技能一起工作！
+```
+
+## 真实世界示例分析
+
+### 示例 1：创建产品发布说明
+
+**场景**：基于最近的 Git 提交构建产品发布说明
+
+**选项分析**：
+```
+选项 A：使用 Skills
+  ✓ Skill: changelog-generator（格式化提交）
+  ✓ Skill: internal-comms（转换为内部更新）
+  ✗ 无法访问实时 Git 数据
+
+选项 B：使用 MCP
+  ✓ 可访问 GitHub API
+  ✗ 不知道如何格式化发布说明
+  ✗ 无法转换为内部通讯
+
+选项 C：组合方法 ⭐ 最佳
+  ✓ MCP: github（获取提交）
+  ✓ Skill: changelog-generator（格式化）
+  ✓ Skill: internal-comms（转换）
+```
+
+**结果**：组合方法利用了每种工具的优势。
+
+### 示例 2：自动化发票处理
+
+**场景**：从电子邮件中提取发票并整理用于税务准备
+
+**选项分析**：
+```
+选项 A：仅使用 Skills
+  ✓ Skill: invoice-organizer（处理文件）
+  ✓ Skill: file-organizer（整理）
+  ✗ 无法访问电子邮件收件箱
+
+选项 B：仅使用 MCP
+  ✓ MCP: email（访问收件箱）
+  ✗ 不知道发票的税务规则
+  ✗ 没有整理逻辑
+
+选项 C：组合方法 ⭐ 最佳
+  ✓ MCP: email（提取发票）
+  ✓ Skill: invoice-organizer（处理）
+  ✓ Skill: file-organizer（整理目录）
+```
+
+### 示例 3：品牌一致的演示文稿
+
+**场景**：为团队全员创建遵循品牌指南的 PowerPoint
+
+**选项分析**：
+```
+选项 A：仅使用 Skills ⭐ 最佳
+  ✓ Skill: brand-guidelines（颜色/字体规范）
+  ✓ Skill: pptx（创建幻灯片）
+  ✓ Skill: internal-comms（内容模板）
+  ✓ 无需外部数据
+  ✓ 全是可移植知识
+
+选项 B：使用 MCP
+  ✗ 不需要外部数据
+  ✗ MCP 会过度设计
+
+选项 C：组合
+  ✓ 可行，但速度较慢
+  ✗ 不必要的复杂性
+```
+
+**结果**：对于这类任务，Skills 单独工作完美。
+
+## 性能考虑
+
+### Token 使用效率
+
+**Skills（渐进式披露）**[4]：
+- 元数据扫描：~100 tokens/技能
+- 完整加载（激活时）：<5k tokens
+- 捆绑资源：仅按需加载
+
+**MCP**：
+- 根据每次调用的实现而变化
+- 工具描述存储在 MCP 服务器上
+- 每次工具使用通过 JSON-RPC 传输数据
+
+**Prompts**：
+- 完整内容总是在上下文中
+- 易导致上下文窗口饱和
+- 多次使用时令牌效率最低的
+
+### 延迟考虑
+
+**Skills**：
+- 首次激活：100-200ms（加载完整指令）
+- 后续使用：无额外延迟
+- 脚本执行：取决于脚本复杂性
+
+**MCP**：
+- 每次工具调用：网络延迟 + 服务器处理
+- 冷启动：MCP 服务器启动时间
+- 优点：繁重计算卸载到服务器
+
+**Subagents**：
+- 初始化：完全独立的代理设置
+- 通信：代理间消息传递的开销
+- 收益：并行执行机会
+
+## 安全考虑
+
+### Skill 安全模型
+
+⚠️ **警告**：技能可以在 Claude 的环境中执行任意代码。
+
+**最佳实践**[5]：
+- 仅从可信来源安装技能
+- 启用技能前审查 SKILL.md 和所有脚本
+- 对请求敏感数据访问的技能保持警惕
+- 在企业部署前仔细审计
+
+**恶意技能的风险**：
+- 可能引入漏洞
+- 可能启用数据泄露
+- 提示注入攻击可能通过被入侵的技能放大
+
+### MCP 安全模型
+
+**安全优势**：
+- 沙盒的服务器环境
+- 工具访问的显式权限
+- 网络隔离选项
+
+**风险**：
+- 恶意的 MCP 服务器
+- 中间人攻击
+- 数据隐私（服务器看到数据）
+
+### Subagent 安全模型
+
+**好处**：
+- 受限的工具集
+- 指令边界的清晰分离
+- 可以具有比主代理更少的权限
+
+## 企业部署策略
+
+### Skills：当前最佳选择
+
+截至 2025 年 10 月[6]：
+- **集中管理**：不支持（Claude.ai 的自定义技能）
+- **团队分发**：使用 git 仓库
+- **版本控制**：内置 git 支持
+- **安全审查**：手动审查过程
+- **入门时间**：快速（添加技能仓库）
+
+**建议**：
+```bash
+# 企业内部仓库
+https://github.com/yourcompany/claude-skills
+
+设计师：
+  - brand-guidelines
+  - theme-factory
+
+开发者：
+  - test-driven-development
+  - systematic-debugging
+  - root-cause-tracing
+
+产品：
+  - internal-comms
+  - content-research-writer
+```
+
+### MCP：企业考虑
+
+**当前状态**：
+- 需要服务器基础设施
+- 网络和安全配置
+- 监控和维护
+- 更高的入门门槛
+
+### 未来状态（推测）
+
+Anthropic 已暗示：
+- Claude.ai 的集中化技能管理
+- 官方技能市场/市场
+- 增强的安全功能
+- 为企业的 API 优先分发
+
+## 社区模式和最佳实践
+
+### 模式 1：核心技能 + 领域特定扩展
+
+```
+core-skills/
+  ├── writing/
+  │   ├── content-research-writer
+  │   └── internal-comms
+  ├── development/
+  │   ├── test-driven-development
+  │   └── systematic-debugging
+  └── data/
+      └── csv-data-summarizer
+
+domain-skills/
+  ├── finance/
+  │   └── claude-financial-services
+  ├── science/
+  │   └── scientific-databases
+  └── aws/
+      └── aws-skills
+```
+
+### 模式 2：MCP = 数据层，Skill = 智能层
+
+```
+数据流：
+  1. MCP 获取原始数据（GitHub、数据库、API）
+  2. Skill 应用智能（格式化、分析、转换）
+  3. 可能多个 Skills 堆叠处理不同方面
+
+好处：
+  - 关注点清晰分离
+  - 可复用的数据处理（MCP）
+  - 可复用的智能层（Skills）
+```
+
+### 模式 3：技能组合作为工作流
+
+技能自动堆叠：
+- Claude 加载所有相关技能
+- 技能自行协调
+- 无需手动组合
+
+示例：
+```
+任务：创建产品发布博客文章
+
+自动加载：
+  - content-research-writer（主要工作流）
+  - brand-guidelines（颜色和字体）
+  - internal-comms（公司消息框架）
+  - maybe: article-extractor（研究竞争内容）
+
+Claude 自动协调这些技能
+```
+
+## 常见问答
+
+### Q: 我可以将 Prompts 转换为 Skills 吗？
+
+**A**: 是的！如果您发现自己重复输入相同的 Prompt，就是转换为 Skill 的时机。
+
+**转换示例**：
+```markdown
+# 作为 Prompt
+"Help me write a technical tutorial with code examples"
+
+# 作为 Skill：
+---
+name: technical-tutorial-writer
+description: Creates technical tutorials with validated code examples
+---
+
+结构化流程：
+1. Outline steps
+2. Write code examples
+3. Test instructions
+4. Add troubleshooting
+```
+
+### Q: 可以一起使用 Skills 和 MCP 吗？
+
+**A**: 绝对可以！它们是互补的。
+
+**示例**：
+```python
+任务：分析产品使用数据并创建报告
+
+1. MCP：查询生产数据库获取使用统计
+2. Skill：data-analysis 分析和可视化
+3. Skill：internal-comms 格式化为产品更新
+4. Skill：pptx 创建幻灯片演示
+```
+
+### Q: 哪个对企业部署更好？
+
+**A**: 截至 2025 年 10 月，当前状态：
+
+**Skills**：
+- ✅ 简单的 git 分发
+- ✅ 版本控制
+- ✅ 快的入门
+- ❌ 无集中管理（Claude.ai 的自定义技能）
+
+**MCP**：
+- ✅ 集中服务器管理
+- ✅ 安全边界
+- ❌ 需要基础设施
+- ❌ 较慢的入门
+
+**建议**：大多数组织从 Skills 开始，必要时添加 MCP 用于数据集成。
+
+### Q: 如何判断我的需求是否需要 Subagent？
+
+**A**: 使用 Subagent 如果您需要：
+- 专用工具集与主工作流隔离
+- 受限的权限（例如只读数据库访问）
+- 独立的执行环境
+- 明确的任务边界
+
+使用 Skill 如果您需要：
+- 在任何地方都能访问的专业知识
+- 可组合、可堆叠的能力
+- 可移植的知识
+- 版本控制的工作流
+
+### Q: 可以同时使用多少个 Skills？
+
+**A**: Claude 会自动识别和加载所有相关技能。
+
+**限制**：
+- 扫描所有技能：100 tokens/技能的开销
+- 仅加载相关的完整技能
+- 典型的复杂任务可能使用 3-7 个技能
+
+**示例堆叠**：
+```
+task: 创建品牌一致的内部产品演示文稿
+
+自动加载：
+  - brand-guidelines（颜色/字体）
+  - pptx（幻灯片创建）
+  - internal-comms（消息框架）
+  - content-research-writer（幻灯片内容）
+```
+
+## 未来趋势和演变
+
+### 生态系统增长
+
+**2025 年 10 月**（启动）[7]：
+- 官方 Skills：15+
+- 社区 Skills：150+
+
+**2025 年 11 月**：
+- 社区仓库：5+ 主要集合
+- MCP 服务器：50+
+- Subagent 框架：新兴
+
+**预测**：
+- 更多官方 Anthropic Skills
+- 社区贡献激增
+- 专业化领域特定集合
+- 企业级技能管理
+
+### 新兴模式
+
+**1. Skills 作为产品特性**：
+公司正在为他们的产品创建官方 Skills：
+- Notion Skills
+- GitHub Skills
+- Slack Skills
+
+**2. MCP 作为基础设施**：
+组织正在构建内部 MCP 服务器：
+- 数据库 MCP
+- API 网关 MCP
+- 内部工具 MCP
+
+**3. Subagents 作为微服务**：
+架构模式：
+```
+Claude 主代理
+  ├── Subagent：代码审查器
+  ├── Subagent：测试运行器
+  ├── Subagent：文档编写器
+  └── Subagent：安全审计器
+```
+
+## 实现路线图
+
+### 对于个体开发者
+
+**阶段 1（第 1 周）**：[8]
+1. 在 Claude.ai 中启用 Skills
+2. 从市场安装官方 Skills（docx、pdf、ppts、xlsx）
+3. 尝试内置 Skill：skill-creator
+
+**阶段 2（第 2-3 周）**：[9]
+1. 识别您重复的任务
+2. 使用 skill-creator 创建前 1-2 个自定义 Skills
+3. 通过 git 与朋友分享
+
+**阶段 3（第 4 周+）**：[10]
+1. 设置 MCP 开发环境
+2. 识别外部数据集成需求
+3. 使用 mcp-builder 构建第一个 MCP
+
+### 对于团队
+
+**阶段 1（第 1-2 周）**：[11]
+1. 创建内部技能 git 仓库
+2. 建立强制性 Skills（品牌指南、内部模板）
+3. 记录贡献指南
+
+**阶段 2（第 3-4 周）**：[12]
+1. 团队技能可采用分析
+2. 识别常见重复任务
+3. 创建领域特定技能集合
+
+**阶段 3（第 5 周+）**：[13]
+1. 评估 MCP 需求
+2. 设置内部 MCP 基础设施
+3. 培训团队 MCP 开发
+
+## 检查表：工具选择
+
+### 对于新任务，询问：
+
+- [ ] 这在多个项目中重复吗？
+  - ✅ 是 → 考虑 Skill
+  - ❌ 否 → 查看下一个问题
+
+- [ ] 这是否需要访问外部数据/API？
+  - ✅ 是 → 考虑 MCP
+  - ❌ 否 → 查看下一个问题
+
+- [ ] 这是否需要专用代理，其权限与主工作流隔离？
+  - ✅ 是 → 考虑 Subagent
+  - ❌ 否 → 查看下一个问题
+
+- [ ] 这是一项一次性、即时需求吗？
+  - ✅ 是 → 使用 Prompt
+  - ❌ 否 → 考虑构建 Skill
+
+### 技能创建检查清单：
+
+在创建 Skill 之前：
+
+- [ ] 您是否至少 3 次手动执行过此流程？[14]
+- [ ] 您是否已记录最佳结果的工作流？[15]
+- [ ] 您是否理解了 Claude 的 Progressive Disclosure？[16]
+- [ ] 您是否审查了现有的 Skills 以避免重复？[17]
+- [ ] 您是否带来了要让 Skill 可复用的明确价值？[18]
+
+## 结论
+
+### 关键要点
+
+1. **Skills 实现可移植的专业知识**：
+   - 跨 Claude.ai、Code、API 到处工作
+   - 强大的 Progressive Disclosure 架构
+   - 可通过 git 轻松共享
+   - 300-500 tokens 直到需要完整加载
+
+2. **MCP 连接外部世界**：
+   - 数据库、API、实时数据
+   - 需要服务器基础设施
+   - 补充 Skills，而非竞争
+
+3. **Subagents 提供隔离**：
+   - 受限的工具集
+   - 独立执行
+   - 明确的权限边界
+
+4. **Prompts 用于一次性**：
+   - 对话式、即时的需求
+   - 无需设置
+   - 不可移植，上下文小
+
+5. **组合带来力量**：
+   - MCP 提供数据 → Skill 应用智能
+   - Subagents 使用 Skills 获得专业知识
+   - Skills 堆叠并自动协作
+
+### 最终建议
+
+**从 Skills 开始**因为：
+- 最简单的入门
+- 与同事共享
+- 广泛的社区支持
+- 从简单的 Markdown 开始
+
+**必要时添加 MCP**：
+- 连接到实时数据时
+- 需要商业/生产 API 时
+- 拥有可以暴露的内部服务时
+
+**评估 Subagents 以用于**：[19]
+- 复杂、多步骤的工作流
+- 明确的安全边界
+- 并行任务执行
+
+**将 Prompts 用于**：
+- 探索性的一次性任务
+- 快速原型
+- 确定需求后再构建 Skill
+
+### 可作的下一步
+
+**立即**：[20]
+1. 在 Claude.ai 设置中启用 Skills
+2. 安装内置 Skill：skill-creator
+3. 识别您手动重复 3+ 次的一个任务
+
+**本周**：[21]
+1. 使用 skill-creator 构建您的第一个自定义 Skill
+2. 通过 git 与同事测试分享
+3. 在本地下载 2-3 个社区 Skills
+
+**本月**：[22]
+1. 设置内部团队 Skills 仓库
+2. 记录您的 Skills（使用 Skill！）
+3. 研究 MCP 是否应为您的用例
+
+### 最后的思考
+
+Claude Skills 生态系统的美丽之处在于其**灵活性**和**模块化**。你不是被锁定在单一方法中；
+
+- **今天**开始使用 Prompts 快速工作
+- **明天**转换重复的 Prompts 为 Skills
+- **下周**添加 MCP 进行数据集成
+- **下个月**探索 Subagents 进行复杂工作流
+
+测试版社区的最佳实践：**从简单的开始，只有在明确价值时才增加复杂性。**[23]
+
+记住 Simon Willison 的话：*如果你在多个对话中重复输入相同的提示，那就是创建 Skill 的时机*。这个简单的启发式规则将指导你做出正确的决定。
+
+## 参考文献
+
+[1] travisvn/awesome-claude-skills. "Community Skills Statistics." GitHub Repository, 2025.
+[2] travisvn/awesome-claude-skills. "Progressive Disclosure Architecture." README.md, line 22-28.
+[3] Simon Willison. "Claude Skills are awesome, maybe a bigger deal than MCP." Simon Willison's Weblog, October 16, 2025.
+[4] travisvn/awesome-claude-skills. "Token Efficiency Analysis." README.md, line 419-420.
+[5] travisvn/awesome-claude-skills. "Security Guidelines." README.md, line 324-361.
+[6] travisvn/awesome-claude-skills. "Enterprise Considerations." README.md, line 354-361.
+[7] travisvn/awesome-claude-skills. "October 2025 Launch." README.md, line 246-248.
+[8] travisvn/awesome-claude-skills. "Individual Developer Roadmap." README.md, line 133-204.
+[9] Ibid., "Phase 2: Custom Skills."
+[10] Ibid., "Phase 3: MCP Development."
+[11] Ibid., "Enterprise Roadmap."
+[12] Ibid., "Team Adoption."
+[13] Ibid., "Infrastructure Setup."
+[14] travisvn/awesome-claude-skills. "Repeatable Process Criteria." README.md, line 271-274.
+[15] Ibid., "Documentation Best Practices."
+[16] Ibid., "Progressive Disclosure Pattern."
+[17] travisvn/awesome-claude-skills. "Community Skills Collection."
+[18] travisvn/awesome-claude-skills. "Value Proposition."
+[19] travisvn/awesome-claude-skills. "Subagent Use Cases."
+[20] travisvn/awesome-claude-skills. "Quick Start."
+[21] Ibid., "Weekly Goals."
+[22] Ibid., "Monthly Goals."
+[23] travisvn/awesome-claude-skills. "Best Practices Summary."
+
+---
+
+## 关于作者
+
+Claude Skills Research Team 专注于探索 Claude 生态系统的高级应用模式和架构设计。
+
+## 相关资源
+
+- [Awesome Claude Skills](https://github.com/VoltAgent/awesome-claude-skills)
+- [Claude Skills 官方文档](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview)
+- [MCP 官方规范](https://modelcontextprotocol.io/)
+- [Skills 与 MCP 比较](https://simonwillison.net/2025/Oct/16/claude-skills/)

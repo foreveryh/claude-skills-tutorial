@@ -1,8 +1,8 @@
 // Blog UI translations
 export const blogTranslations = {
   en: {
-    blog: 'Blog',
-    blogDescription: 'Product news and best practices for teams building with Claude.',
+    blog: 'Skills',
+    blogDescription: 'Build smarter, create faster.',
     filterAndSort: 'Filter and sort',
     sortBy: 'Sort by',
     category: 'Category',
@@ -29,8 +29,8 @@ export const blogTranslations = {
     },
   },
   zh: {
-    blog: '博客',
-    blogDescription: '使用 Claude 构建团队的产品新闻和最佳实践。',
+    blog: 'Skills',
+    blogDescription: '构建更智能，创作更快速。',
     filterAndSort: '筛选和排序',
     sortBy: '排序方式',
     category: '分类',
@@ -57,8 +57,8 @@ export const blogTranslations = {
     },
   },
   fr: {
-    blog: 'Blog',
-    blogDescription: 'Actualités produits et meilleures pratiques pour les équipes utilisant Claude.',
+    blog: 'Skills',
+    blogDescription: 'Construisez plus intelligemment, créez plus rapidement.',
     filterAndSort: 'Filtrer et trier',
     sortBy: 'Trier par',
     category: 'Catégorie',
