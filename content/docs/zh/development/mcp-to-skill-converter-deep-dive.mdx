@@ -1,0 +1,991 @@
+---
+title: "MCP to Skill Converter：通过渐进式披露实现 90% 的上下文节省"
+description: "深入分析 MCP to Skill Converter，这是一个创新工具，可将任何模型上下文协议（MCP）服务器转换为 Claude Skill，同时通过渐进式披露模式显著降低上下文令牌消耗。了解该转换器如何在空闲状态下实现 98.75% 的令牌节省，并支持高效管理 10+ 工具。"
+lang: zh
+category: development
+difficulty: intermediate
+tags:
+  - mcp-converter
+  - claude-skills
+  - model-context-protocol
+  - token-optimization
+  - progressive-disclosure
+  - mcp-server
+  - context-efficiency
+image: /images/docs/mcp-converter/converter-architecture.jpg
+source_url: "https://github.com/GBSOSS/-mcp-to-skill-converter"
+published_date: "2025-10-26"
+author: GBSOSS
+source:
+  url: "https://github.com/GBSOSS/-mcp-to-skill-converter"
+  name: "GBSOSS GitHub Repository"
+  author: "GBSOSS"
+  published_date: "2025-10-26"
+  accessed_date: "2025-11-18"
+  license: "MIT License"
+import:
+  date: "2025-11-18"
+  slug: "mcp-to-skill-converter-deep-dive"
+  translator: "Claude AI"
+---
+
+import { SourceAttribution } from '@/components/SourceAttribution';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+<SourceAttribution
+  source={{
+    url: "https://github.com/GBSOSS/-mcp-to-skill-converter",
+    name: "GBSOSS GitHub Repository",
+    author: "GBSOSS",
+    published_date: "2025-10-26",
+    license: "MIT License"
+  }}
+  languages={['en', 'zh', 'fr']}
+  currentLang="zh"
+/>
+
+# MCP to Skill Converter：通过渐进式披露实现 90% 的上下文节省
+
+**MCP to Skill Converter** 是一个突破性的工具，可将任何模型上下文协议（MCP）服务器转换为 Claude Skill，同时实现显著的上下文令牌节省。这一创新解决方案解决了 AI 代理开发中最紧迫的挑战之一：传统 MCP 服务器实现的大量上下文消耗。
+
+<Callout type="info">
+  该项目拥有 72 个 GitHub 星标，自 2025 年 10 月以来一直在积极开发，代表了高效 LLM 工具集成的重大进步。
+</Callout>
+
+## 概述
+
+### 问题：上下文令牌爆炸
+
+<Callout type="warn">
+  **核心问题**：MCP 服务器很棒，但在启动时会将所有工具定义加载到上下文中。对于 20+ 个工具，在 Claude 开始任何工作之前就消耗了 30-50k 令牌。
+</Callout>
+
+当您将 MCP 服务器集成到 Claude 中时，所有工具定义在启动时立即加载，无论它们是否会被使用。这会产生几个关键问题：
+
+- **大量令牌开销**：一个典型的拥有 20+ 工具的 MCP 服务器仅初始化就消耗 30,000-50,000 令牌
+- **上下文窗口浪费**：在任何实际工作开始之前，Claude 上下文容量的 25% 就被消耗了
+- **扩展限制**：添加更多工具会线性增加上下文负担
+- **经济影响**：更高的令牌使用量导致 API 成本增加
+- **性能下降**：大型上下文窗口会减慢响应时间
+
+### 解决方案：渐进式披露
+
+MCP to Skill Converter 应用了**渐进式披露**模式，从根本上重新构想了工具如何加载和暴露给 Claude：
+
+<Cards>
+  <Card title="启动：~100 令牌" icon="Zap">
+    仅加载元数据（工具名称和简要描述）- 相比传统 MCP 减少 99%
+  </Card>
+
+  <Card title="活动：~5k 令牌" icon="Activity">
+    仅在实际需要技能时加载完整说明 - 即使在活动使用期间也减少 37.5%
+  </Card>
+
+  <Card title="执行：0 令牌" icon="CheckCircle">
+    工具通过 Python 执行器在外部运行，不消耗额外的上下文
+  </Card>
+</Cards>
+
+### 实际影响：GitHub MCP 服务器示例
+
+一个实际示例展示了显著的效率提升：
+
+**传统 MCP 方法（GitHub 服务器，8 个工具）：**
+- **空闲状态**：消耗 8,000 令牌
+- **活动状态**：消耗 8,000 令牌
+- **上下文可用性**：显著减少
+
+**转换后的 Skill 方法：**
+- **空闲状态**：100 令牌（节省 98.75%）
+- **活动状态**：5,000 令牌（节省 37.5%）
+- **上下文可用性**：最大化用于实际工作
+
+## 项目架构
+
+### 核心组件
+
+转换器生成完整的 Claude Skill 结构，包含三个关键元素：
+
+<Files>
+  <Folder name="generated-skill" defaultOpen>
+    <File name="SKILL.md" />
+    <File name="executor.py" />
+    <File name="mcp_config.json" />
+    <File name="package.json" />
+  </Folder>
+</Files>
+
+### 组件分解
+
+#### 1. SKILL.md - 渐进式披露接口
+
+生成的 `SKILL.md` 文件作为 Claude 与技能的主要接口：
+
+**内容结构：**
+- **元数据部分**：技能名称、描述和类别
+- **工具目录**：列出可用工具的最小元数据
+- **使用说明**：如何识别和调用工具
+- **执行器调用**：用于动态工具加载的命令
+
+**令牌效率：**
+- 初始加载：~100 令牌（仅目录）
+- 完整加载：~5k 令牌（当技能激活时）
+- 延迟加载：根据需要加载详细的工具模式
+
+#### 2. executor.py - 动态 MCP 桥接
+
+Python 执行器脚本处理所有 MCP 服务器通信：
+
+**关键函数：**
+
+```python
+# 三个核心操作
+--list              # 枚举所有可用工具
+--describe <tool>   # 仅加载一个工具的完整模式
+--call <json>       # 使用提供的参数执行工具
+```
+
+**架构：**
+- **异步通信**：非阻塞 MCP 服务器交互
+- **按需模式加载**：仅在需要时获取工具详细信息
+- **外部执行**：在 Claude 上下文窗口之外运行
+- **错误处理**：优雅失败并提供可操作的消息
+
+#### 3. mcp_config.json - 服务器配置
+
+保留原始 MCP 服务器配置：
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "<YOUR_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+## 技术深入探讨
+
+### 转换过程
+
+<Steps>
+  <Step>
+    **工具内省**：`MCPSkillGenerator` 类连接到 MCP 服务器，并通过 `tools/list` 请求检索完整的工具目录
+  </Step>
+
+  <Step>
+    **SKILL.md 生成**：创建 Claude 可读的说明，包含工具名称和简要描述，保持初始负载最小（~100 令牌）
+  </Step>
+
+  <Step>
+    **执行器脚本创建**：生成一个 Python CLI 处理器，通过三个命令（list、describe、call）管理动态 MCP 通信
+  </Step>
+
+  <Step>
+    **配置保留**：保存原始 MCP 服务器参数供运行时使用，确保与现有配置兼容
+  </Step>
+
+  <Step>
+    **依赖清单**：生成 package.json 用于自动设置和安装所需依赖项
+  </Step>
+</Steps>
+
+### 渐进式披露的工作原理
+
+转换器实现了三层加载策略：
+
+<Tabs items={['第 1 层：发现', '第 2 层：检查', '第 3 层：执行']}>
+  <Tab value="第 1 层：发现">
+    **初始加载（空闲状态）**
+
+    当 Claude 首次遇到该技能时：
+    - 仅加载 SKILL.md 元数据（~100 令牌）
+    - 工具名称和单行描述可见
+    - 没有详细的模式或示例
+    - Claude 知道工具存在但不知道如何使用它们
+
+    **示例：**
+    ```markdown
+    可用工具：
+    - create_issue：创建新的 GitHub issue
+    - search_code：在仓库中搜索代码
+    - get_pull_request：检索拉取请求详细信息
+    ```
+  </Tab>
+
+  <Tab value="第 2 层：检查">
+    **活动加载（需要时）**
+
+    当 Claude 决定使用特定工具时：
+    - 执行：`python executor.py --describe <tool>`
+    - 仅加载该单个工具的完整模式
+    - 包括参数、类型、示例、约束
+    - 其他工具保持未加载状态
+
+    **示例：**
+    ```bash
+    $ python executor.py --describe create_issue
+    {
+      "name": "create_issue",
+      "description": "使用标题和正文创建新的 GitHub issue",
+      "parameters": {
+        "repo": {"type": "string", "description": "格式为 owner/name 的仓库"},
+        "title": {"type": "string", "description": "Issue 标题"},
+        "body": {"type": "string", "description": "Issue 正文文本"}
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab value="第 3 层：执行">
+    **工具执行（外部）**
+
+    当 Claude 调用工具时：
+    - 执行：`python executor.py --call '{"tool": "create_issue", "args": {...}}'`
+    - 完全在上下文窗口之外运行
+    - 仅返回结果
+    - 零额外令牌消耗
+
+    **示例：**
+    ```bash
+    $ python executor.py --call '{"tool": "create_issue", "args": {"repo": "owner/repo", "title": "Bug fix", "body": "Details..."}}'
+    {
+      "success": true,
+      "issue_number": 123,
+      "url": "https://github.com/owner/repo/issues/123"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### 关键实现模式
+
+#### 异步 MCP 通信
+
+```python
+async def _get_mcp_tools(self):
+    """
+    启动 MCP 服务器进程
+    发送 tools/list 请求
+    解析并返回工具目录
+    """
+    # 实现处理：
+    # - 服务器进程管理
+    # - 异步 I/O 通信
+    # - 工具元数据提取
+    # - 错误恢复
+```
+
+#### 延迟模式加载
+
+执行器不是预先加载所有工具模式，而是提供按需访问：
+
+```python
+# 传统 MCP：立即加载所有模式
+all_tools = load_all_schemas()  # 30-50k 令牌
+
+# 转换器方法：按需加载
+tool_schema = load_schema_for(specific_tool)  # 200-500 令牌
+```
+
+#### 上下文分离
+
+转换器分离三个关注点以最小化上下文使用：
+
+1. **发现层**（SKILL.md）：存在哪些工具
+2. **模式层**（executor --describe）：如何使用特定工具
+3. **执行层**（executor --call）：实际运行工具
+
+这种分离确保 Claude 只为实际使用的内容支付上下文成本。
+
+## 安装和使用
+
+### 先决条件
+
+<Callout type="info">
+  需要 Python 3.8+ 和 MCP 包
+</Callout>
+
+```bash
+pip install mcp
+```
+
+### 基本工作流程
+
+<Steps>
+  <Step>
+    **创建 MCP 配置文件**
+
+    以 JSON 格式定义您的 MCP 服务器：
+
+    ```json
+    {
+      "mcpServers": {
+        "my-service": {
+          "command": "python",
+          "args": ["my_mcp_server.py"],
+          "env": {
+            "API_KEY": "your-key-here"
+          }
+        }
+      }
+    }
+    ```
+  </Step>
+
+  <Step>
+    **运行转换器**
+
+    将您的 MCP 服务器转换为技能：
+
+    ```bash
+    python mcp_to_skill.py \
+      --mcp-config config.json \
+      --output-dir ./generated-skills
+    ```
+
+    这会在输出目录中生成完整的技能结构。
+  </Step>
+
+  <Step>
+    **安装依赖项**
+
+    导航到生成的技能并安装要求：
+
+    ```bash
+    cd generated-skills/my-service
+    pip install -r requirements.txt
+    ```
+  </Step>
+
+  <Step>
+    **部署到 Claude**
+
+    将技能复制到您的 Claude 技能目录：
+
+    ```bash
+    cp -r generated-skills/my-service ~/.claude/skills/
+    ```
+
+    Claude 将自动发现并加载该技能。
+  </Step>
+</Steps>
+
+### 高级配置
+
+对于具有多个工具的复杂 MCP 服务器，您可以自定义转换：
+
+```bash
+python mcp_to_skill.py \
+  --mcp-config config.json \
+  --output-dir ./skills \
+  --skill-name "Custom Name" \
+  --description "Custom description" \
+  --category "integration"
+```
+
+## 何时使用 MCP to Skill Converter
+
+### 理想用例
+
+<Cards>
+  <Card title="10+ 工具" icon="Package">
+    在管理许多独立工具且上下文空间受限时最有益
+  </Card>
+
+  <Card title="间歇使用" icon="Clock">
+    非常适合可用但不常用的工具 - 仅在需要时支付上下文成本
+  </Card>
+
+  <Card title="上下文受限场景" icon="Layers">
+    在使用多个技能并需要最大化可用上下文进行实际工作时至关重要
+  </Card>
+
+  <Card title="成本优化" icon="DollarSign">
+    通过显著的令牌节省（空闲状态下 90-99%）大幅降低 API 成本
+  </Card>
+</Cards>
+
+### 何时传统 MCP 更好
+
+<Callout type="warn">
+  转换器并不总是最佳选择。在某些场景下，传统 MCP 集成仍然更可取。
+</Callout>
+
+**在以下情况下使用传统 MCP：**
+
+- **1-5 个工具**：工具数量少 - 渐进式披露的开销不合理
+- **持久连接**：需要有状态连接或会话管理的工具
+- **复杂的 OAuth 流程**：需要持续连接的身份验证模式
+- **实时数据流**：需要持久通道的 WebSocket 或 SSE 工具
+- **频繁的工具切换**：大多数工具在每次交互中都被使用的场景
+
+## 对比：传统 MCP vs. 转换器
+
+### 令牌消耗分析
+
+<Tabs items={['空闲状态', '活动状态', '重度使用']}>
+  <Tab value="空闲状态">
+    **场景**：Claude 可以访问拥有 8 个工具的 GitHub MCP，但没有使用它
+
+    | 方法 | 令牌消耗 | 可用上下文 |
+    |----------|-------------------|-------------------|
+    | 传统 MCP | 8,000 令牌 | 192,000 令牌 |
+    | 转换后的 Skill | 100 令牌 | 199,900 令牌 |
+    | **节省** | **98.75%** | **+7,900 令牌** |
+
+    在空闲状态下，转换器为实际工作提供了近 8,000 个额外令牌。
+  </Tab>
+
+  <Tab value="活动状态">
+    **场景**：Claude 正在积极使用 GitHub MCP 中的 1-2 个工具
+
+    | 方法 | 令牌消耗 | 可用上下文 |
+    |----------|-------------------|-------------------|
+    | 传统 MCP | 8,000 令牌（所有工具） | 192,000 令牌 |
+    | 转换后的 Skill | 5,000 令牌（仅活动工具） | 195,000 令牌 |
+    | **节省** | **37.5%** | **+3,000 令牌** |
+
+    即使在活动使用期间，转换器也通过仅加载所需工具提供显著节省。
+  </Tab>
+
+  <Tab value="重度使用">
+    **场景**：Claude 广泛使用所有 8 个工具
+
+    | 方法 | 令牌消耗 | 效率 |
+    |----------|-------------------|------------|
+    | 传统 MCP | 预先 8,000 令牌 | 立即加载所有 |
+    | 转换后的 Skill | ~6,000 令牌（渐进式） | 根据需要加载工具 |
+    | **优势** | **延迟加载** | **更快的初始状态响应** |
+
+    即使在重度使用下，渐进式加载也能改善初始响应时间，并在对话中分散令牌成本。
+  </Tab>
+</Tabs>
+
+### 性能特征
+
+**传统 MCP：**
+- ✅ 立即访问所有工具模式
+- ✅ 工具切换的较低延迟
+- ✅ 更适合有状态操作
+- ❌ 高初始上下文成本
+- ❌ 随工具数量扩展性差
+- ❌ 未使用工具上的上下文浪费
+
+**转换后的 Skill：**
+- ✅ 最小初始上下文成本
+- ✅ 随工具数量优秀的扩展性
+- ✅ 按使用付费模式
+- ✅ 最大化可用上下文
+- ❌ 首次使用工具时略有延迟
+- ❌ 额外的 Python 执行开销
+
+## 实际应用
+
+### 用例 1：多服务集成平台
+
+**场景**：一家公司希望 Claude 访问 GitHub、Slack、Jira 和 PostgreSQL（总共 35+ 个工具）
+
+**挑战**：传统 MCP 集成仅工具定义就会消耗 60-80k 令牌，为实际工作留下的上下文很少。
+
+**使用转换器的解决方案**：
+
+<Steps>
+  <Step>
+    将每个 MCP 服务器转换为技能：
+    ```bash
+    python mcp_to_skill.py --mcp-config github.json --output-dir skills
+    python mcp_to_skill.py --mcp-config slack.json --output-dir skills
+    python mcp_to_skill.py --mcp-config jira.json --output-dir skills
+    python mcp_to_skill.py --mcp-config postgres.json --output-dir skills
+    ```
+  </Step>
+
+  <Step>
+    将所有技能部署到 Claude：
+    ```bash
+    cp -r skills/* ~/.claude/skills/
+    ```
+  </Step>
+
+  <Step>
+    **结果**：
+    - 空闲状态：总共 400 令牌（每个技能 100）
+    - 活动状态：5-10k 令牌（仅活动技能）
+    - 上下文节省：与传统方法相比超过 95%
+    - Claude 可以同时使用所有服务
+  </Step>
+</Steps>
+
+**结果**：Claude 可以无缝地跨所有四个平台工作，没有上下文限制，实现复杂的跨平台工作流程，如"从此 GitHub issue 创建 Jira ticket，在 Slack 中通知团队，并更新 PostgreSQL 跟踪表"。
+
+### 用例 2：大规模 API 集成
+
+**场景**：电子商务平台，拥有 20+ 个 MCP 工具，用于库存、订单、客户、配送、分析
+
+**传统方法的问题**：
+- 启动时消耗 40-50k 令牌
+- 仅有 150k 令牌可用于实际任务
+- 由于大型上下文而响应时间慢
+- 持续令牌使用导致 API 成本高
+
+**转换器优势**：
+
+<Cards>
+  <Card title="最小空闲成本" icon="Battery">
+    20 个工具 2,000 令牌（每个 100）- 减少 96%
+  </Card>
+
+  <Card title="选择性加载" icon="Filter">
+    处理订单时仅加载订单管理工具 - ~5k 令牌而不是 40k
+  </Card>
+
+  <Card title="上下文灵活性" icon="Maximize">
+    195k 令牌可用于复杂的订单处理逻辑
+  </Card>
+
+  <Card title="成本效率" icon="TrendingDown">
+    基线令牌消耗减少 90% 转化为显著的 API 成本节省
+  </Card>
+</Cards>
+
+### 用例 3：DevOps 自动化
+
+**场景**：跨 AWS、Kubernetes、GitHub、监控工具的基础设施管理（25 个工具）
+
+**转换器工作流程**：
+
+1. **将所有 MCP 服务器转换为技能**，用于 AWS、K8s、GitHub、Datadog
+2. **部署到 Claude**，空闲成本约 2,500 令牌（每个服务器 100）
+3. **启用复杂工作流程**，如"将此应用部署到 K8s，创建 GitHub 发布，设置 AWS 负载均衡器，配置 Datadog 监控"
+
+**关键优势**：Claude 可以跨所有平台进行编排而不会耗尽上下文，因为只有活跃使用的工具才会消耗大量令牌。
+
+## 最佳实践
+
+### 转换策略
+
+<Steps>
+  <Step>
+    **审核您的 MCP 服务器**
+
+    在转换之前，评估您的 MCP 格局：
+    - 计算所有服务器的总工具数
+    - 识别使用模式（哪些工具经常使用）
+    - 测量当前上下文消耗
+    - 计算潜在节省
+  </Step>
+
+  <Step>
+    **优先处理高工具数服务器**
+
+    按此顺序转换服务器：
+    1. 拥有 10+ 工具的服务器（影响最大）
+    2. 间歇使用的服务器
+    3. 多服务场景中的服务器
+    4. 将 1-5 工具服务器保留为传统 MCP
+  </Step>
+
+  <Step>
+    **增量测试**
+
+    不要一次转换所有内容：
+    - 从一个非关键服务开始
+    - 测量上下文节省和性能
+    - 验证工具功能
+    - 逐步转换其他服务
+  </Step>
+
+  <Step>
+    **监控和优化**
+
+    转换后：
+    - 跟踪实际上下文使用
+    - 识别经常使用的工具组合
+    - 考虑为常见工作流程创建专门的技能
+    - 微调工具描述以更好地发现
+  </Step>
+</Steps>
+
+### 工具设计考虑
+
+<Callout type="tip">
+  当您的 MCP 服务器将被转换时，请考虑渐进式披露来设计工具
+</Callout>
+
+**优化工具描述**：
+```markdown
+✅ 好："create_issue：使用标题和正文创建新的 GitHub issue"
+❌ 差："create_issue：用于 GitHub issue 创建的工具"
+```
+
+描述出现在最小元数据中，所以要让它有意义：
+- 具体说明工具的作用
+- 在描述中包含关键参数
+- 使用一致的命名约定
+- 使用前缀对相关工具进行分组（例如，`github_*`）
+
+**为按需加载而设计**：
+- 保持工具接口简单且专注
+- 避免工具模式之间的依赖关系
+- 确保每个工具可以独立描述
+- 最小化共享上下文要求
+
+### 集成模式
+
+**多技能编排**：
+
+使用多个转换后的技能时：
+
+```markdown
+1. 加载所有技能元数据（每个约 100 令牌）
+2. Claude 识别任务的相关技能
+3. 仅激活必要的技能（每个约 5k 令牌）
+4. 从多个技能执行工具
+5. 未使用的技能保持最小令牌成本
+```
+
+**混合方法**：
+
+将传统 MCP 与转换后的技能结合：
+
+- **传统 MCP**：1-5 个常用核心工具
+- **转换后的 Skill**：间歇使用的大型工具库
+- **两全其美**：立即访问基本功能 + 按需访问扩展功能
+
+## 常见陷阱和故障排除
+
+### 陷阱 1：转换小工具集
+
+**症状**：边际或负面的性能改进
+
+**原因**：对于 1-5 个工具，渐进式披露的开销不合理
+
+**解决方案**：仅转换拥有 10+ 工具的 MCP 服务器。将小工具集保留为传统 MCP。
+
+### 陷阱 2：有状态工具问题
+
+**症状**：需要持久连接的工具失败或行为异常
+
+**原因**：执行器为每个操作启动一个新的 MCP 服务器进程
+
+**解决方案**：
+- 对有状态工具使用传统 MCP
+- 或者，修改执行器以维护持久连接
+- 或者，将工具设计为无状态
+
+### 陷阱 3：身份验证复杂性
+
+**症状**：OAuth 流程或交互式身份验证失败
+
+**原因**：执行器以非交互方式运行，无法处理复杂的身份验证
+
+**解决方案**：
+- 对转换后的技能使用 API 令牌而不是 OAuth
+- 预先身份验证并在配置中存储凭据
+- 将基于 OAuth 的工具保留在传统 MCP 中
+
+### 陷阱 4：工具描述不清楚
+
+**症状**：Claude 没有发现或使用正确的工具
+
+**原因**：最小元数据没有为工具选择提供足够的上下文
+
+**解决方案**：
+- 增强 SKILL.md 中的工具描述
+- 使用一致的命名约定
+- 使用清晰的前缀对相关工具进行分组
+- 在描述中包含关键用例
+
+### 故障排除指南
+
+<Callout type="warn">
+  常见问题及其解决方案
+</Callout>
+
+**问题**：执行器脚本无法启动
+```bash
+# 解决方案：检查 Python 依赖项
+pip install -r requirements.txt
+
+# 解决方案：验证 MCP 配置文件
+python executor.py --list  # 应显示所有工具
+```
+
+**问题**：工具执行超时
+```bash
+# 解决方案：增加执行器中的超时时间
+# 编辑 executor.py 并调整超时参数
+TIMEOUT = 60  # 从默认的 30 秒增加
+```
+
+**问题**：上下文节省不如预期
+```bash
+# 解决方案：测量实际令牌使用
+# 使用 Claude 的令牌计数器验证：
+# - 空闲状态使用
+# - 活动状态使用
+# - 每个工具的加载成本
+```
+
+## 高级主题
+
+### 自定义执行器修改
+
+生成的 executor.py 可以针对特定需求进行自定义：
+
+**添加缓存**：
+```python
+# 缓存经常使用的工具模式
+schema_cache = {}
+
+def get_tool_schema(tool_name):
+    if tool_name not in schema_cache:
+        schema_cache[tool_name] = load_schema(tool_name)
+    return schema_cache[tool_name]
+```
+
+**实现持久连接**：
+```python
+# 维护长期运行的 MCP 服务器连接
+class PersistentExecutor:
+    def __init__(self):
+        self.mcp_server = start_server()
+
+    def execute(self, tool, args):
+        return self.mcp_server.call(tool, args)
+```
+
+**添加指标和日志记录**：
+```python
+# 跟踪工具使用以进行优化
+import logging
+
+def execute_with_metrics(tool, args):
+    start_time = time.time()
+    result = execute(tool, args)
+    duration = time.time() - start_time
+    logging.info(f"Tool {tool} executed in {duration}s")
+    return result
+```
+
+### 与其他技能集成
+
+转换器与其他 Claude 技能无缝协作：
+
+**与 mcp-builder 配合使用**：
+1. 使用 mcp-builder 创建高质量的 MCP 服务器
+2. 将其转换为技能用于生产部署
+3. 从以代理为中心的设计和上下文效率中受益
+
+**与 skill-creator 配合使用**：
+1. 为特定工作流程生成自定义技能
+2. 与转换后的 MCP 技能结合
+3. 创建全面的能力集
+
+**与评估框架配合使用**：
+1. 使用标准评估框架测试转换后的技能
+2. 测量上下文效率改进
+3. 根据使用模式优化工具描述
+
+## 未来潜力和发展
+
+### 项目状态
+
+<Callout type="info">
+  MCP to Skill Converter 是一个早期概念验证，截至 2025 年 11 月拥有活跃的开发和不断增长的社区采用（72 个星标，8 个分叉）。
+</Callout>
+
+**当前功能：**
+- ✅ 将标准 MCP 服务器转换为技能
+- ✅ 支持 stdio、SSE 和 HTTP 传输
+- ✅ 生成完整的技能结构
+- ✅ 提供用于动态加载的 Python 执行器
+- ✅ 与主要 MCP 服务器兼容（GitHub、Slack、文件系统、PostgreSQL）
+
+**增强领域：**
+- 🔄 有状态工具的持久连接支持
+- 🔄 高级缓存策略
+- 🔄 工具分组和批量加载
+- 🔄 改进的身份验证处理
+- 🔄 TypeScript 执行器选项
+- 🔄 增强的指标和监控
+
+### 社区贡献
+
+该项目欢迎贡献：
+
+- **测试**：尝试不同的 MCP 服务器并报告兼容性
+- **文档**：分享使用模式和最佳实践
+- **功能**：实现持久连接、缓存或其他优化
+- **集成**：创建与流行 MCP 服务器的集成
+
+**仓库**：https://github.com/GBSOSS/-mcp-to-skill-converter
+**许可证**：MIT（开源，宽松）
+
+### 研究方向
+
+转换器开辟了有趣的研究问题：
+
+<Cards>
+  <Card title="最佳加载策略" icon="Brain">
+    如何预测需要哪些工具并智能地预加载它们
+  </Card>
+
+  <Card title="动态工具分组" icon="Group">
+    自动聚类相关工具以减少描述调用
+  </Card>
+
+  <Card title="上下文预算管理" icon="PieChart">
+    在工具可用性与上下文使用之间平衡的复杂算法
+  </Card>
+
+  <Card title="多模态工具加载" icon="Layers">
+    基于对话上下文和任务类型的不同加载策略
+  </Card>
+</Cards>
+
+## 结论
+
+MCP to Skill Converter 代表了高效 LLM 工具集成的重大进步。通过应用渐进式披露模式，它实现了：
+
+✅ **显著的令牌节省**：在空闲状态下上下文消耗减少 90-99%
+✅ **可扩展架构**：随工具数量线性扩展，而不是二次增长
+✅ **按使用付费**：仅在实际需要工具时才有上下文成本
+✅ **无缝集成**：无需修改即可与标准 MCP 服务器配合使用
+✅ **生产就绪**：与主要 MCP 实现一起使用（GitHub、Slack、PostgreSQL）
+✅ **开源**：MIT 许可，活跃的社区开发
+
+### 关键要点
+
+<Steps>
+  <Step>
+    **渐进式披露有效**：延迟工具模式加载直到需要时，可在不牺牲功能的情况下提供巨大的效率提升
+  </Step>
+
+  <Step>
+    **上下文宝贵**：使用 Claude 的 200k 上下文窗口，为工具节省 30-50k 令牌意味着实际工作能力增加 15-25%
+  </Step>
+
+  <Step>
+    **规模很重要**：转换器在拥有 10+ 工具时表现出色，但对于小工具集不值得开销
+  </Step>
+
+  <Step>
+    **为效率而设计**：在构建 MCP 服务器时，考虑它们将如何被转换并相应地优化工具描述
+  </Step>
+</Steps>
+
+### 何时使用此工具
+
+**绝对使用**当您拥有：
+- 一个或多个 MCP 服务器中的 10+ 个工具
+- 限制 Claude 有效性的上下文约束
+- 间歇性的工具使用模式
+- 需要同时访问的多个服务
+- 高令牌使用带来的 API 成本担忧
+
+**考虑替代方案**当您拥有：
+- 1-5 个常用工具
+- 需要持久连接的有状态操作
+- 复杂的 OAuth 或交互式身份验证
+- 实时流式传输要求
+
+### 下一步
+
+准备好优化您的 MCP 集成了吗？
+
+<Steps>
+  <Step>
+    **克隆仓库**：
+    ```bash
+    git clone https://github.com/GBSOSS/-mcp-to-skill-converter
+    cd -mcp-to-skill-converter
+    ```
+  </Step>
+
+  <Step>
+    **安装依赖项**：
+    ```bash
+    pip install mcp
+    ```
+  </Step>
+
+  <Step>
+    **为您的服务器创建 MCP 配置**
+  </Step>
+
+  <Step>
+    **运行转换**：
+    ```bash
+    python mcp_to_skill.py --mcp-config your-config.json --output-dir ./skills
+    ```
+  </Step>
+
+  <Step>
+    **部署到 Claude**：
+    ```bash
+    cp -r skills/* ~/.claude/skills/
+    ```
+  </Step>
+
+  <Step>
+    **测量和优化**：跟踪上下文节省并调整工具描述
+  </Step>
+</Steps>
+
+### 相关资源
+
+- **MCP to Skill Converter**：[github.com/GBSOSS/-mcp-to-skill-converter](https://github.com/GBSOSS/-mcp-to-skill-converter)
+- **模型上下文协议**：[modelcontextprotocol.io](https://modelcontextprotocol.io)
+- **Claude Skills 文档**：[docs.claude.com/en/docs/claude-skills](https://docs.claude.com/en/docs/claude-skills)
+- **MCP Builder Skill**：[分析 mcp-builder](/development/analyzing-mcp-builder)
+- **Claude Skills vs MCP 对比**：[Simon Willison 的博客](https://simonwillison.net/2025/Oct/16/claude-skills/)
+
+---
+
+## 总结
+
+这个全面的分析涵盖了：
+
+- ✅ 传统 MCP 集成的上下文令牌爆炸问题
+- ✅ 渐进式披露架构和 3 层加载策略
+- ✅ 实际影响：通过 GitHub MCP 示例节省 90-99% 的令牌
+- ✅ 从 MCP 服务器到 Claude Skill 的完整转换过程
+- ✅ 使用异步 MCP 通信的执行器实现
+- ✅ 安装和部署工作流程
+- ✅ 何时使用转换器 vs. 传统 MCP
+- ✅ 详细对比：令牌消耗和性能特征
+- ✅ 跨多个行业的实际应用
+- ✅ 转换策略和工具设计的最佳实践
+- ✅ 常见陷阱和全面的故障排除指南
+- ✅ 高级主题：自定义执行器、缓存、持久连接
+- ✅ 未来发展方向和社区贡献
+
+## ℹ️ 来源信息
+
+**原始项目**：[MCP to Skill Converter](https://github.com/GBSOSS/-mcp-to-skill-converter)
+
+- **作者**：GBSOSS
+- **仓库**：github.com/GBSOSS/-mcp-to-skill-converter
+- **创建时间**：2025 年 10 月 26 日
+- **最后更新**：2025 年 11 月 17 日
+- **星标**：72 | **分叉**：8
+- **许可证**：MIT License
+- **语言**：Python
+- **访问时间**：2025-11-18
+
+*本文通过对项目仓库、文档和实际使用模式的全面分析生成。转换器代表了 AI 代理开发中紧迫问题的实用解决方案：大规模的高效工具集成。*
+
+---
+
+**准备好大幅降低您的上下文消耗了吗？** 今天就试用 MCP to Skill Converter，在您的 Claude 工作流程中体验渐进式披露的力量。
