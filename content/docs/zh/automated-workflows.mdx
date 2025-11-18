@@ -1,6 +1,7 @@
 ---
 title: "Claude Skills 如何驱动我们的自动化"
 description: "深入了解我们如何构建一个自文档化生态系统，其中 skills 编写关于 skills 的内容、验证自己的输出并自动发布 - 彻底改变了文档创建和维护的方式。"
+image: /assets/img/automated-workflows/workflow-automation-overview.svg
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -10,7 +11,7 @@ import { File, Folder, Files } from 'fumadocs-ui/components/files';
 
 # Claude Skills 如何驱动我们的自动化
 
-image: /images/docs/automated-workflows/workflow-automation-overview.svg**Claude Skills 从根本上改变了我们创建和维护文档的方式。**曾经是手动且容易出错的过程，现在变成了一个自我维持的生态系统，智能代理分析复杂系统、生成综合指南、验证自己的工作，并以最少的人工干预进行发布。
+**Claude Skills 从根本上改变了我们创建和维护文档的方式。**曾经是手动且容易出错的过程，现在变成了一个自我维持的生态系统，智能代理分析复杂系统、生成综合指南、验证自己的工作，并以最少的人工干预进行发布。
 
 <Callout type="tip">
   这并非理论 - 您现在正在阅读的内容正是由我们的 skill 自动化流程创建的。
@@ -39,9 +40,9 @@ image: /images/docs/automated-workflows/workflow-automation-overview.svg**Claude
 
 那时我们意识到：这不仅仅是自动化 - 它是 **增强的技术写作**。
 
-## 生态系统：三个 Skills，无限可能
+## 生态系统：四个 Skills，无限可能
 
-我们的自动化由三个相互协作的 skills 提供动力：
+我们的自动化由四个相互协作的 skills 提供动力：
 
 ### 1. skill-article-writer：分析师
 
@@ -82,7 +83,7 @@ image: /images/docs/automated-workflows/workflow-automation-overview.svg**Claude
     **语义分析**：分类变更（feat、docs、fix）并检测受影响的语言
   </Step>
   <Step>
-    **智能提交**：生成有意义的提交消息，如 "feat: publish analyzing-mcp-builder (en, zh, fr)"
+    **智能提交**：生成有意义的提交消息，如 "feat: publish analyzing-mcp-builder with cover image (en, zh, fr)"
   </Step>
   <Step>
     **自动发布**：暂存更改、创建提交并推送到远程仓库
@@ -91,7 +92,48 @@ image: /images/docs/automated-workflows/workflow-automation-overview.svg**Claude
 
 **突破**：它捕获了会破坏构建的微妙 MDX 问题 - 比如 XML 示例中未转义的 `>` 运算符，MDX 解析器会误解。这种规模的验证手动几乎不可能。
 
-### 3. 综合 Skill 分析：知识库
+### 3. philosophical-illustrator：视觉设计师
+
+每篇文章都需要引人注目的视觉识别。此 skill **生成针对每篇文章技术主题定制的 SVG 插图**：
+
+<Steps>
+  <Step>
+    **主题分析**：读取文章内容和 frontmatter 以理解技术主题（MCP、测试、前端等）
+  </Step>
+  <Step>
+    **调色板选择**：从 6 个基于主题的调色板中选择适当的配色方案（开发/粉色、Web/橙色、系统/绿色、测试/蓝色、数据/米色、多主题）
+  </Step>
+  <Step>
+    **图标设计**：创建具体的技术图标（代码括号、浏览器、服务器等）结合创意视觉隐喻
+  </Step>
+  <Step>
+    **SVG 生成**：生成具有适当构图和视觉层次的干净、现代插图
+  </Step>
+  <Step>
+    **Frontmatter 更新**：自动更新文章元数据的图片路径
+  </Step>
+</Steps>
+
+**创新点**：与通用库存图片不同，每个插图都与其文章**语义连接**。当你看到蓝色背景配浏览器和对勾，你立即认出这是关于测试的。橙色配代码括号？那是前端开发。
+
+**交付成果**：
+- ✅ 11 个独特的 SVG 插图，覆盖所有文章
+- ✅ 使用色彩编码主题的一致视觉语言
+- ✅ 每个插图 ~2KB 文件大小（为 Web 优化）
+- ✅ 多语言支持（同一图片适用于 en/zh/fr）
+- ✅ 零手动设计工作
+
+**技术方法**：skill 使用现代、平易近人的美学：
+- 对内容类型进行分类的鲜艳背景色
+- 具体的技术符号（不是抽象形状）
+- 带有手绘点缀的干净几何设计
+- 适应任何尺寸的响应式构图
+
+<Callout type="tip">
+  查看 skill 的实际应用：本网站上的每张封面图片都是由 philosophical-illustrator 从概念到 SVG 在几秒内生成的。
+</Callout>
+
+### 4. 综合 Skill 分析：知识库
 
 这是可见的输出 - 作为文档和案例研究的详细技术指南：
 
@@ -133,24 +175,31 @@ image: /images/docs/automated-workflows/workflow-automation-overview.svg**Claude
   → 创建法文翻译
   → 更新所有导航文件 (meta.json)
 
-步骤 4：skill-article-publisher 验证
+
+步骤 4：philosophical-illustrator 生成视觉效果
+  → 分析文章主题（MCP = 数据/API 调色板）
+  → 创建带有花括号、浏览器、地球图标的自定义 SVG
+  → 保存到 /public/images/docs/analyzing-mcp-builder/
+  → 更新 frontmatter 的图片路径
+  → 文件大小：~2.1KB（优化）
+步骤 5：skill-article-publisher 验证
   → 检查未转义运算符 (> → \u0026gt;, < → \u0026lt;)
-  → 验证前置结构
+  → 验证 frontmatter 结构（包括新的 image 字段）
   → 运行 npm run build 验证编译
 
-步骤 5：自动发布
+步骤 6：自动发布
   → 检测变更类型（新内容的 feat）
   → 识别受影响的语言（en, zh, fr）
-  → 生成提交："feat: publish analyzing-mcp-builder (en, zh, fr)"
+  → 生成提交："feat: publish analyzing-mcp-builder with cover image (en, zh, fr)"
   → 暂存、提交并推送到仓库
 
-步骤 6：部署
+步骤 7：部署
   → 构建流程拾取更改
   → 部署到生产环境
-  → 内容上线并可访问
+  → 内容上线并可访问，配有自定义插图
 
 总时间：15-20 分钟（对比手动工作的数天）
-质量：跨所有内容保持一致、已验证
+质量：一致、已验证、多语言、视觉品牌化
 规模：可重复用于任何 skill
 ```
 
@@ -276,6 +325,12 @@ if (x \u0026gt; y \u0026amp;\u0026amp; y \u0026lt; z)  # 正确转义
     <File name="scripts/analyze_skill.py" description="分析 skill 结构并提取见解" />
     <File name="scripts/generate_article_outline.py" description="生成结构化 MDX 内容" />
     <File name="SKILL.md" description="6 步工作流和最佳实践" />
+  </Folder>
+</Files>
+
+<Files>
+  <Folder name="philosophical-illustrator">
+    <File name="SKILL.md" description="SVG 生成规则、调色板和输出规范" />
   </Folder>
 </Files>
 
@@ -450,6 +505,11 @@ def analyze_skill(skill_path: Path) -> Dict[str, Any]:
     title="skill-article-writer"
     description="分析 skills 并自动生成综合文章"
     icon="Zap"
+  />
+  <Card
+    title="philosophical-illustrator"
+    description="生成针对每篇文章主题定制的自定义 SVG 封面图片"
+    icon="Palette"
   />
   <Card
     title="skill-article-publisher"

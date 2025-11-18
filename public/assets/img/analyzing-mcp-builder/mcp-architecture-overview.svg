@@ -1,0 +1,42 @@
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="450" fill="#C9BFA8"/>
+
+  <!-- Large curly braces frame -->
+  <path d="M 200 100 Q 190 100 190 110 L 190 190 Q 190 200 180 200 Q 190 200 190 210 L 190 290 Q 190 300 200 300"
+        stroke="#1A1A1A" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M 600 100 Q 610 100 610 110 L 610 190 Q 610 200 620 200 Q 610 200 610 210 L 610 290 Q 610 300 600 300"
+        stroke="#1A1A1A" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- Browser/Server window -->
+  <rect x="280" y="140" width="240" height="160" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="3"/>
+
+  <!-- Window top bar -->
+  <rect x="280" y="140" width="240" height="30" rx="8" fill="#1A1A1A"/>
+  <circle cx="295" cy="155" r="4" fill="#FFFFFF"/>
+  <circle cx="310" cy="155" r="4" fill="#FFFFFF"/>
+  <circle cx="325" cy="155" r="4" fill="#FFFFFF"/>
+
+  <!-- Globe/Network icon inside window -->
+  <circle cx="400" cy="225" r="45" stroke="#1A1A1A" stroke-width="3" fill="none"/>
+  <ellipse cx="400" cy="225" rx="20" ry="45" stroke="#1A1A1A" stroke-width="2.5" fill="none"/>
+  <line x1="355" y1="225" x2="445" y2="225" stroke="#1A1A1A" stroke-width="2.5"/>
+  <path d="M 365 195 Q 400 200 435 195" stroke="#1A1A1A" stroke-width="2" fill="none"/>
+  <path d="M 365 255 Q 400 250 435 255" stroke="#1A1A1A" stroke-width="2" fill="none"/>
+
+  <!-- Connection arrows -->
+  <path d="M 250 160 L 270 160" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 264 156 L 270 160 L 264 164" fill="#1A1A1A"/>
+
+  <path d="M 530 160 L 550 160" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 536 156 L 530 160 L 536 164" fill="#1A1A1A"/>
+
+  <!-- Decorative wavy line -->
+  <path d="M 220 350 Q 240 340 260 350 Q 280 360 300 350 Q 320 340 340 350"
+        stroke="#1A1A1A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Small geometric accent shapes -->
+  <circle cx="240" cy="120" r="8" fill="#1A1A1A"/>
+  <rect x="535" y="112" width="16" height="16" fill="#1A1A1A"/>
+  <path d="M 560 310 L 570 330 L 550 330 Z" fill="#1A1A1A"/>
+</svg>

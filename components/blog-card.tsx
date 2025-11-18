@@ -18,12 +18,14 @@ export function BlogCard({ post, viewMode = 'grid', lang }: BlogCardProps) {
   const difficultyName = translateDifficulty(post.difficulty, lang);
 
   // Check if there's a custom illustration
-  const hasCustomIllustration = post.image && (post.image.startsWith('/illustrations/') || post.image.startsWith('/images/'));
+  const hasCustomIllustration = post.image && (post.image.startsWith('/illustrations/') || post.image.startsWith('/images/') || post.image.startsWith('/assets/'));
 
   // Normalize image URL to bypass i18n middleware
   // Remove language prefix if present (e.g., /en/images/ -> /images/)
   const normalizedImageUrl = post.image
-    ? post.image.replace(/^\/[^/]+\/images\//, '/images/').replace(/^\/[^/]+\/illustrations\//, '/illustrations/')
+    ? post.image.replace(/^\/[^/]+\/images\//, '/images/')
+        .replace(/^\/[^/]+\/illustrations\//, '/illustrations/')
+        .replace(/^\/[^/]+\/assets\//, '/assets/')
     : undefined;
 
   if (viewMode === 'list') {

@@ -91,7 +91,7 @@ export type BlogTranslations = typeof blogTranslations.en;
 
 export function getBlogTranslations(lang: string): BlogTranslations {
   const normalizedLang = lang.toLowerCase() as Language;
-  return blogTranslations[normalizedLang] || blogTranslations.en;
+  return (blogTranslations[normalizedLang] || blogTranslations.en) as BlogTranslations;
 }
 
 // Helper to translate category

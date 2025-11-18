@@ -1,0 +1,50 @@
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="450" fill="#CA8760"/>
+
+  <!-- Workflow nodes -->
+  <g transform="translate(150, 150)">
+    <circle cx="0" cy="0" r="35" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <path d="M -15 -5 L -5 5 L 15 -15" stroke="#1A1A1A" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(300, 150)">
+    <rect x="-35" y="-35" width="70" height="70" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <circle cx="0" cy="0" r="20" fill="#1A1A1A"/>
+    <path d="M -8 -10 L -8 10 L 8 0 Z" fill="#FFFFFF"/>
+  </g>
+
+  <g transform="translate(450, 150)">
+    <circle cx="0" cy="0" r="35" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <circle cx="0" cy="0" r="18" fill="none" stroke="#1A1A1A" stroke-width="2.5"/>
+    <path d="M -12 -12 L 12 12 M -12 12 L 12 -12" stroke="#1A1A1A" stroke-width="2.5"/>
+  </g>
+
+  <g transform="translate(600, 150)">
+    <rect x="-35" y="-35" width="70" height="70" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <path d="M -15 0 L -5 10 L 15 -10" stroke="#1A1A1A" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Flow arrows -->
+  <path d="M 190 150 L 255 150" stroke="#1A1A1A" stroke-width="3"/>
+  <path d="M 249 145 L 255 150 L 249 155" fill="#1A1A1A"/>
+
+  <path d="M 345 150 L 410 150" stroke="#1A1A1A" stroke-width="3"/>
+  <path d="M 404 145 L 410 150 L 404 155" fill="#1A1A1A"/>
+
+  <path d="M 490 150 L 555 150" stroke="#1A1A1A" stroke-width="3"/>
+  <path d="M 549 145 L 555 150 L 549 155" fill="#1A1A1A"/>
+
+  <!-- Gear icon -->
+  <g transform="translate(400, 280)">
+    <circle cx="0" cy="0" r="40" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="3"/>
+    <path d="M -10 -20 L -10 -30 L 10 -30 L 10 -20 Z M -10 20 L -10 30 L 10 30 L 10 20 Z M -20 -10 L -30 -10 L -30 10 L -20 10 Z M 20 -10 L 30 -10 L 30 10 L 20 10 Z" fill="#FFFFFF"/>
+    <circle cx="0" cy="0" r="18" fill="#CA8760"/>
+  </g>
+
+  <!-- Decorative -->
+  <path d="M 250 350 Q 270 340 290 350 Q 310 360 330 350" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <circle cx="700" cy="280" r="12" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+  <rect x="80" y="80" width="22" height="22" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+</svg>

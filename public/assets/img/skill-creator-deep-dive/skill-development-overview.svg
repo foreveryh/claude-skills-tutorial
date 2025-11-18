@@ -1,0 +1,54 @@
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="450" fill="#C67B9B"/>
+
+  <!-- Main document/file icon -->
+  <rect x="250" y="80" width="300" height="280" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="3"/>
+  <path d="M 470 80 L 470 150 L 550 150 L 550 80" fill="#1A1A1A"/>
+  <path d="M 470 80 L 550 150" stroke="#C67B9B" stroke-width="2"/>
+
+  <!-- SKILL.md text -->
+  <text x="310" y="130" font-family="monospace" font-size="24" font-weight="bold" fill="#1A1A1A">SKILL.md</text>
+
+  <!-- Code lines -->
+  <rect x="280" y="160" width="180" height="8" rx="4" fill="#C67B9B" opacity="0.6"/>
+  <rect x="280" y="180" width="220" height="8" rx="4" fill="#C67B9B" opacity="0.4"/>
+  <rect x="280" y="200" width="150" height="8" rx="4" fill="#C67B9B" opacity="0.6"/>
+
+  <rect x="280" y="230" width="200" height="8" rx="4" fill="#C67B9B" opacity="0.5"/>
+  <rect x="280" y="250" width="180" height="8" rx="4" fill="#C67B9B" opacity="0.4"/>
+
+  <rect x="280" y="280" width="210" height="8" rx="4" fill="#C67B9B" opacity="0.6"/>
+  <rect x="280" y="300" width="170" height="8" rx="4" fill="#C67B9B" opacity="0.5"/>
+
+  <!-- Geometric tool shapes -->
+  <g transform="translate(150, 180)">
+    <rect x="0" y="0" width="50" height="50" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <path d="M 10 15 L 10 35 L 25 35 L 25 25 L 40 25 L 40 15 Z" fill="#1A1A1A"/>
+  </g>
+
+  <g transform="translate(600, 200)">
+    <circle cx="25" cy="25" r="25" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5"/>
+    <path d="M 15 25 L 25 15 L 35 25 L 25 35 Z" fill="#1A1A1A"/>
+  </g>
+
+  <!-- Hand-drawn arrow pointing to document -->
+  <path d="M 180 130 Q 200 110 220 120" stroke="#1A1A1A" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M 214 116 L 220 120 L 216 126" fill="#1A1A1A"/>
+
+  <!-- Decorative wavy line -->
+  <path d="M 300 380 Q 320 370 340 380 Q 360 390 380 380 Q 400 370 420 380"
+        stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Small accent shapes -->
+  <circle cx="620" cy="130" r="10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+  <rect x="160" y="290" width="20" height="20" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+  <path d="M 610 330 L 620 350 L 600 350 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+
+  <!-- Process flow dots -->
+  <circle cx="300" cy="50" r="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+  <circle cx="350" cy="50" r="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+  <circle cx="400" cy="50" r="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+  <circle cx="450" cy="50" r="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+  <circle cx="500" cy="50" r="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+</svg>

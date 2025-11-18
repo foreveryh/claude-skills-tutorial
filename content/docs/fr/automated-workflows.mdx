@@ -1,6 +1,7 @@
 ---
 title: "Comment Claude Skills Alimente Notre Automatisation"
 description: "Un regard dans les coulisses de la façon dont nous avons construit un écosystème auto-documentant où les skills écrivent sur les skills, valident leur propre sortie et publient automatiquement - révolutionnant la façon dont la documentation est créée et maintenue."
+image: /assets/img/automated-workflows/workflow-automation-overview.svg
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -10,7 +11,7 @@ import { File, Folder, Files } from 'fumadocs-ui/components/files';
 
 # Comment Claude Skills Alimente Notre Automatisation
 
-image: /images/docs/automated-workflows/workflow-automation-overview.svg**Claude Skills a fondamentalement changé la façon dont nous créons et maintenons la documentation.** Ce qui était autrefois un processus manuel et sujet aux erreurs est devenu un écosystème auto-suffisant où des agents intelligents analysent des systèmes complexes, génèrent des guides complets, valident leur propre travail et publient avec une intervention humaine minimale.
+**Claude Skills a fondamentalement changé la façon dont nous créons et maintenons la documentation.** Ce qui était autrefois un processus manuel et sujet aux erreurs est devenu un écosystème auto-suffisant où des agents intelligents analysent des systèmes complexes, génèrent des guides complets, valident leur propre travail et publient avec une intervention humaine minimale.
 
 <Callout type="tip">
   Ce n'est pas théorique - vous lisez du contenu créé par notre pipeline d'automatisation des skills en ce moment même.
@@ -39,9 +40,9 @@ Lorsque nous avons d'abord analysé `mcp-builder` depuis le dépôt d'Anthropic 
 
 C'est à ce moment-là que nous avons réalisé : ce n'est pas seulement de l'automatisation - c'est de **l'écriture technique augmentée**.
 
-## L'Écosystème : Trois Skills, Des Possibilités Infinies
+## L'Écosystème : Quatre Skills, Des Possibilités Infinies
 
-Notre automatisation est propulsée par trois skills interconnectés qui fonctionnent en concert :
+Notre automatisation est propulsée par quatre skills interconnectés qui fonctionnent en concert :
 
 ### 1. skill-article-writer : L'Analyste
 
@@ -82,7 +83,7 @@ La génération brute ne suffit pas - la qualité compte. Ce skill fournit une *
     **Analyse Sémantique** : Classe les changements (feat, docs, fix) et détecte les langues affectées
   </Step>
   <Step>
-    **Commits Intelligents** : Génère des messages de commit significatifs comme "feat: publish analyzing-mcp-builder (en, zh, fr)"
+    **Commits Intelligents** : Génère des messages de commit significatifs comme "feat: publish analyzing-mcp-builder with cover image (en, zh, fr)"
   </Step>
   <Step>
     **Publication Automatisée** : Indexe les changements, crée des commits et pousse vers le dépôt distant
@@ -100,6 +101,12 @@ Ceci est la sortie visible - des guides techniques détaillés qui servent à la
     <File name="analyzing-mcp-builder.mdx" description="Guide de développement de serveurs MCP de 7 300+ mots" />
     <File name="analyzing-webapp-testing.mdx" description="Guide complet de test Playwright de 7 900+ mots" />
   </Folder>
+
+<Files>
+  <Folder name="philosophical-illustrator">
+    <File name="SKILL.md" description="Règles de génération SVG, palettes de couleurs et spécifications de sortie" />
+  </Folder>
+</Files>
 </Files>
 
 Chaque analyse est un **artefact technique** qui démontre les capacités des skills tout en servant de documentation pratique.
@@ -133,18 +140,25 @@ Voici le pipeline automatisé complet qui a créé le contenu que vous lisez :
   → Crée une traduction française
   → Met à jour tous les fichiers de navigation (meta.json)
 
-Étape 4 : skill-article-publisher valide
+Étape 4 : philosophical-illustrator génère des visuels
+  → Analyse le thème de l'article (MCP = palette Données/API)
+  → Crée un SVG personnalisé avec accolades, navigateur, icônes de globe
+  → Enregistre dans /public/images/docs/analyzing-mcp-builder/
+  → Met à jour le frontmatter avec le chemin de l'image
+  → Taille du fichier : ~2.1KB (optimisé)
+
+Étape 5 : skill-article-publisher valide
   → Vérifie les opérateurs non échappés (> → \u0026gt;, < → \u0026lt;)
   → Valide la structure du frontmatter
   → Exécute npm run build pour vérifier la compilation
 
-Étape 5 : Publication automatisée
+Étape 6 : Publication automatisée
   → Détecte le type de changement (feat pour un nouveau contenu)
   → Identifie les langues affectées (en, zh, fr)
-  → Génère le commit : "feat: publish analyzing-mcp-builder (en, zh, fr)"
+  → Génère le commit : "feat: publish analyzing-mcp-builder with cover image (en, zh, fr)"
   → Indexe, valide et pousse vers le dépôt
 
-Étape 6 : Déploiement
+Étape 7 : Déploiement
   → Le pipeline de build récupère les changements
   → Déploie vers la production
   → Le contenu est en ligne et accessible
@@ -451,6 +465,11 @@ Voyez les skills en action :
     title="skill-article-writer"
     description="Analyser les skills et générer automatiquement des articles complets"
     icon="Zap"
+  />
+  <Card
+    title="philosophical-illustrator"
+    description="Générer des images de couverture SVG personnalisées adaptées au thème de chaque article"
+    icon="Palette"
   />
   <Card
     title="skill-article-publisher"
