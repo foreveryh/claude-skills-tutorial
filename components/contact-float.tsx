@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { MessageCircle, X } from 'lucide-react';
 
 export function ContactFloat() {
@@ -68,11 +67,9 @@ export function ContactFloat() {
                   onClick={() => setShowQRCode(!showQRCode)}
                   className="flex w-full cursor-pointer items-center gap-3 rounded-md border border-fd-border bg-fd-muted/30 p-3 transition-colors hover:bg-fd-accent"
                 >
-                  <Image
+                  <img
                     src="/icons/wechat.png"
                     alt="WeChat"
-                    width={20}
-                    height={20}
                     className="h-5 w-5 flex-shrink-0"
                   />
                   <div className="flex-1 text-left">
@@ -119,12 +116,10 @@ export function ContactFloat() {
                       扫码添加微信
                     </p>
                     <div className="flex justify-center">
-                      <Image
+                      <img
                         src="/wechat_browncony999.jpg"
                         alt="微信二维码"
-                        width={200}
-                        height={200}
-                        className="rounded-lg"
+                        className="rounded-lg w-48 h-48 object-contain"
                       />
                     </div>
                     <p className="text-center text-xs text-fd-muted-foreground">
