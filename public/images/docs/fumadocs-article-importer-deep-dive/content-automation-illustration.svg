@@ -1,0 +1,131 @@
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background: Development/Code (Pink-Purple) -->
+  <rect width="800" height="450" fill="#C67B9B" rx="12"/>
+
+  <!-- Main content: Document transformation metaphor -->
+
+  <!-- Left: Source document (web page) -->
+  <g transform="translate(150, 100)">
+    <!-- Browser window frame -->
+    <rect x="0" y="0" width="140" height="180" fill="#1A1A1A" rx="8"/>
+    <rect x="10" y="10" width="120" height="160" fill="#FFFFFF" rx="4"/>
+
+    <!-- Browser top bar -->
+    <rect x="10" y="10" width="120" height="25" fill="#F0F0F0" rx="4"/>
+    <circle cx="25" cy="22" r="4" fill="#FF5F56"/>
+    <circle cx="40" cy="22" r="4" fill="#FFBD2E"/>
+    <circle cx="55" cy="22" r="4" fill="#27C93F"/>
+
+    <!-- Content lines representing article -->
+    <rect x="20" y="45" width="80" height="8" fill="#C67B9B" rx="2"/>
+    <rect x="20" y="60" width="100" height="8" fill="#D8D8D8" rx="2"/>
+    <rect x="20" y="75" width="90" height="8" fill="#D8D8D8" rx="2"/>
+    <rect x="20" y="90" width="70" height="8" fill="#D8D8D8" rx="2"/>
+
+    <!-- Image placeholder -->
+    <rect x="20" y="105" width="60" height="40" fill="#E8E8E8" rx="4"/>
+    <circle cx="50" cy="125" r="8" fill="#B8B8B8"/>
+
+    <!-- More content lines -->
+    <rect x="20" y="150" width="95" height="8" fill="#D8D8D8" rx="2"/>
+    <rect x="20" y="165" width="85" height="8" fill="#D8D8D8" rx="2"/>
+  </g>
+
+  <!-- Middle: AI Processing/Transformation -->
+  <g transform="translate(350, 140)">
+    <!-- Central AI brain icon -->
+    <circle cx="50" cy="50" r="45" fill="#1A1A1A" stroke="#FFFFFF" stroke-width="4"/>
+    <circle cx="50" cy="50" r="35" fill="#FFFFFF"/>
+
+    <!-- Brain circuit pattern -->
+    <path d="M 30 40 Q 50 30, 70 40 Q 65 50, 50 55 Q 35 50, 30 40" fill="#C67B9B" stroke="none"/>
+    <circle cx="40" cy="45" r="3" fill="#1A1A1A"/>
+    <circle cx="60" cy="45" r="3" fill="#1A1A1A"/>
+    <circle cx="50" cy="40" r="3" fill="#1A1A1A"/>
+    <circle cx="50" cy="50" r="3" fill="#1A1A1A"/>
+
+    <!-- Processing arrows -->
+    <path d="M 100 50 L 140 50" stroke="#FFFFFF" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+    <path d="M -40 50 L 0 50" stroke="#FFFFFF" stroke-width="3" fill="none" marker-end="url(#arrowhead2)"/>
+  </g>
+
+  <!-- Right: Output documents (multi-language MDX files) -->
+  <g transform="translate(550, 80)">
+    <!-- EN document -->
+    <g transform="translate(0, 0)">
+      <rect x="0" y="0" width="120" height="140" fill="#1A1A1A" rx="6"/>
+      <rect x="5" y="5" width="110" height="130" fill="#FFFFFF" rx="3"/>
+      <text x="60" y="25" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#1A1A1A">EN</text>
+      <rect x="15" y="35" width="90" height="4" fill="#C67B9B" rx="1"/>
+      <rect x="15" y="45" width="70" height="4" fill="#D8D8D8" rx="1"/>
+      <rect x="15" y="55" width="80" height="4" fill="#D8D8D8" rx="1"/>
+      <!-- Code block -->
+      <rect x="15" y="65" width="90" height="30" fill="#F5F5F5" rx="2"/>
+      <text x="20" y="80" font-family="monospace" font-size="10" fill="#1A1A1A">{title: "..."}</text>
+      <text x="20" y="92" font-family="monospace" font-size="10" fill="#1A1A1A">lang: en</text>
+      <rect x="15" y="100" width="75" height="4" fill="#D8D8D8" rx="1"/>
+      <rect x="15" y="110" width="85" height="4" fill="#D8D8D8" rx="1"/>
+      <rect x="15" y="120" width="65" height="4" fill="#D8D8D8" rx="1"/>
+    </g>
+
+    <!-- ZH document -->
+    <g transform="translate(0, 155)">
+      <rect x="0" y="0" width="120" height="140" fill="#1A1A1A" rx="6"/>
+      <rect x="5" y="5" width="110" height="130" fill="#FFFFFF" rx="3"/>
+      <text x="60" y="25" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle" fill="#1A1A1A">中文</text>
+      <rect x="15" y="35" width="90" height="4" fill="#C67B9B" rx="1"/>
+      <rect x="15" y="45" width="85" height="4" fill="#D8D8D8" rx="1"/>
+      <rect x="15" y="55" width="75" height="4" fill="#D8D8D8" rx="1"/>
+      <!-- Chinese characters placeholder -->
+      <rect x="15" y="65" width="90" height="30" fill="#F5F5F5" rx="2"/>
+      <text x="60" y="80" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#1A1A1A">标题: "..."</text>
+      <text x="60" y="92" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#1A1A1A">语言: zh</text>
+      <rect x="15" y="100" width="80" height="4" fill="#D8D8D8" rx="1"/>
+      <rect x="15" y="110" width="70" height="4" fill="#D8D8D8" rx="1"/>
+      <rect x="15" y="120" width="85" height="4" fill="#D8D8D8" rx="1"/>
+    </g>
+  </g>
+
+  <!-- Decorative elements -->
+
+  <!-- Top floating tech symbols -->
+  <g transform="translate(100, 50)" opacity="0.3">
+    <text x="0" y="0" font-family="monospace" font-size="20" fill="#FFFFFF">&lt;/&gt;</text>
+  </g>
+
+  <g transform="translate(650, 40)" opacity="0.3">
+    <text x="0" y="0" font-family="monospace" font-size="20" fill="#FFFFFF">{}</text>
+  </g>
+
+  <!-- Bottom decorative waves -->
+  <path d="M 50 400 Q 200 380, 350 400 T 650 400" stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.3"/>
+  <path d="M 100 420 Q 250 400, 400 420 T 700 420" stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.2"/>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <polygon points="0 0, 10 5, 0 10" fill="#FFFFFF"/>
+    </marker>
+    <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="1" refY="5" orient="auto">
+      <polygon points="10 0, 0 5, 10 10" fill="#FFFFFF"/>
+    </marker>
+  </defs>
+
+  <!-- Code brackets accent -->
+  <g transform="translate(380, 50)" opacity="0.4">
+    <text x="0" y="0" font-family="monospace" font-size="24" font-weight="bold" fill="#FFFFFF">&lt;/&gt;</text>
+  </g>
+
+  <!-- Small gear icons for automation theme -->
+  <g transform="translate(320, 280)" opacity="0.5">
+    <circle cx="10" cy="10" r="8" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+    <circle cx="10" cy="10" r="3" fill="#FFFFFF"/>
+    <rect x="8" y="0" width="4" height="20" fill="#FFFFFF"/>
+    <rect x="0" y="8" width="20" height="4" fill="#FFFFFF"/>
+  </g>
+
+  <g transform="translate(450, 320)" opacity="0.4">
+    <circle cx="8" cy="8" r="6" fill="none" stroke="#FFFFFF" stroke-width="1.5"/>
+    <circle cx="8" cy="8" r="2" fill="#FFFFFF"/>
+  </g>
+</svg>
