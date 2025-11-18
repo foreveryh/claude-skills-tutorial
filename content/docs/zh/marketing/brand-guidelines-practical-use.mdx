@@ -1,0 +1,164 @@
+---
+title: "品牌指南的实际应用：使用 Anthropic Skills 保持品牌一致性"
+description: "了解如何使用 Anthropic Skills 来保持品牌指南、颜色和排版在所有内容中的一致性。"
+lang: zh
+category: marketing
+difficulty: beginner
+tags:
+  - 营销
+  - 品牌指南
+  - 品牌一致性
+  - 品牌颜色
+  - 排版
+  - AI工具
+image: /images/docs/brand-guidelines-practical-use/brand-design-overview.svg
+source_url: ""
+published_date: "2025-11-18"
+author: "Anthropic 团队"
+---
+
+# 品牌指南的实际应用：使用 Anthropic Skills 保持品牌一致性
+
+在所有营销内容中保持一致的品牌指南、颜色和排版可能会非常耗时——尤其是在与多个团队成员或 AI 工具合作时。Anthropic Skills 通过将您的品牌专业知识封装到 Claude 可以自动应用的可重用包中来解决这个问题。
+
+在本文中，我们将重点介绍 `brand-guidelines` 技能，作为如何使用 Anthropic Skills 确保每一条内容都遵循您的品牌标准的实际示例。
+
+## 技能的结构：SKILL.md 文件
+
+每个 Anthropic Skill 都以一个 `SKILL.md` 文件开头——这是一个简单的 markdown 文档，包含两部分：用于元数据的 **YAML 前页** 和用于说明的 **markdown 内容**。
+
+让我们看看 GitHub 仓库中的官方 `brand-guidelines` 技能示例：
+
+### 前页：技能元数据
+```yaml
+---
+name: brand-guidelines
+description: 将 Anthropic 的官方品牌颜色和排版应用于任何可能受益于 Anthropic 外观的产品。当适用品牌颜色或样式指南、视觉格式或公司设计标准时使用它。
+license: Complete terms in LICENSE.txt
+---
+```
+
+此元数据告诉 Claude：
+- `name`：技能的唯一标识符（小写，空格用连字符代替）
+- `description`：技能的功能以及何时使用它
+- `license`：使用技能的法律条款
+
+### 内容：技能说明
+前页下方的 markdown 内容为 Claude 提供了所需的特定专业知识。对于 `brand-guidelines` 技能，这包括：
+
+#### 核心品牌元素
+该技能定义了 Anthropic 的官方调色板和排版规则：
+
+**主要颜色：**
+- 深色：`#141413` - 主要文本和深色背景
+- 浅色：`#faf9f5` - 浅色背景和深色文本
+- 中灰色：`#b0aea5` - 次要元素
+- 浅灰色：`#e8e6dc` - 微妙的背景
+
+**强调色：**
+- 橙色：`#d97757` - 主要强调色
+- 蓝色：`#6a9bcc` - 次要强调色
+- 绿色：`#788c5d` - 第三强调色
+
+**排版：**
+- **标题：** Poppins（Arial 作为备选）
+- **正文文本：** Lora（Georgia 作为备选）
+
+#### 功能特性
+该技能还包括如何应用这些品牌元素的规则：
+
+**智能字体应用：**
+- 标题（24pt 及以上）使用 Poppins 字体
+- 正文文本使用 Lora 字体
+- 若自定义字体不可用，自动回退到 Arial/Georgia
+- 保持跨系统的可读性
+
+清晰的元数据和详细的说明结合在一起，使 Claude 能够将 Anthropic 的品牌标识一致地应用于任何文档或产品。
+
+## 品牌指南技能的实际用例
+
+以下是 `brand-guidelines` 技能可以简化营销工作流程的一些实际场景：
+
+### 1. 一致的社交媒体内容
+创建社交媒体帖子时，Claude 可以自动应用：
+- 图像和图形的品牌调色板
+- 标题和正文文本的正确字体层级
+- 所有标题一致的语气和声音
+- 品牌特定的标签和行动呼吁短语
+
+### 2. 符合品牌的营销素材
+生成遵循以下规则的宣传册、传单和演示文稿：
+- 公司的排版规则
+- 批准的颜色组合
+- 布局指南（边距大小、间距、图像放置）
+- 品牌 messaging 框架
+
+### 3. 统一的电子邮件活动
+确保每封电子邮件都遵循您的品牌指南：
+- 电子邮件模板结构
+- 页眉和页脚设计
+- 按钮样式和颜色
+- 内容格式和语气
+
+## 如何使用品牌指南技能
+
+在所有 Claude 平台上使用该技能都很简单：
+
+1. **启用技能：**
+   - 在 Claude Code 中：`/plugin install brand-guidelines@anthropic-agent-skills`
+   - 在 Claude.ai 中：通过技能菜单访问
+   - 通过 API：在请求中包含技能引用
+
+2. **创建具有品牌一致性的内容：**
+   - 只需要求 Claude 创建内容（例如："撰写一篇关于我们新产品的社交媒体帖子"）
+   - 该技能将自动应用您的品牌指南
+   - 对于自定义请求："使用我们的品牌颜色和排版设计一个新闻稿横幅"
+
+## 对营销团队的好处
+
+- **节省时间：** 不再需要手动审查品牌一致性
+- **一致性：** 每一条内容都遵循相同的品牌标准
+- **可扩展性：** 在不损害品牌形象的情况下轻松扩展内容创作
+- **团队对齐：** 确保所有团队成员（和 AI 工具）遵循相同的准则
+
+## 创建您自己的自定义品牌指南技能
+
+虽然 Anthropic 提供了官方的 brand-guidelines 技能示例，但您可以为您的组织创建一个自定义版本：
+
+1. **使用模板结构：**
+   ```markdown
+   ---
+   name: my-company-brand-guidelines
+   description: 将我公司的品牌颜色、排版和风格指南应用于内容。
+   ---
+
+   # 我公司品牌指南
+
+   ## 调色板
+   - 主要：`#your-primary-color` - 主要品牌颜色
+   - 次要：`#your-secondary-color` - 辅助颜色
+   - 强调：`#your-accent-color` - 行动呼吁颜色
+
+   ## 排版
+   - 标题：您的品牌字体（Arial 作为备选）
+   - 正文文本：您的正文字体（Georgia 作为备选）
+
+   ## 语气和声音
+   - 保持信息友好且平易近人
+   - 避免行话
+   - 强调以客户为中心的语言
+
+   ## 布局规则
+   - 所有边使用 16px 边距
+   - 各部分之间的间距：24px
+   ```
+
+2. **注重细节：**
+   - 包含确切的颜色代码
+   - 定义字体家族和大小
+   - 概述语气和声音指南
+   - 添加应该做什么和不应该做什么的例子
+
+有了自定义的品牌指南技能，您可以确保每一条内容——无论是 Claude 还是您的团队创建的——都能与您的品牌标识完美对齐。
+
+如需了解更多信息，请访问 [Anthropics Skills GitHub 仓库](https://github.com/anthropics/skills) 或浏览 [官方文档](https://support.claude.com/en/articles/12512176-what-are-skills)。

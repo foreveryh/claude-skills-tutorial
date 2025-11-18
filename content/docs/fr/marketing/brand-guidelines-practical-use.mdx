@@ -1,0 +1,164 @@
+---
+title: "Utilisation pratique des directives de marque avec Anthropics Skills"
+description: "Apprenez comment utiliser Anthropics Skills pour maintenir des directives de marque, des couleurs et une typographie cohérentes dans tout votre contenu."
+lang: fr
+category: marketing
+difficulty: beginner
+tags:
+  - marketing
+  - directives-de-marque
+  - coherence-de-marque
+  - couleurs-de-marque
+  - typographie
+  - outils-ai
+image: /images/docs/brand-guidelines-practical-use/brand-design-overview.svg
+source_url: ""
+published_date: "2025-11-18"
+author: "Équipe Anthropic"
+---
+
+# Utilisation pratique des directives de marque avec Anthropics Skills
+
+Maintenir des directives de marque, des couleurs et une typographie cohérentes dans tout votre contenu marketing peut prendre beaucoup de temps — surtout quand vous travaillez avec plusieurs membres de l'équipe ou des outils AI. Anthropics Skills résout ce problème en encapsulant votre expertise en matière de marque dans un package réutilisable que Claude peut appliquer automatiquement.
+
+Dans cet article, nous nous concentrons sur la compétence `brand-guidelines` en tant qu'exemple pratique de l'utilisation d'Anthropics Skills pour garantir que chaque contenu suit vos normes de marque.
+
+## Anatomie d'une compétence : Le fichier SKILL.md
+
+Chaque Anthropic Skill commence par un fichier `SKILL.md` — un document markdown simple avec deux parties : **l'en-tête YAML** pour les métadonnées et **le contenu markdown** pour les instructions.
+
+Regardons l'exemple de la compétence officielle `brand-guidelines` dans le dépôt GitHub :
+
+### En-tête : Métadonnées de la compétence
+```yaml
+---
+name: brand-guidelines
+description: Applique les couleurs et la typographie officielles d'Anthropic à tout type de produit qui pourrait bénéficier de l'identité visuelle d'Anthropic. Utilisez-le lorsque des couleurs de marque ou des lignes directrices de style, un formatage visuel ou des normes de conception d'entreprise s'appliquent.
+license: Complete terms in LICENSE.txt
+---
+```
+
+Cette métadonnée informe Claude :
+- `name` : Identifiant unique de la compétence (minuscule, espaces remplacés par des tirets)
+- `description` : Ce que fait la compétence et quand l'utiliser
+- `license` : Conditions légales d'utilisation de la compétence
+
+### Contenu : Instructions de la compétence
+Le contenu markdown sous l'en-tête fournit à Claude l'expertise spécifique dont il a besoin. Pour la compétence `brand-guidelines`, cela inclut :
+
+#### Éléments de marque core
+La compétence définit la palette de couleurs officielle et les règles de typographie d'Anthropic :
+
+**Couleurs principales :**
+- Sombre : `#141413` - Texte principal et arrière-plans sombres
+- Clair : `#faf9f5` - Arrière-plans clairs et texte sur fond sombre
+- Gris moyen : `#b0aea5` - Éléments secondaires
+- Gris clair : `#e8e6dc` - Arrière-plans subtils
+
+**Couleurs d'accent :**
+- Orange : `#d97757` - Accent principal
+- Bleu : `#6a9bcc` - Accent secondaire
+- Vert : `#788c5d` - Accent tertiaire
+
+**Typographie :**
+- **Titres :** Poppins (Arial en fallback)
+- **Texte corps :** Lora (Georgia en fallback)
+
+#### Fonctionnalités
+La compétence inclut également des règles sur la façon d'appliquer ces éléments de marque :
+
+**Application intelligente des polices :**
+- Applique la police Poppins aux titres (24pt et plus)
+- Applique la police Lora au texte corps
+- Retourne automatiquement à Arial/Georgia si les polices personnalisées ne sont pas disponibles
+- Préserve la lisibilité sur tous les systèmes
+
+La combinaison de métadonnées claires et d'instructions détaillées permet à Claude d'appliquer l'identité de marque d'Anthropic de manière cohérente à tout document ou produit.
+
+## Cas d'usage pratique de la compétence directives de marque
+
+Voici quelques scénarios réels où la compétence `brand-guidelines` peut rationaliser votre flux de travail marketing :
+
+### 1. Contenu de réseaux sociaux cohérent
+Lors de la création de posts sur les réseaux sociaux, Claude peut appliquer automatiquement :
+- Votre palette de couleurs aux images et aux graphiques
+- La hiérarchie de polices correcte pour les titres et le texte corps
+- Un ton et une voix cohérents dans toutes les légendes
+- Des hashtags spécifiques à la marque et des phrases d'appel à l'action
+
+### 2. Supports marketing conformes à la marque
+Générez des brochures, des dépliants et des présentations qui respectent :
+- Les règles de typographie de votre entreprise
+- Les combinaisons de couleurs approuvées
+- Les directives de mise en page (tailles de marges, espacement, placement des images)
+- Les cadres de messages de marque
+
+### 3. Campagnes email uniformes
+Assurez-vous que chaque email suit vos directives de marque :
+- Structure de modèle email
+- Design de l'en-tête et du pied de page
+- Styles et couleurs des boutons
+- Formatage du contenu et ton
+
+## Comment utiliser la compétence directives de marque
+
+L'utilisation de la compétence est simple sur toutes les plateformes Claude :
+
+1. **Activer la compétence :**
+   - Dans Claude Code : `/plugin install brand-guidelines@anthropic-agent-skills`
+   - Dans Claude.ai : Accès via le menu des compétences
+   - Via API : Inclure une référence à la compétence dans vos requêtes
+
+2. **Créer du contenu avec cohérence de marque :**
+   - Demandez simplement à Claude de créer du contenu (ex. : "Écris un post sur les réseaux sociaux à propos de notre nouveau produit")
+   - La compétence appliquera automatiquement vos directives de marque
+   - Pour les requêtes personnalisées : "Concevez une bannière pour la newsletter en utilisant nos couleurs et typographie de marque"
+
+## Avantages pour les équipes marketing
+
+- **Économies de temps :** Plus de vérifications manuelles de cohérence de marque
+- **Cohérence :** Chaque contenu suit les mêmes normes de marque
+- **Extensibilité :** Étendez facilement la création de contenu sans compromettre l'identité de marque
+- **Alignement de l'équipe :** Assurez que tous les membres de l'équipe (et les outils AI) suivent les mêmes directives
+
+## Créer votre propre compétence de directives de marque personnalisée
+
+Bien qu'Anthropic fournisse un exemple de compétence `brand-guidelines` officiel, vous pouvez créer une version personnalisée pour votre organisation :
+
+1. **Utilisez la structure du modèle :**
+   ```markdown
+   ---
+   name: my-company-brand-guidelines
+   description: Applique les couleurs de marque, la typographie et les directives de style de My Company au contenu.
+   ---
+
+   # Directives de marque de My Company
+
+   ## Palette de couleurs
+   - Primaire: `#your-primary-color` - Couleur principale de la marque
+   - Secondaire: `#your-secondary-color` - Couleur de soutien
+   - Accent: `#your-accent-color` - Couleur d'appel à l'action
+
+   ## Typographie
+   - Titres: Votre Police de Marque (Arial en fallback)
+   - Texte corps: Votre Police de Texte (Georgia en fallback)
+
+   ## Ton et voix
+   - Gardez les messages conviviaux et accessibles
+   - Évitez le jargon
+   - Mettez l'accent sur un langage centré sur le client
+
+   ## Règles de mise en page
+   - Utilisez des marges de 16px sur tous les côtés
+   - Espace entre sections: 24px
+   ```
+
+2. **Mettez l'accent sur la spécificité :**
+   - Incluez des codes de couleur exacts
+   - Définissez les familles et tailles de polices
+   - Décrivez les directives de ton et de voix
+   - Ajoutez des exemples de ce qu'il faut faire et de ce qu'il ne faut pas faire
+
+Avec une compétence de directives de marque personnalisée, vous pouvez garantir que chaque contenu — que ce soit créé par Claude ou votre équipe — s'aligne parfaitement avec votre identité de marque.
+
+Pour en savoir plus, visitez le [dépôt GitHub d'Anthropics Skills](https://github.com/anthropics/skills) ou explorez la [documentation officielle](https://support.claude.com/en/articles/12512176-what-are-skills).

@@ -1,0 +1,164 @@
+---
+title: "Practical Use of Brand Guidelines with Anthropics Skills"
+description: "Learn how to use Anthropics Skills to maintain consistent brand guidelines, colors, and typography across all your content."
+lang: en
+category: marketing
+difficulty: beginner
+tags:
+  - marketing
+  - brand-guidelines
+  - brand-consistency
+  - brand-colors
+  - typography
+  - ai-tools
+image: /images/docs/brand-guidelines-practical-use/brand-design-overview.svg
+source_url: ""
+published_date: "2025-11-18"
+author: "Anthropic Team"
+---
+
+# Using Anthropics Skills for Consistent Brand Guidelines
+
+Maintaining consistent brand guidelines, colors, and typography across all your marketing content can be time-consuming—especially when working with multiple team members or AI tools. Anthropics Skills solve this problem by encapsulating your brand expertise into a reusable package that Claude can apply automatically.
+
+In this article, we'll focus on the **brand-guidelines** skill as a practical example of how to use Anthropics Skills to ensure every piece of content follows your brand standards.
+
+## Anatomy of a Skill: The SKILL.md File
+
+Every Anthropics Skill starts with a `SKILL.md` file—a simple markdown document with two key parts: **YAML frontmatter** for metadata and **markdown content** for instructions.
+
+Let's examine the official `brand-guidelines` skill from the GitHub repository to see how this works:
+
+### Frontmatter: Skill Metadata
+```yaml
+---
+name: brand-guidelines
+description: Applies Anthropic's official brand colors and typography to any sort of artifact that may benefit from having Anthropic's look-and-feel. Use it when brand colors or style guidelines, visual formatting, or company design standards apply.
+license: Complete terms in LICENSE.txt
+---
+```
+
+This metadata tells Claude:
+- `name`: A unique identifier for the skill (lowercase, hyphens for spaces)
+- `description`: What the skill does and when to use it
+- `license`: Legal terms for using the skill
+
+### Content: Skill Instructions
+The markdown content below the frontmatter provides Claude with the specific expertise it needs. For the `brand-guidelines` skill, this includes:
+
+#### Core Brand Elements
+The skill defines Anthropic's official color palette and typography rules:
+
+**Main Colors:**
+- Dark: `#141413` - Primary text and dark backgrounds
+- Light: `#faf9f5` - Light backgrounds and text on dark
+- Mid Gray: `#b0aea5` - Secondary elements
+- Light Gray: `#e8e6dc` - Subtle backgrounds
+
+**Accent Colors:**
+- Orange: `#d97757` - Primary accent
+- Blue: `#6a9bcc` - Secondary accent
+- Green: `#788c5d` - Tertiary accent
+
+**Typography:**
+- **Headings**: Poppins (with Arial fallback)
+- **Body Text**: Lora (with Georgia fallback)
+
+#### Functional Features
+The skill also includes rules for how these brand elements should be applied:
+
+**Smart Font Application:**
+- Applies Poppins font to headings (24pt and larger)
+- Applies Lora font to body text
+- Automatically falls back to Arial/Georgia if custom fonts unavailable
+- Preserves readability across all systems
+
+This combination of clear metadata and detailed instructions allows Claude to consistently apply Anthropic's brand identity to any document or artifact.
+
+## Practical Use Cases for Brand Guidelines Skill
+
+Here are some real-world scenarios where the `brand-guidelines` skill can streamline your marketing workflow:
+
+### 1. Consistent Social Media Content
+When creating social media posts, Claude can automatically apply:
+- Your brand color palette to images and graphics
+- The correct font hierarchy for headlines and body text
+- Consistent tone and voice across all captions
+- Brand-specific hashtags and call-to-action phrases
+
+### 2. On-Brand Marketing Collateral
+Generate brochures, flyers, and presentations that adhere to:
+- Your company's typography rules
+- Approved color combinations
+- Layout guidelines (margin sizes, spacing, image placement)
+- Brand messaging frameworks
+
+### 3. Uniform Email Campaigns
+Ensure every email follows your brand guidelines:
+- Email template structure
+- Header and footer design
+- Button styles and colors
+- Content formatting and tone
+
+## How to Use the Brand Guidelines Skill
+
+Using the skill is simple across all Claude platforms:
+
+1. **Enable the Skill**:
+   - In Claude Code: `/plugin install brand-guidelines@anthropic-agent-skills`
+   - In Claude.ai: Access via the skills menu
+   - Via API: Include skill reference in your requests
+
+2. **Create Content with Brand Consistency**:
+   - Simply ask Claude to create content (e.g., "Write a social media post about our new product")
+   - The skill will automatically apply your brand guidelines
+   - For custom requests: "Design a newsletter banner using our brand colors and typography"
+
+## Benefits for Marketing Teams
+
+- **Time Savings**: No more manual reviews for brand consistency
+- **Consistency**: Every piece of content follows the same brand standards
+- **Scalability**: Easily scale content creation without compromising brand identity
+- **Team Alignment**: Ensures all team members (and AI tools) follow the same guidelines
+
+## Creating Your Own Custom Brand Guidelines Skill
+
+While Anthropic provides an official brand-guidelines skill example, you can create a custom version for your organization:
+
+1. **Use the template structure**:
+   ```markdown
+   ---
+   name: my-company-brand-guidelines
+   description: Applies My Company's brand colors, typography, and style guidelines to content.
+   ---
+
+   # My Company Brand Guidelines
+
+   ## Color Palette
+   - Primary: `#your-primary-color` - Main brand color
+   - Secondary: `#your-secondary-color` - Supporting color
+   - Accent: `#your-accent-color` - Call-to-action color
+
+   ## Typography
+   - Headings: Your Brand Font (fallback to Arial)
+   - Body Text: Your Body Font (fallback to Georgia)
+
+   ## Tone & Voice
+   - Keep messaging friendly and approachable
+   - Avoid jargon
+   - Emphasize customer-centric language
+
+   ## Layout Rules
+   - Use 16px margin on all sides
+   - Space between sections: 24px
+   ```
+
+2. **Focus on specificity**:
+   - Include exact color codes
+   - Define font families and sizes
+   - Outline tone and voice guidelines
+   - Add examples of do's and don'ts
+
+With a custom brand guidelines skill, you can ensure every piece of content—whether created by Claude or your team—aligns perfectly with your brand identity.
+
+To learn more, visit the [Anthropics Skills GitHub repository](https://github.com/anthropics/skills) or explore the [official documentation](https://support.claude.com/en/articles/12512176-what-are-skills).
