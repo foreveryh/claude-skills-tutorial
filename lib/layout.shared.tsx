@@ -6,6 +6,28 @@ export function baseOptions(locale: string): BaseLayoutProps {
     nav: {
       title: 'Claude Skills',
     },
+    links: [
+      {
+        text: 'Why',
+        url: `/${locale}/docs`,
+        active: 'nested-url',
+      },
+      {
+        text: 'How',
+        url: `/${locale}/docs/automated-workflows`,
+        active: 'nested-url',
+      },
+      {
+        text: 'Author',
+        url: `/${locale}/docs/about`,
+        active: 'nested-url',
+      },
+      {
+        text: 'GitHub',
+        url: 'https://github.com/foreveryh/claude-skills-tutorial',
+        external: true,
+      },
+    ],
     i18n,
   };
 }

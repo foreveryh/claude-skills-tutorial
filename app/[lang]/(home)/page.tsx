@@ -1,16 +1,26 @@
-import Link from 'next/link';
+import { BlogList } from '@/components/blog-list';
+import { getBlogPosts, getCategories, getDifficulties, getTags } from '@/lib/blog-utils';
 
-export default function HomePage() {
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang } = await params;
+
+  // Fetch all data on the server
+  const posts = getBlogPosts(lang);
+  const categories = getCategories(posts);
+  const difficulties = getDifficulties(posts);
+  const tags = getTags(posts);
+
   return (
-    <div className="flex flex-col justify-center text-center flex-1">
-      <h1 className="text-2xl font-bold mb-4">Hello World</h1>
-      <p>
-        You can open{' '}
-        <Link href="/docs" className="font-medium underline">
-          /docs
-        </Link>{' '}
-        and see the documentation.
-      </p>
-    </div>
+    <BlogList
+      posts={posts}
+      categories={categories}
+      difficulties={difficulties}
+      tags={tags}
+      lang={lang}
+    />
   );
 }
