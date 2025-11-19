@@ -37,6 +37,16 @@ interface SourceAttributionProps {
  * />
  */
 export function SourceAttribution({ source, languages, currentLang, className }: SourceAttributionProps) {
+  // Add defensive checks for undefined props
+  if (!source || !languages || !currentLang) {
+    return null;
+  }
+
+  // Validate source object has required properties
+  if (!source.url || !source.name) {
+    return null;
+  }
+
   const langNames: Record<string, string> = {
     en: 'English',
     zh: '简体中文',
