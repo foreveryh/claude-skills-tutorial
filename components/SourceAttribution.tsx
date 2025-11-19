@@ -57,12 +57,12 @@ export function SourceAttribution({ source, languages, currentLang, className }:
   const otherLangs = languages.filter(lang => lang !== currentLang);
 
   return (
-    <div className={["mb-8 rounded-lg border bg-muted/50 p-4", className].join(' ')}>
+    <div className={["mb-8 rounded-lg border border-border bg-muted/50 dark:bg-muted/30 p-4", className].join(' ')}>
       <div className="flex flex-col gap-3">
         {/* Header */}
         <div className="flex items-center gap-2">
           <Globe className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold text-muted-foreground">
+          <h3 className="text-sm font-semibold text-foreground dark:text-muted-foreground">
             📚 Source Information
           </h3>
         </div>
@@ -76,7 +76,7 @@ export function SourceAttribution({ source, languages, currentLang, className }:
               href={source.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-primary hover:underline"
+              className="font-medium text-primary hover:underline dark:text-blue-400"
             >
               {source.name}
             </a>
@@ -86,7 +86,7 @@ export function SourceAttribution({ source, languages, currentLang, className }:
             <div className="flex items-center gap-2 text-sm">
               <User className="h-3 w-3 text-muted-foreground" />
               <span className="text-muted-foreground">Author:</span>
-              <span className="font-medium">{source.author}</span>
+              <span className="font-medium text-foreground">{source.author}</span>
             </div>
           )}
 
@@ -94,7 +94,7 @@ export function SourceAttribution({ source, languages, currentLang, className }:
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-3 w-3 text-muted-foreground" />
               <span className="text-muted-foreground">Published:</span>
-              <span className="font-medium">
+              <span className="font-medium text-foreground">
                 {new Date(source.publishedDate).toLocaleDateString('en-US')}
               </span>
             </div>
@@ -103,7 +103,7 @@ export function SourceAttribution({ source, languages, currentLang, className }:
 
         {/* Language selector */}
         {otherLangs.length > 0 && (
-          <div className="mt-3 border-t pt-3 pl-6">
+          <div className="mt-3 border-t border-border pt-3 pl-6">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs text-muted-foreground">🌐 Available in:</span>
               {languages.map(lang => {
@@ -115,7 +115,7 @@ export function SourceAttribution({ source, languages, currentLang, className }:
                     className={`text-xs rounded-full px-2 py-1 ${
                       isActive
                         ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground'
+                        : 'bg-muted text-muted-foreground dark:bg-muted/50'
                     }`}
                   >
                     {langNames[lang]}
@@ -127,7 +127,7 @@ export function SourceAttribution({ source, languages, currentLang, className }:
         )}
 
         {/* Import notes */}
-        <div className="mt-3 border-t pt-3 pl-6">
+        <div className="mt-3 border-t border-border pt-3 pl-6">
           <p className="text-xs text-muted-foreground">
             ℹ️ This article was automatically imported and translated using Claude AI.
             {source.accessedDate && ` Imported on ${new Date(source.accessedDate).toLocaleDateString()}.`}
