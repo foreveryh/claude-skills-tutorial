@@ -18,6 +18,14 @@
     --font-body: 'Lora', Georgia, serif;
   }
 
+  .dark {
+    /* Dark mode: Swap light/dark values */
+    --color-dark: #faf9f5;
+    --color-light: #181818;
+    --color-mid-gray: #8b8b8b;
+    --color-light-gray: #303030;
+  }
+
   body {
     background-color: var(--color-light);
     color: var(--color-dark);
