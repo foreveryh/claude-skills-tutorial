@@ -57,12 +57,12 @@ export function SourceAttribution({ source, languages, currentLang, className }:
   const otherLangs = languages.filter(lang => lang !== currentLang);
 
   return (
-    <div className={["mb-8 rounded-lg border border-border bg-muted/50 dark:bg-muted/30 p-4", className].join(' ')}>
+    <div className={["mb-8 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-4", className].join(' ')}>
       <div className="flex flex-col gap-3">
         {/* Header */}
         <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold text-foreground dark:text-muted-foreground">
+          <Globe className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             📚 Source Information
           </h3>
         </div>
@@ -70,13 +70,13 @@ export function SourceAttribution({ source, languages, currentLang, className }:
         {/* Main source info */}
         <div className="grid gap-2 pl-6">
           <div className="flex items-center gap-2 text-sm">
-            <ExternalLink className="h-3 w-3 text-muted-foreground" />
-            <span className="text-muted-foreground">Original article:</span>
+            <ExternalLink className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+            <span className="text-gray-600 dark:text-gray-400">Original article:</span>
             <a
               href={source.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-primary hover:underline dark:text-blue-400"
+              className="font-medium text-orange-600 hover:underline dark:text-orange-400"
             >
               {source.name}
             </a>
@@ -84,17 +84,17 @@ export function SourceAttribution({ source, languages, currentLang, className }:
 
           {source.author && (
             <div className="flex items-center gap-2 text-sm">
-              <User className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Author:</span>
-              <span className="font-medium text-foreground">{source.author}</span>
+              <User className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+              <span className="text-gray-600 dark:text-gray-400">Author:</span>
+              <span className="font-medium text-gray-900 dark:text-gray-200">{source.author}</span>
             </div>
           )}
 
           {source.publishedDate && (
             <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-3 w-3 text-muted-foreground" />
-              <span className="text-muted-foreground">Published:</span>
-              <span className="font-medium text-foreground">
+              <Calendar className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+              <span className="text-gray-600 dark:text-gray-400">Published:</span>
+              <span className="font-medium text-gray-900 dark:text-gray-200">
                 {new Date(source.publishedDate).toLocaleDateString('en-US')}
               </span>
             </div>
@@ -103,9 +103,9 @@ export function SourceAttribution({ source, languages, currentLang, className }:
 
         {/* Language selector */}
         {otherLangs.length > 0 && (
-          <div className="mt-3 border-t border-border pt-3 pl-6">
+          <div className="mt-3 border-t border-gray-300 dark:border-gray-700 pt-3 pl-6">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-muted-foreground">🌐 Available in:</span>
+              <span className="text-xs text-gray-600 dark:text-gray-400">🌐 Available in:</span>
               {languages.map(lang => {
                 const isActive = lang === currentLang;
 
@@ -114,8 +114,8 @@ export function SourceAttribution({ source, languages, currentLang, className }:
                     key={lang}
                     className={`text-xs rounded-full px-2 py-1 ${
                       isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground dark:bg-muted/50'
+                        ? 'bg-orange-600 text-white dark:bg-orange-500'
+                        : 'bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                     }`}
                   >
                     {langNames[lang]}
@@ -127,8 +127,8 @@ export function SourceAttribution({ source, languages, currentLang, className }:
         )}
 
         {/* Import notes */}
-        <div className="mt-3 border-t border-border pt-3 pl-6">
-          <p className="text-xs text-muted-foreground">
+        <div className="mt-3 border-t border-gray-300 dark:border-gray-700 pt-3 pl-6">
+          <p className="text-xs text-gray-600 dark:text-gray-400">
             ℹ️ This article was automatically imported and translated using Claude AI.
             {source.accessedDate && ` Imported on ${new Date(source.accessedDate).toLocaleDateString()}.`}
           </p>
