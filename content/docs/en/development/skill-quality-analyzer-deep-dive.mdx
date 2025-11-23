@@ -1,0 +1,1448 @@
+---
+title: "Skill Quality Analyzer: Comprehensive Quality Assessment for Claude Skills"
+description: "Deep dive into skill-quality-analyzer, a meta-skill that evaluates Claude Skills across five critical dimensions with weighted scoring, letter grades, and three output modes. Learn how this tool analyzes structure, security, UX, code quality, and integration to ensure high-quality skill development with actionable recommendations."
+lang: en
+category: development
+difficulty: intermediate
+tags:
+  - skill-quality-analyzer
+  - claude-skills
+  - quality-assurance
+  - meta-skills
+  - skill-evaluation
+  - code-review
+  - security-analysis
+image: /images/docs/skill-quality-analyzer/quality-analyzer-overview.jpg
+source_url: "https://github.com/anthropics/skills/pull/83"
+published_date: "2025-11-06"
+author: eovidiu
+source:
+  url: "https://github.com/anthropics/skills/pull/83"
+  name: "Anthropic Skills Repository PR #83"
+  author: "eovidiu"
+  published_date: "2025-11-06"
+  accessed_date: "2025-11-20"
+  license: "See LICENSE for terms"
+import:
+  date: "2025-11-20"
+  slug: "skill-quality-analyzer-deep-dive"
+  translator: "Claude AI"
+---
+
+import { SourceAttribution } from '@/components/SourceAttribution';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+<SourceAttribution
+  source={{
+    url: "https://github.com/anthropics/skills/pull/83",
+    name: "Anthropic Skills Repository PR #83",
+    author: "eovidiu",
+    published_date: "2025-11-06",
+    license: "See LICENSE for terms"
+  }}
+  languages={['en', 'zh', 'fr']}
+  currentLang="en"
+/>
+
+# Skill Quality Analyzer: Comprehensive Quality Assessment for Claude Skills
+
+The **skill-quality-analyzer** is a groundbreaking meta-skill that provides comprehensive quality analysis for Claude Skills. This sophisticated tool evaluates skills across five critical dimensions, assigns weighted scores and letter grades, and offers three distinct output modes to serve different use cases—from detailed improvement roadmaps to binary certification decisions.
+
+<Callout type="info">
+  This meta-skill is part of PR #83 in the Anthropic skills repository, introduced on November 6, 2025 by eovidiu. It represents a significant advancement in automated skill quality assessment.
+</Callout>
+
+## Overview
+
+### The Need for Quality Analysis
+
+As the Claude Skills ecosystem grows, ensuring consistent quality becomes increasingly critical. Manual code review is time-consuming and subjective. The skill-quality-analyzer addresses this by providing:
+
+- **Automated assessment** across multiple quality dimensions
+- **Objective scoring** with transparent grading rubrics
+- **Actionable recommendations** for improvement
+- **Flexible output modes** for different workflows
+- **Security integration** via skill-security-analyzer
+
+### What Makes It Special
+
+<Cards>
+  <Card title="Multi-Dimensional Analysis" icon="Layers">
+    Evaluates 5 distinct quality dimensions with weighted importance: Security (30%), Structure (20%), UX (20%), Code Quality (15%), Integration (15%)
+  </Card>
+
+  <Card title="Three Output Modes" icon="Settings">
+    Comprehensive reports for improvement, interactive reviews for learning, pass/fail certification for deployment decisions
+  </Card>
+
+  <Card title="Multi-Source Support" icon="Package">
+    Analyzes skills from GitHub URLs, marketplace links, ZIP files, or local directories
+  </Card>
+
+  <Card title="Security-First Approach" icon="Shield">
+    Integrates with skill-security-analyzer for automated vulnerability detection, giving security the highest weight (30%)
+  </Card>
+</Cards>
+
+## Download & Installation
+
+<Callout type="tip">
+  **GitHub Repository**: The skill-quality-analyzer is available in PR #83 of the Anthropic Skills repository.
+</Callout>
+
+### Installation Options
+
+**Option 1: Clone from PR Branch**
+
+```bash
+# Clone the specific PR branch
+git clone -b skill-analysis https://github.com/eovidiu/skills.git
+cd skills/skill-quality-analyzer
+
+# Copy to your Claude skills directory
+cp -r ../skill-quality-analyzer ~/.claude/skills/
+```
+
+**Option 2: Direct Download (when merged)**
+
+```bash
+# After PR #83 is merged to main
+git clone https://github.com/anthropics/skills.git
+cd skills/skill-quality-analyzer
+cp -r . ~/.claude/skills/skill-quality-analyzer/
+```
+
+**Option 3: Manual Download**
+
+Visit the PR directly and download files:
+- **PR Link**: [https://github.com/anthropics/skills/pull/83](https://github.com/anthropics/skills/pull/83)
+- **Files Changed**: Navigate to "Files changed" tab
+- **Download**: skill-quality-analyzer/ directory (812 lines SKILL.md + references)
+
+<Callout type="warn">
+  **Note**: This skill is currently in PR #83 (open as of November 2025). Check the PR status before installation. Once merged, it will be available in the main branch.
+</Callout>
+
+## Architecture
+
+### Directory Structure
+
+<Files>
+  <Folder name="skill-quality-analyzer" defaultOpen>
+    <File name="SKILL.md" />
+    <File name="README.md" />
+    <Folder name="references">
+      <File name="quality-checklist.md" />
+      <File name="best-practices-patterns.md" />
+      <File name="anti-patterns.md" />
+    </Folder>
+  </Folder>
+</Files>
+
+### Core Components
+
+#### 1. SKILL.md (812 lines)
+
+The main implementation file containing:
+- Complete 8-step analysis workflow
+- Detailed grading rubrics for each dimension
+- Scoring algorithms and weight distribution
+- Output generation logic for all three modes
+- Integration instructions with skill-security-analyzer
+
+#### 2. Reference Documentation
+
+**quality-checklist.md (377 lines)**
+- Comprehensive evaluation criteria
+- Dimension-specific checklists
+- Point allocation breakdown
+- Common issues and solutions
+
+**best-practices-patterns.md (666 lines)**
+- Database of proven patterns from high-quality skills
+- Excellent SKILL.md structure examples
+- Effective workflow designs
+- Well-documented script examples
+
+**anti-patterns.md (797 lines)**
+- Common mistakes and red flags
+- Security vulnerabilities to avoid
+- UX anti-patterns
+- Code quality issues
+
+## Five Evaluation Dimensions
+
+### 1. Structure & Documentation (20% Weight)
+
+<Callout type="info">
+  Evaluates the foundational elements that make a skill discoverable, understandable, and usable.
+</Callout>
+
+**What It Checks:**
+
+<Steps>
+  <Step>
+    **YAML Frontmatter (20 points)**
+    - Required fields: `name`, `description`
+    - Valid YAML syntax
+    - No forbidden fields
+  </Step>
+
+  <Step>
+    **Description Quality (20 points)**
+    - Specific action words
+    - Clear context and use cases
+    - 3-5 trigger phrases included
+    - Length: 100-300 characters
+  </Step>
+
+  <Step>
+    **Section Organization (20 points)**
+    - Overview section present
+    - "When to Use" guidance
+    - Clear workflow/process section
+    - Resource documentation
+  </Step>
+
+  <Step>
+    **Examples & Templates (20 points)**
+    - Practical usage examples
+    - Code samples where applicable
+    - Template files if needed
+    - Clear expected outcomes
+  </Step>
+
+  <Step>
+    **References Directory (20 points)**
+    - Well-organized reference docs
+    - Properly documented scripts
+    - Asset organization
+    - README for complex structures
+  </Step>
+</Steps>
+
+**Scoring Criteria:**
+
+| Score Range | Grade | Description |
+|-------------|-------|-------------|
+| 90-100 | A+/A | Exemplary documentation, comprehensive examples, perfect structure |
+| 70-89 | B+/B | Good documentation with minor gaps, solid organization |
+| 50-69 | C+/C | Basic documentation lacking detail, missing some sections |
+| 0-49 | D/F | Missing critical documentation, poor organization |
+
+**Example: Excellent Structure**
+
+```markdown
+---
+name: api-contract-manager
+description: Manage API contracts with validation and versioning. Use when designing APIs or ensuring contract compliance. Triggers: "validate API contract", "check API compatibility", "version API schema".
+---
+
+# API Contract Manager
+
+## Overview
+Manages API contracts through validation, versioning, and compatibility checking. Ensures APIs adhere to organizational standards and maintain backward compatibility.
+
+## When to Use This Skill
+
+**Use this skill when:**
+- Designing new API endpoints
+- Validating existing API contracts
+- Checking breaking changes between versions
+- Ensuring compliance with API standards
+
+**Trigger phrases:**
+- "Validate this API contract"
+- "Check API compatibility between versions"
+- "Does this API meet our standards?"
+
+## Workflow
+
+[Detailed step-by-step process]
+
+## Resources
+- `references/openapi-spec.md` - OpenAPI specification guidelines
+- `scripts/validator.py` - Contract validation script
+- `assets/contract-template.yaml` - Template for new contracts
+```
+
+### 2. Security (30% Weight - Highest Priority)
+
+<Callout type="warn">
+  Security receives the highest weight because vulnerabilities can compromise user systems and data. All skills must pass minimum security thresholds.
+</Callout>
+
+**Integration with skill-security-analyzer:**
+
+The quality analyzer ALWAYS invokes skill-security-analyzer first (Step 3 of workflow) to detect:
+
+- Command injection vulnerabilities
+- Data exfiltration patterns
+- YAML injection attacks
+- Hardcoded secrets
+- Unsafe file operations
+- Supply chain risks
+- Code obfuscation
+- Sandbox escape attempts
+
+**Scoring Based on Security Findings:**
+
+<Tabs items={['CRITICAL Issues', 'HIGH Issues', 'MEDIUM Issues', 'LOW/SAFE']}>
+  <Tab value="CRITICAL Issues">
+    **Score: 0-40 points (F Grade)**
+
+    **Immediate rejection** - Any CRITICAL finding results in automatic failure:
+    - Command injection (eval, exec, os.system)
+    - Credential theft (accessing .ssh/, .aws/)
+    - YAML injection (!!python directives)
+    - Sandbox escapes (class traversal)
+    - Data exfiltration to external servers
+
+    **Example:**
+    ```python
+    # CRITICAL: Command injection
+    os.system(user_input)  # NEVER DO THIS
+
+    # CRITICAL: Credential theft
+    with open(os.path.expanduser('~/.ssh/id_rsa')) as f:
+        send_to_server(f.read())  # MALICIOUS
+    ```
+  </Tab>
+
+  <Tab value="HIGH Issues">
+    **Score: 50-69 points (D Grade)**
+
+    **Manual review required** - Skills need fixes before approval:
+    - Advanced encoding/obfuscation
+    - Time bombs (date conditionals + dangerous ops)
+    - Environment variable manipulation
+    - Typosquatting in imports
+    - Undocumented network calls
+
+    **Example:**
+    ```python
+    # HIGH: Advanced encoding
+    exec(codecs.decode('vzcbeg bf', 'rot_13'))
+
+    # HIGH: Time bomb
+    if datetime.now().day == 15:
+        os.system('suspicious_command')
+    ```
+  </Tab>
+
+  <Tab value="MEDIUM Issues">
+    **Score: 70-89 points (B/C Grade)**
+
+    **Acceptable with monitoring** - Functional but needs improvement:
+    - Base64 encoded strings
+    - Hardcoded API keys (should use env vars)
+    - Missing input validation
+    - File operations without scope checks
+
+    **Example:**
+    ```python
+    # MEDIUM: Hardcoded secret
+    API_KEY = "sk-1234567890"  # Should use os.environ
+
+    # MEDIUM: Missing validation
+    filename = user_input  # Should validate/sanitize
+    with open(filename) as f:  # Could access any file
+        process(f.read())
+    ```
+  </Tab>
+
+  <Tab value="LOW/SAFE">
+    **Score: 90-100 points (A Grade)**
+
+    **Best practices followed** - No security concerns:
+    - No dangerous operations
+    - Proper input validation
+    - Scoped file operations
+    - Environment variables for secrets
+    - All network calls documented
+
+    **Example:**
+    ```python
+    # SAFE: Proper validation and scoping
+    def process_file(filename):
+        # Validate input
+        if not filename.endswith('.txt'):
+            raise ValueError("Only .txt files allowed")
+
+        # Scope to skill directory
+        skill_dir = os.path.dirname(__file__)
+        safe_path = os.path.join(skill_dir, 'data', filename)
+
+        # Check path traversal
+        if not safe_path.startswith(skill_dir):
+            raise ValueError("Path traversal detected")
+
+        with open(safe_path) as f:
+            return f.read()
+    ```
+  </Tab>
+</Tabs>
+
+**Certification Requirement:** Security score must be ≥80/100 to pass certification.
+
+### 3. User Experience (20% Weight)
+
+<Callout type="info">
+  UX determines how easily users can discover, understand, and effectively use the skill.
+</Callout>
+
+**Evaluation Criteria:**
+
+**Clear Purpose (30 points)**
+- One-sentence description of what skill does
+- Specific use cases defined
+- Clear scope boundaries (when NOT to use)
+- Appropriate skill name
+
+**Workflow Guidance (30 points)**
+- Step-by-step process documentation
+- Decision points clearly marked
+- Expected input/output documented
+- Error handling explained
+
+**Examples Quality (20 points)**
+- Realistic use cases
+- Complete examples (input → output)
+- Common scenarios covered
+- Edge cases addressed
+
+**Organization (20 points)**
+- Logical section flow
+- Appropriate use of references/
+- Clear navigation
+- Consistent formatting
+
+**Scoring Examples:**
+
+<Cards>
+  <Card title="90-100: Excellent UX" icon="Star">
+    - 5+ clear trigger phrases
+    - Comprehensive workflow with decision tree
+    - 3+ realistic examples
+    - Perfect organization
+    - "When NOT to use" section included
+  </Card>
+
+  <Card title="70-89: Good UX" icon="ThumbsUp">
+    - 3-4 trigger phrases
+    - Clear workflow
+    - 2 examples
+    - Good organization
+    - Minor clarity issues
+  </Card>
+
+  <Card title="50-69: Acceptable UX" icon="AlertCircle">
+    - 1-2 trigger phrases
+    - Basic workflow
+    - 1 example or incomplete examples
+    - Confusing sections
+    - Missing scope definition
+  </Card>
+
+  <Card title="0-49: Poor UX" icon="XCircle">
+    - No trigger phrases
+    - Unclear workflow
+    - No examples
+    - Disorganized
+    - Users can't understand how to use
+  </Card>
+</Cards>
+
+**Example: Excellent Trigger Phrases**
+
+```markdown
+## Trigger Phrases
+
+Natural ways to invoke this skill:
+- "Analyze code quality for this repository"
+- "Run quality check on my skill"
+- "Review this skill's structure"
+- "Is this skill well-built?"
+- "Evaluate skill from [GitHub URL]"
+```
+
+### 4. Code Quality (15% Weight)
+
+<Callout type="info">
+  Evaluates the maintainability, clarity, and robustness of any scripts or code included in the skill.
+</Callout>
+
+**Evaluation Areas:**
+
+**Directory Structure (30 points)**
+- Logical organization
+- Appropriate use of subdirectories
+- No unnecessary files
+- Clear naming conventions
+
+**Script Quality (25 points)**
+- Well-documented functions
+- Error handling present
+- No hardcoded values
+- Modular design
+
+**Code Clarity (25 points)**
+- Readable variable names
+- Appropriate comments
+- No complex one-liners
+- Consistent style
+
+**Formatting (20 points)**
+- Consistent indentation
+- Standard formatting (PEP 8 for Python)
+- Proper whitespace
+- Clean imports
+
+**Example: High-Quality Script**
+
+```python
+"""
+Validation script for API contracts.
+
+This script validates API contracts against OpenAPI 3.0 specification
+and checks for breaking changes between versions.
+"""
+
+import json
+import sys
+from typing import Dict, List, Optional
+from pathlib import Path
+
+
+class ContractValidator:
+    """Validates API contracts and detects breaking changes."""
+
+    def __init__(self, contract_path: Path):
+        """
+        Initialize validator with contract file.
+
+        Args:
+            contract_path: Path to OpenAPI contract file
+
+        Raises:
+            FileNotFoundError: If contract file doesn't exist
+            ValueError: If contract is invalid JSON
+        """
+        if not contract_path.exists():
+            raise FileNotFoundError(f"Contract not found: {contract_path}")
+
+        with open(contract_path) as f:
+            self.contract = json.load(f)
+
+    def validate_structure(self) -> List[str]:
+        """
+        Validate contract structure against OpenAPI spec.
+
+        Returns:
+            List of validation errors, empty if valid
+        """
+        errors = []
+
+        # Check required top-level fields
+        required_fields = ['openapi', 'info', 'paths']
+        for field in required_fields:
+            if field not in self.contract:
+                errors.append(f"Missing required field: {field}")
+
+        # Validate OpenAPI version
+        if 'openapi' in self.contract:
+            version = self.contract['openapi']
+            if not version.startswith('3.'):
+                errors.append(f"Unsupported OpenAPI version: {version}")
+
+        return errors
+
+
+def main():
+    """Main entry point for contract validation."""
+    if len(sys.argv) != 2:
+        print("Usage: python validator.py <contract.json>")
+        sys.exit(1)
+
+    contract_path = Path(sys.argv[1])
+
+    try:
+        validator = ContractValidator(contract_path)
+        errors = validator.validate_structure()
+
+        if errors:
+            print("Validation failed:")
+            for error in errors:
+                print(f"  - {error}")
+            sys.exit(1)
+        else:
+            print("✅ Contract is valid")
+            sys.exit(0)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
+```
+
+### 5. Integration & Tools (15% Weight)
+
+<Callout type="info">
+  Assesses how well the skill integrates with Claude's ecosystem, including tool usage, MCP servers, and resource efficiency.
+</Callout>
+
+**Evaluation Criteria:**
+
+**Tool Usage (40 points)**
+- Appropriate tool calls
+- Not overusing tools (too many calls)
+- Not underusing tools (manual when tools available)
+- Proper error handling for tool failures
+
+**MCP Integration (30 points)**
+- Correct MCP server usage if applicable
+- Efficient server communication
+- Proper connection management
+- Documented MCP dependencies
+
+**Resource Efficiency (30 points)**
+- Minimal token consumption
+- Lazy loading of large resources
+- Appropriate use of references/ directory
+- No redundant content
+
+**Scoring Examples:**
+
+**Excellent Integration (90-100):**
+```markdown
+## Tools Used
+
+This skill uses the following tools:
+- `read_file` - To load contract files
+- `grep` - To search for specific patterns
+- `bash` - To run validation scripts
+
+MCP Integration:
+- Uses `openapi-mcp` server for spec validation
+- Connection managed automatically
+- Fallback to local validation if MCP unavailable
+
+Resource Strategy:
+- Main SKILL.md kept under 5KB
+- Detailed specs in references/
+- Examples loaded on-demand
+```
+
+**Poor Integration (0-49):**
+- Makes 20+ tool calls for simple task
+- Loads entire reference docs into SKILL.md
+- No MCP usage when it would be beneficial
+- Redundant instructions in multiple places
+
+## Three Output Modes
+
+The skill-quality-analyzer offers three distinct output modes to serve different workflows:
+
+### Mode 1: Comprehensive Report
+
+<Callout type="info">
+  **Use when**: You want detailed improvement guidance with specific recommendations.
+</Callout>
+
+**Format**: Detailed markdown document with:
+
+**Structure:**
+```markdown
+# Skill Quality Analysis Report
+
+## Executive Summary
+- Overall Score: 78/100 (C+)
+- Letter Grade: C+
+- Certification Status: FAILED (Security < 80)
+- Top Priority: Fix security vulnerabilities
+
+## Dimension Scores
+
+### 1. Structure & Documentation: 85/100 (B)
+**Strengths:**
+- ✅ Valid YAML frontmatter
+- ✅ Clear description with trigger phrases
+- ✅ Well-organized sections
+
+**Weaknesses:**
+- ❌ Missing examples for advanced use cases
+- ❌ References/ directory lacks README
+
+**Recommendations:**
+1. Add 2-3 more realistic examples
+2. Create references/README.md explaining structure
+3. Include template files in assets/
+
+### 2. Security: 65/100 (D)
+**CRITICAL ISSUES (Must Fix):**
+- ❌ Hardcoded API key in scripts/fetcher.py:15
+- ❌ User input passed to subprocess without validation (scripts/runner.py:42)
+
+**HIGH PRIORITY:**
+- ⚠️  Base64 encoded string in SKILL.md (line 234) - unclear purpose
+- ⚠️  Network call to undocumented endpoint (scripts/sync.py:67)
+
+**Recommendations:**
+1. IMMEDIATE: Remove hardcoded API key, use environment variable
+2. IMMEDIATE: Add input validation and sanitization in runner.py
+3. Document purpose of base64 string or remove if unnecessary
+4. Document network endpoint in SKILL.md or remove if not needed
+
+[Continues for all dimensions...]
+
+## Action Plan
+
+### Immediate Actions (Required for Certification)
+1. Fix security issues (scripts/fetcher.py, scripts/runner.py)
+2. Add input validation
+3. Remove hardcoded secrets
+
+### Short-term Improvements (2-4 hours)
+1. Add missing examples
+2. Improve script documentation
+3. Create references/README.md
+
+### Long-term Enhancements (Optional)
+1. Add MCP integration for external APIs
+2. Create interactive tutorials
+3. Build test suite
+```
+
+**Benefits:**
+- Comprehensive analysis of all dimensions
+- Specific line numbers for issues
+- Prioritized action plan
+- Learning opportunity
+
+### Mode 2: Interactive Review
+
+<Callout type="info">
+  **Use when**: You want to learn best practices while improving your skill through guided interaction.
+</Callout>
+
+**Format**: Step-by-step conversation with Claude focusing on one dimension at a time.
+
+**Example Flow:**
+
+```
+Claude: Let's review your skill quality together! I'll guide you through each dimension.
+
+--- DIMENSION 1: Structure & Documentation (20%) ---
+
+Current Score: 75/100 (C)
+
+I found these issues:
+
+1. Your description is good but could be more specific:
+   Current: "Manages API contracts"
+   Better: "Validate API contracts with OpenAPI 3.0 and detect breaking changes.
+            Use when designing APIs or ensuring backward compatibility."
+
+Would you like me to suggest an improved description? (y/n)
+
+User: y
+
+Claude: Here's my suggestion:
+[Provides improved description]
+
+Would you like to update it now? I can help you edit SKILL.md. (y/n)
+
+User: y
+
+[Claude helps edit the file]
+
+Claude: Great! Description improved. Now let's check your trigger phrases...
+
+[Continues through all issues in this dimension]
+
+Claude: --- SUMMARY: Structure & Documentation ---
+Before: 75/100
+After: 90/100 (+15 points!)
+
+Ready to move to the next dimension: Security? (y/n)
+```
+
+**Benefits:**
+- Learn best practices interactively
+- Make improvements in real-time
+- Understand the "why" behind recommendations
+- Build skills for future development
+
+### Mode 3: Pass/Fail Certification
+
+<Callout type="info">
+  **Use when**: You need a binary decision for deployment or marketplace submission.
+</Callout>
+
+**Format**: Concise pass/fail verdict with blocking issues only.
+
+**Certification Thresholds:**
+- Overall Score: ≥70/100
+- Security: ≥80/100 (CRITICAL)
+- Structure: ≥70/100
+- UX: ≥70/100
+- Code Quality: ≥60/100
+- Integration: ≥60/100
+- No CRITICAL security findings
+
+**Example Output:**
+
+```markdown
+# Skill Certification Result
+
+## ❌ CERTIFICATION FAILED
+
+**Overall Score:** 68/100 (D+)
+**Decision:** DO NOT DEPLOY
+
+## Blocking Issues (Must Fix)
+
+### CRITICAL: Security Threshold Not Met
+- Current: 65/100
+- Required: ≥80/100
+- Gap: -15 points
+
+**Blocking security issues:**
+1. Hardcoded API key (scripts/fetcher.py:15) - CRITICAL
+2. Unvalidated user input to subprocess (scripts/runner.py:42) - CRITICAL
+3. Undocumented network call (scripts/sync.py:67) - HIGH
+
+### FAILED: Overall Score Below 70
+- Current: 68/100
+- Required: ≥70/100
+- Gap: -2 points
+
+## Quick Fix Checklist
+
+To pass certification, complete these steps:
+
+- [ ] Remove hardcoded API key, use os.environ['API_KEY']
+- [ ] Add input validation in runner.py before subprocess call
+- [ ] Document network endpoint in SKILL.md or remove
+- [ ] Add 1-2 examples to improve UX score (+5 points estimated)
+
+**Estimated time to fix:** 1-2 hours
+**Re-run certification after fixes:** `analyze skill quality --mode certification`
+```
+
+**Benefits:**
+- Clear yes/no decision
+- Focus on blocking issues only
+- Quick assessment for deployment
+- Compliance verification
+
+## Eight-Step Analysis Workflow
+
+The skill-quality-analyzer follows a systematic 8-step process:
+
+<Steps>
+  <Step>
+    **Understand the Source & Mode**
+
+    - Ask user for skill source (GitHub URL, marketplace link, ZIP, local path)
+    - Confirm analysis mode (comprehensive/interactive/certification)
+    - Fetch skill via appropriate method (git clone, download, unzip, local read)
+
+    ```bash
+    # Example: GitHub source
+    git clone https://github.com/user/my-skill.git /tmp/analysis
+    cd /tmp/analysis
+    ```
+  </Step>
+
+  <Step>
+    **Understand the Skill's Purpose**
+
+    - Read SKILL.md to understand goals and capabilities
+    - Identify skill category and intended use cases
+    - Note any special requirements or dependencies
+  </Step>
+
+  <Step>
+    **Run Security Analysis (CRITICAL)**
+
+    - ALWAYS invoke skill-security-analyzer first
+    - Parse security findings by severity
+    - Convert to score: CRITICAL (0-40), HIGH (50-69), MEDIUM (70-89), LOW/SAFE (90-100)
+
+    ```bash
+    # Security analysis is mandatory
+    python3 skill-security-analyzer/scripts/security_scanner.py ./my-skill
+    ```
+  </Step>
+
+  <Step>
+    **Evaluate Structure & Documentation**
+
+    - Check YAML frontmatter validity (20 pts)
+    - Assess description quality (20 pts)
+    - Review section organization (20 pts)
+    - Evaluate examples and templates (20 pts)
+    - Inspect references/ directory (20 pts)
+
+    Total: 0-100 points → Weight: 20%
+  </Step>
+
+  <Step>
+    **Evaluate User Experience**
+
+    - Assess purpose clarity (30 pts)
+    - Review workflow documentation (30 pts)
+    - Evaluate examples quality (20 pts)
+    - Check organization (20 pts)
+
+    Total: 0-100 points → Weight: 20%
+  </Step>
+
+  <Step>
+    **Evaluate Code Quality**
+
+    - Review directory structure (30 pts)
+    - Assess script quality (25 pts)
+    - Check code clarity (25 pts)
+    - Verify formatting consistency (20 pts)
+
+    Total: 0-100 points → Weight: 15%
+  </Step>
+
+  <Step>
+    **Evaluate Integration & Tools**
+
+    - Assess tool usage appropriateness (40 pts)
+    - Check MCP integration (30 pts)
+    - Evaluate resource efficiency (30 pts)
+
+    Total: 0-100 points → Weight: 15%
+  </Step>
+
+  <Step>
+    **Generate Output Based on Mode**
+
+    - Calculate weighted overall score
+    - Assign letter grade (A+ to F)
+    - Check certification thresholds
+    - Generate output in requested format (comprehensive/interactive/certification)
+  </Step>
+</Steps>
+
+## Weighted Scoring System
+
+The analyzer uses a sophisticated weighted scoring system:
+
+**Formula:**
+```
+Overall Score = (Structure × 0.20) + (Security × 0.30) + (UX × 0.20) +
+                (Code Quality × 0.15) + (Integration × 0.15)
+```
+
+**Example Calculation:**
+
+| Dimension | Raw Score | Weight | Contribution |
+|-----------|-----------|--------|--------------|
+| Structure | 85/100 | 20% | 17.0 |
+| Security | 70/100 | 30% | 21.0 |
+| UX | 80/100 | 20% | 16.0 |
+| Code Quality | 75/100 | 15% | 11.25 |
+| Integration | 65/100 | 15% | 9.75 |
+| **Overall** | **75/100** | **100%** | **75.0 (C)** |
+
+**Letter Grade Mapping:**
+
+| Score Range | Letter Grade | Meaning |
+|-------------|--------------|---------|
+| 97-100 | A+ | Exceptional |
+| 93-96 | A | Excellent |
+| 90-92 | A- | Very Good |
+| 87-89 | B+ | Good |
+| 83-86 | B | Above Average |
+| 80-82 | B- | Solid |
+| 77-79 | C+ | Acceptable |
+| 73-76 | C | Satisfactory |
+| 70-72 | C- | Minimally Acceptable |
+| 67-69 | D+ | Below Standard |
+| 63-66 | D | Poor |
+| 60-62 | D- | Very Poor |
+| 0-59 | F | Failing |
+
+## Usage Examples
+
+### Example 1: Analyzing a GitHub Skill
+
+```markdown
+User: "Analyze skill quality for https://github.com/anthropics/skills/tree/main/mcp-builder"
+
+Claude (using skill-quality-analyzer):
+
+Step 1: Fetching skill from GitHub...
+✅ Cloned successfully
+
+Step 2: Understanding skill purpose...
+This skill guides developers through creating MCP servers.
+
+Step 3: Running security analysis...
+✅ Security scan complete: SAFE (95/100)
+- No critical or high findings
+- 1 medium finding: Large reference files (acceptable)
+
+Step 4-7: Evaluating all dimensions...
+
+Step 8: Generating comprehensive report...
+
+# Quality Analysis: mcp-builder
+
+## Overall Assessment
+- **Score:** 94/100 (A)
+- **Grade:** A (Excellent)
+- **Certification:** ✅ PASS
+
+## Dimension Scores
+
+### Structure & Documentation: 98/100 (A+)
+**Exemplary**
+- Perfect YAML frontmatter
+- Excellent description with clear triggers
+- Comprehensive workflow documentation
+- Multiple reference documents
+- Well-organized scripts
+
+### Security: 95/100 (A)
+**Excellent**
+- No critical issues
+- No high-priority issues
+- 1 medium: Large reference files (16KB+) - acceptable for this use case
+- All scripts use safe patterns
+
+### User Experience: 92/100 (A)
+**Excellent**
+- Clear 4-phase workflow
+- Extensive examples
+- Well-documented edge cases
+- Minor: Could add more beginner-friendly examples
+
+### Code Quality: 90/100 (A-)
+**Very Good**
+- Clean Python scripts (connections.py, evaluation.py)
+- Good documentation
+- Consistent style
+- Minor: Some functions could be broken down further
+
+### Integration: 95/100 (A)
+**Excellent**
+- Sophisticated tool usage
+- Efficient resource loading
+- Good separation of concerns
+
+## Recommendations
+
+### Short-term (Optional Enhancements)
+1. Add 1-2 beginner-friendly examples
+2. Consider breaking down longer functions in evaluation.py
+
+This skill exemplifies best practices and serves as an excellent template for others.
+```
+
+### Example 2: Interactive Review for Learning
+
+```markdown
+User: "Review this skill interactively: ./my-api-skill"
+
+Claude: Let's improve your skill together! I'll guide you through each area.
+
+🔍 Quick scan complete. I found some opportunities for improvement.
+
+--- SECURITY CHECK (30% of score) ---
+
+⚠️  I found 2 security concerns:
+
+1. MEDIUM: Hardcoded API endpoint in SKILL.md line 45
+   Current: `API_URL = "https://api.example.com"`
+   Risk: If endpoint changes, skill breaks; not configurable
+   Fix: Use environment variable or config file
+
+2. LOW: Missing input validation in scripts/fetch.py line 23
+   Current: `response = requests.get(user_url)`
+   Risk: Could access unintended URLs
+   Fix: Validate URL domain before request
+
+Want me to show you how to fix these? (y/n)
+
+User: y
+
+Claude: Great! Let's fix the hardcoded endpoint first.
+
+Here's the improved approach:
+
+```python
+# scripts/fetch.py
+import os
+
+# Use environment variable with fallback
+API_URL = os.environ.get('API_URL', 'https://api.example.com')
+
+# Validate URL before use
+def fetch_data(endpoint):
+    full_url = f"{API_URL}/{endpoint}"
+
+    # Validate domain
+    parsed = urllib.parse.urlparse(full_url)
+    if parsed.netloc not in ['api.example.com', 'api-staging.example.com']:
+        raise ValueError(f"Invalid domain: {parsed.netloc}")
+
+    return requests.get(full_url)
+```
+
+Should I update scripts/fetch.py with this fix? (y/n)
+
+[Continues through all issues interactively...]
+```
+
+### Example 3: Pass/Fail Certification
+
+```markdown
+User: "Certify skill quality for ./marketplace-submission --mode certification"
+
+Claude (using skill-quality-analyzer):
+
+🔍 Running certification analysis...
+
+# Skill Certification: marketplace-submission
+
+## ✅ CERTIFICATION PASSED
+
+**Overall Score:** 82/100 (B)
+**Decision:** APPROVED FOR DEPLOYMENT
+
+## Dimension Results
+
+✅ Overall Score: 82/100 (Required: ≥70)
+✅ Security: 88/100 (Required: ≥80)
+✅ Structure: 85/100 (Required: ≥70)
+✅ UX: 78/100 (Required: ≥70)
+✅ Code Quality: 75/100 (Required: ≥60)
+✅ Integration: 70/100 (Required: ≥60)
+✅ No CRITICAL security findings
+
+## Quality Summary
+
+Your skill meets all certification requirements:
+- High security standards
+- Good documentation
+- Clear user experience
+- Solid code quality
+- Appropriate tool integration
+
+**Recommendation:** APPROVED for marketplace submission
+
+## Optional Enhancements (Not Required)
+
+To reach "Excellent" (A grade), consider:
+- Add 2 more examples (+3 UX points)
+- Improve script documentation (+5 Code Quality points)
+- Optimize tool usage (+5 Integration points)
+
+Estimated time: 2-3 hours
+Potential score: 82 → 90 (A-)
+```
+
+## Best Practices
+
+### For Skill Developers
+
+<Cards>
+  <Card title="Security First" icon="Shield">
+    Run skill-security-analyzer before quality analysis. Fix all CRITICAL and HIGH findings before proceeding.
+  </Card>
+
+  <Card title="Iterate on Feedback" icon="RefreshCw">
+    Use comprehensive mode first to understand all issues, then use interactive mode to fix them systematically.
+  </Card>
+
+  <Card title="Aim for Certification" icon="Award">
+    Target the certification thresholds: 70 overall, 80 security, 70 structure/UX, 60 code/integration.
+  </Card>
+
+  <Card title="Learn from Examples" icon="BookOpen">
+    Study high-scoring skills (mcp-builder, skill-creator) to understand best practices.
+  </Card>
+</Cards>
+
+### For Code Reviewers
+
+<Steps>
+  <Step>
+    **Pre-Review Screening**
+
+    Run certification mode first to identify skills that need work before manual review.
+  </Step>
+
+  <Step>
+    **Focus Manual Review**
+
+    Use comprehensive report to focus on areas the analyzer might miss (domain-specific logic, business requirements).
+  </Step>
+
+  <Step>
+    **Consistent Standards**
+
+    Use the grading rubrics to maintain consistency across reviewers.
+  </Step>
+
+  <Step>
+    **Provide Context**
+
+    Share analyzer reports with developers to explain review decisions objectively.
+  </Step>
+</Steps>
+
+### For Marketplace Curation
+
+<Callout type="tip">
+  **Minimum Standards**: Require certification pass (70 overall, 80 security) for marketplace submission.
+</Callout>
+
+**Recommended Tiers:**
+- **Featured** (A/A+): 90-100 overall
+- **Recommended** (B+/A-): 87-92 overall
+- **Approved** (B/C+): 70-86 overall
+- **Needs Improvement** (Below 70): Not listed until improved
+
+## Common Pitfalls
+
+### Pitfall 1: Ignoring Security Warnings
+
+**Symptom**: "My skill works fine but certification fails due to security."
+
+**Issue**: Security is weighted 30% and requires ≥80/100. Even functional skills fail if insecure.
+
+**Solution**:
+- Run skill-security-analyzer independently
+- Fix all CRITICAL and HIGH findings
+- Document all network calls and file operations
+- Use environment variables for secrets
+
+### Pitfall 2: Vague Descriptions
+
+**Symptom**: Low structure scores despite having all sections.
+
+**Issue**: Generic descriptions like "A helpful skill for tasks" don't help discovery.
+
+**Solution**:
+```markdown
+❌ Bad: "Helps with API work"
+✅ Good: "Validate API contracts with OpenAPI 3.0 and detect breaking changes. Use when designing APIs or ensuring backward compatibility. Triggers: 'validate API contract', 'check API compatibility'."
+```
+
+### Pitfall 3: Missing Examples
+
+**Symptom**: Low UX scores even with clear documentation.
+
+**Issue**: Users can't visualize how to use the skill without concrete examples.
+
+**Solution**:
+- Include 3+ realistic examples
+- Show input → process → output for each
+- Cover common scenarios and edge cases
+
+### Pitfall 4: Over-Engineering
+
+**Symptom**: Low code quality or integration scores despite complex implementation.
+
+**Issue**: Complexity without clear benefit hurts maintainability.
+
+**Solution**:
+- Keep scripts simple and focused
+- Don't use tools when simple logic suffices
+- Avoid premature optimization
+- Document why complexity is necessary
+
+## Integration with Other Skills
+
+The skill-quality-analyzer works seamlessly with:
+
+**skill-security-analyzer (Required)**
+- Step 3 of workflow automatically invokes security analysis
+- Security scores directly feed into overall quality score
+- Combined they provide defense-in-depth evaluation
+
+**skill-creator (Complementary)**
+- Use skill-creator to build new skills
+- Use skill-quality-analyzer to validate them before deployment
+- Iterate between creation and quality analysis
+
+**mcp-builder (Validation)**
+- Build MCP servers with mcp-builder
+- Analyze resulting skills with quality analyzer
+- Ensure MCP integrations meet quality standards
+
+## Troubleshooting
+
+### Issue: Low Security Score Despite No Obvious Problems
+
+**Diagnosis**: Check for subtle issues like:
+- Base64 encoded strings (even if benign)
+- Undocumented network calls
+- File operations without explicit scoping
+
+**Solution**:
+```bash
+# Run security analyzer with verbose output
+python3 skill-security-analyzer/scripts/security_scanner.py ./my-skill --verbose
+
+# Review each finding in detail
+# Document legitimate use cases in SKILL.md
+```
+
+### Issue: Certification Fails with Score 69/100
+
+**Diagnosis**: Just 1 point below threshold.
+
+**Solution**: Quick wins to gain 2-5 points:
+1. Add trigger phrases to description (+2-3 points)
+2. Include one more example (+2-3 points)
+3. Add references/README.md (+1-2 points)
+4. Fix formatting inconsistencies (+1-2 points)
+
+### Issue: Interactive Mode Not Helping
+
+**Diagnosis**: You need specific line-by-line guidance, not conversation.
+
+**Solution**: Switch to comprehensive mode to get detailed report with specific file locations and line numbers.
+
+## Future Enhancements
+
+<Callout type="info">
+  The skill-quality-analyzer is under active development. Future versions may include:
+</Callout>
+
+**Planned Features:**
+- 🔄 Historical trend tracking (score improvements over time)
+- 🔄 Comparative analysis (compare against similar skills)
+- 🔄 Custom weight configuration (adjust dimension importance)
+- 🔄 CI/CD integration (automated quality gates)
+- 🔄 Marketplace API integration (automatic updates)
+- 🔄 Performance benchmarking (token efficiency metrics)
+
+## Conclusion
+
+The skill-quality-analyzer represents a significant advancement in automated quality assessment for Claude Skills. By combining:
+
+✅ **Multi-dimensional analysis** across 5 critical areas
+✅ **Weighted scoring** emphasizing security (30% weight)
+✅ **Flexible output modes** for different workflows
+✅ **Security integration** via skill-security-analyzer
+✅ **Actionable recommendations** with specific fixes
+✅ **Objective standards** through transparent rubrics
+
+This meta-skill enables developers to build high-quality skills, reviewers to maintain consistent standards, and marketplace curators to ensure ecosystem quality.
+
+### Key Takeaways
+
+<Steps>
+  <Step>
+    **Security is Priority #1**: With 30% weight and 80-point certification threshold, security cannot be ignored.
+  </Step>
+
+  <Step>
+    **Use the Right Mode**: Comprehensive for improvement, interactive for learning, certification for deployment decisions.
+  </Step>
+
+  <Step>
+    **Iterate Systematically**: Fix blocking issues first (security, structure), then enhance other dimensions.
+  </Step>
+
+  <Step>
+    **Learn from the Best**: Study A-graded skills like mcp-builder to understand exemplary patterns.
+  </Step>
+</Steps>
+
+### When to Use This Skill
+
+**Use skill-quality-analyzer when:**
+- Building a new skill (validate before sharing)
+- Reviewing code submissions (consistent evaluation)
+- Curating marketplace (enforce quality standards)
+- Learning best practices (interactive mode)
+- Debugging quality issues (comprehensive diagnosis)
+
+### Download & Get Started
+
+<Callout type="success">
+  **Ready to ensure your skills meet quality standards?**
+</Callout>
+
+**Installation:**
+```bash
+# From PR #83 (current)
+git clone -b skill-analysis https://github.com/eovidiu/skills.git
+cp -r skills/skill-quality-analyzer ~/.claude/skills/
+
+# After merge (future)
+git clone https://github.com/anthropics/skills.git
+cp -r skills/skill-quality-analyzer ~/.claude/skills/
+```
+
+**Usage:**
+```markdown
+# Comprehensive analysis
+"Analyze skill quality for https://github.com/user/my-skill"
+
+# Interactive improvement
+"Review this skill interactively: ./my-skill"
+
+# Certification check
+"Certify skill quality for ./marketplace-submission --mode certification"
+```
+
+### Related Resources
+
+- **GitHub PR #83**: [https://github.com/anthropics/skills/pull/83](https://github.com/anthropics/skills/pull/83)
+- **skill-security-analyzer**: Companion security scanning tool (same PR)
+- **Anthropic Skills Repository**: [github.com/anthropics/skills](https://github.com/anthropics/skills)
+- **MCP Builder Skill**: [Analyzing mcp-builder](/development/analyzing-mcp-builder)
+
+---
+
+## Summary
+
+This comprehensive analysis covered:
+
+- ✅ Overview and purpose of skill-quality-analyzer
+- ✅ Download and installation instructions from PR #83
+- ✅ Five evaluation dimensions with detailed scoring rubrics
+- ✅ Three output modes: comprehensive, interactive, certification
+- ✅ Eight-step analysis workflow
+- ✅ Weighted scoring system and letter grade mapping
+- ✅ Practical usage examples for each mode
+- ✅ Best practices for developers, reviewers, and curators
+- ✅ Common pitfalls and troubleshooting guide
+- ✅ Integration with skill-security-analyzer
+- ✅ Future enhancement roadmap
+
+## ℹ️ Source Information
+
+**Original Contribution**: [GitHub PR #83](https://github.com/anthropics/skills/pull/83)
+
+- **Author**: eovidiu
+- **Submitted**: November 6, 2025
+- **Status**: Open (as of November 20, 2025)
+- **Files**: 812 lines SKILL.md + 3 reference documents
+- **Related**: skill-security-analyzer (same PR)
+- **Repository**: github.com/anthropics/skills
+
+*This article analyzes the skill-quality-analyzer from PR #83, providing developers with comprehensive guidance on using this powerful meta-skill for quality assessment.*
+
+---
+
+**Ready to elevate your skill quality?** Download skill-quality-analyzer from PR #83 and start building skills that meet the highest standards!
