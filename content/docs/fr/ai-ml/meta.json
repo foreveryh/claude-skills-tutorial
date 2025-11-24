@@ -2,7 +2,8 @@
   "title": "IA et Apprentissage Automatique",
   "icon": "Brain",
   "pages": [
-    "skills-explained"
+    "skills-explained",
+    "claude-agent-skills-first-principles-deep-dive"
   ],
   "defaultOpen": true
 }

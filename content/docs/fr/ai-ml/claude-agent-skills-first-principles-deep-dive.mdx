@@ -1,0 +1,1288 @@
+---
+title: "Claude Agent Skills : Analyse approfondie selon les premiers principes"
+description: "Analyse technique approfondie du système Agent Skills de Claude selon les premiers principes, examinant l'architecture méta-outil, l'injection de contexte basée sur les prompts, et le cycle de vie complet d'exécution avec des études de cas réels."
+image: /images/docs/claude-agent-skills-first-principles-deep-dive/agent-skills-architecture.svg
+lang: fr
+category: ai-ml
+difficulty: advanced
+tags:
+  - claude-skills
+  - claude-code
+  - ai-agents
+  - prompt-engineering
+  - meta-tools
+  - llm-architecture
+  - skill-development
+source_url: "https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/"
+published_date: "2025-10-26"
+author: "Hanchung Lee"
+
+source:
+  url: "https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/"
+  name: "Hanchung Lee's Blog"
+  author: "Hanchung Lee"
+  published_date: "2025-10-26"
+  accessed_date: "2025-11-24"
+  license: "Copyright © 2025 Hanchung Lee"
+
+import:
+  date: "2025-11-24"
+  slug: "claude-agent-skills-first-principles-deep-dive"
+  translator: "Claude AI"
+---
+
+import { SourceAttribution } from '@/components/SourceAttribution';
+
+<SourceAttribution
+  source={{
+    url: "https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/",
+    name: "Hanchung Lee's Blog",
+    author: "Hanchung Lee",
+    publishedDate: "2025-10-26",
+    accessedDate: "2025-11-24",
+    license: "Copyright © 2025 Hanchung Lee"
+  }}
+  languages={['en', 'zh', 'fr']}
+  currentLang="fr"
+/>
+
+# Claude Agent Skills : Analyse approfondie selon les premiers principes
+
+Le système Agent `Skills` de Claude représente une architecture méta-outil sophistiquée basée sur les prompts qui étend les capacités LLM grâce à l'injection d'instructions spécialisées. Contrairement aux appels de fonctions traditionnels ou à l'exécution de code, les `skills` fonctionnent par **expansion de prompt** et **modification de contexte** pour modifier la façon dont Claude traite les demandes suivantes sans écrire de code exécutable.
+
+Cette analyse approfondie déconstruit le système Agent `Skills` de Claude selon les premiers principes, documente l'architecture où un outil nommé "`Skill`" agit comme méta-outil pour injecter des prompts spécifiques au domaine dans le contexte de conversation. Nous parcourrons le cycle de vie complet en utilisant `skill-creator` et `internal-comms` comme études de cas, en examinant tout, de l'analyse de fichiers à la structure de requête API jusqu'au processus de décision de Claude.
+
+## Vue d'ensemble des Claude Agent Skills
+
+Claude utilise les `Skills` pour améliorer sa performance dans des tâches spécifiques. Les `Skills` sont définis comme des dossiers incluant des instructions, des scripts et des ressources que Claude peut charger au besoin. Claude utilise un **système déclaratif basé sur les prompts** pour la découverte et l'invocation de skills. Le modèle IA (Claude) prend la décision d'invoquer les `skills` en fonction des descriptions textuelles présentées dans son prompt système. **Il n'y a pas de sélection algorithmique de `skill` ou de détection d'intention alimentée par l'IA** au niveau du code. La prise de décision se produit entièrement dans le processus de raisonnement de Claude en fonction des descriptions de skills fournies.
+
+Les `Skills` ne sont pas du code exécutable. Ils **NE** lancent **PAS** Python ou JavaScript, et il n'y a pas de serveur HTTP ou d'appel de fonction en arrière-plan. Ils ne sont pas non plus codés en dur dans le prompt système de Claude. Les `Skills` vivent dans une partie séparée de la structure de requête API.
+
+Alors qu'est-ce que c'est ? Les `Skills` sont des modèles de prompt spécialisés qui injectent des instructions spécifiques au domaine dans le contexte de conversation. Lorsqu'un skill est invoqué, il modifie à la fois le contexte de conversation (en injectant des prompts d'instruction) et le contexte d'exécution (en modifiant les permissions d'outils et potentiellement en changeant de modèle). Au lieu d'exécuter des actions directement, les skills se développent en prompts détaillés qui préparent Claude à résoudre un type spécifique de problème. Chaque skill apparaît comme un ajout dynamique au schéma d'outils que Claude voit.
+
+Lorsque les utilisateurs envoient une requête, Claude reçoit trois choses : le message utilisateur, les outils disponibles (Read, Write, Bash, etc.) et l'outil `Skill`. La description de l'outil `Skill` contient une liste formatée de chaque skill disponible avec leur `name`, `description` et d'autres champs combinés. Claude lit cette liste et utilise sa compréhension native du langage pour faire correspondre votre intention avec les descriptions de skills. Si vous dites "aidez-moi à créer un skill pour les logs", Claude voit la description du skill `internal-comms` ("Lorsque l'utilisateur veut écrire des communications internes en utilisant le format que son entreprise aime utiliser"), reconnaît la correspondance et invoque l'outil `Skill` avec `command: "internal-comms"`.
+
+> **Note terminologique :**
+>
+> *   **Outil `Skill`** (S majuscule) = Le méta-outil qui gère tous les skills. Il apparaît dans le tableau `tools` de Claude aux côtés de Read, Write, Bash, etc.
+> *   **skills** (s minuscule) = Skills individuels comme `pdf`, `skill-creator`, `internal-comms`. Ce sont les modèles d'instructions spécialisés que l'outil `Skill` charge.
+
+Voici une représentation plus visuelle de la façon dont les `skills` sont utilisés par Claude.
+
+![Claude Skill Flowchart](https://leehanchung.github.io/assets/img/2025-10-26/01-claude-skill-1.png)
+
+Le mécanisme de sélection de skills n'a pas de routage algorithmique ou de classification d'intention au niveau du code. Claude Code n'utilise pas d'embeddings, de classificateurs ou de correspondance de motifs pour décider quel skill invoquer. Au lieu de cela, le système formate tous les skills disponibles en une description textuelle intégrée dans le prompt de l'outil `Skill`, et laisse le modèle de langage de Claude prendre la décision. C'est du raisonnement LLM pur. Pas de regex, pas de correspondance de mots-clés, pas de détection d'intention basée sur le ML. La décision se produit à l'intérieur du passage avant de Claude à travers le transformer, pas dans le code de l'application.
+
+Lorsque Claude invoque un skill, le système suit un flux de travail simple : il charge un fichier markdown (`SKILL.md`), l'étend en instructions détaillées, injecte ces instructions comme nouveaux messages utilisateur dans le contexte de conversation, modifie le contexte d'exécution (outils autorisés, sélection de modèle) et continue la conversation dans cet environnement enrichi. C'est fondamentalement différent des outils traditionnels, qui s'exécutent et retournent des résultats. Les skills _préparent Claude_ à résoudre un problème, plutôt que de le résoudre directement.
+
+Le tableau suivant aide à mieux distinguer la différence entre les outils et les Skills et leurs capacités :
+
+| Aspect | Outils traditionnels | Skills |
+| --- | --- | --- |
+| **Modèle d'exécution** | Synchrone, direct | Expansion de prompt |
+| **Objectif** | Effectuer des opérations spécifiques | Guider des flux de travail complexes |
+| **Valeur de retour** | Résultats immédiats | Contexte de conversation + changements de contexte d'exécution |
+| **Exemple** | `Read`, `Write`, `Bash` | `internal-comms`, `skill-creator` |
+| **Concurrence** | Généralement sûr | Non sûr pour la concurrence |
+| **Type** | Divers | Toujours `"prompt"` |
+
+## Construction d'Agent Skills
+
+Plongeons maintenant dans la construction de Skills en examinant le Skill `skill-creator` du dépôt de skills d'Anthropic comme étude de cas. Pour rappel, les `skills` d'agent sont des dossiers organisés d'instructions, de scripts et de ressources que les agents peuvent découvrir et charger dynamiquement pour mieux performer dans des tâches spécifiques. Les `Skills` étendent les capacités de Claude en emballant votre expertise dans des ressources composables pour Claude, transformant les agents polyvalents en agents spécialisés qui correspondent à vos besoins.
+
+> **Insight clé :** Skill = Modèle de prompt + Injection de contexte de conversation + Modification de contexte d'exécution + Fichiers de données et scripts Python optionnels
+
+Chaque `Skill` est défini dans un fichier markdown nommé `SKILL.md` (insensible à la casse) avec des fichiers groupés optionnels stockés sous `/scripts`, `/references` et `/assets`. Ces fichiers groupés peuvent être des scripts Python, des scripts shell, des définitions de polices, des modèles, etc. En utilisant `skill-creator` comme exemple, il contient `SKILL.md`, `LICENSE.txt` pour la licence, et quelques scripts Python sous le dossier `/scripts`. `skill-creator` n'a ni `/references` ni `/assets`.
+
+![skill-creator package](https://leehanchung.github.io/assets/img/2025-10-26/03-claude-skill-package.png)
+
+Les skills sont découverts et chargés depuis plusieurs sources. Claude Code scanne les paramètres utilisateur (`~/.config/claude/skills/`), les paramètres de projet (`.claude/skills/`), les skills fournis par les plugins et les skills intégrés pour construire la liste des skills disponibles. Pour Claude Desktop, nous pouvons télécharger un skill personnalisé comme suit.
+
+![Claude Desktop Skill](https://leehanchung.github.io/assets/img/2025-10-26/02-claude-desktop-skill.png)
+
+> **REMARQUE :** Le concept le plus important pour construire des Skills est la **Divulgation progressive** - montrer juste assez d'informations pour aider les agents à décider quoi faire ensuite, puis révéler plus de détails au fur et à mesure qu'ils en ont besoin. Dans le cas des `agent skills`, cela
+>
+> 1.   Divulgue le Frontmatter : minimal (nom, description, licence)
+> 2.   Si un `skill` est choisi, charge SKILL.md : complet mais ciblé
+> 3.   Puis charge les ressources d'aide, les références et les scripts au fur et à mesure que le `skill` est exécuté
+
+## Écrire SKILL.md
+
+`SKILL.md` est le cœur du prompt d'un skill. C'est un fichier markdown qui suit une structure en deux parties - frontmatter et contenu. Le frontmatter configure COMMENT le skill s'exécute (permissions, modèle, métadonnées), tandis que le contenu markdown indique à Claude QUOI faire. Le frontmatter est l'en-tête du fichier markdown écrit en YAML.
+
+```
+┌─────────────────────────────────────┐
+│ 1. YAML Frontmatter (Metadata)      │ ← Configuration
+│    ---                              │
+│    name: skill-name                 │
+│    description: Brief overview      │
+│    allowed-tools: "Bash, Read"      │
+│    version: 1.0.0                   │
+│    ---                              │
+├─────────────────────────────────────┤
+│ 2. Markdown Content (Instructions)  │ ← Prompt pour Claude
+│                                     │
+│    Purpose explanation              │
+│    Detailed instructions            │
+│    Examples and guidelines          │
+│    Step-by-step procedures          │
+└─────────────────────────────────────┘
+```
+
+### Frontmatter
+
+Le frontmatter contient les métadonnées qui contrôlent comment Claude découvre et utilise le skill. Par exemple, voici le frontmatter de `skill-creator` :
+
+```
+---
+name: skill-creator
+description: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.
+license: Complete terms in LICENSE.txt
+---
+```
+
+Parcourons les champs du frontmatter un par un.
+
+![Claude Skills Frontmatter](https://leehanchung.github.io/assets/img/2025-10-26/04-claude-skill-frontmatter.png)
+
+#### `name` (Requis)
+
+Évident. Nom du `skill`. Le `name` d'un `skill` est utilisé comme `command` dans l'`Outil Skill`.
+
+> Le `name` d'un `skill` est utilisé comme `command` dans l'`Outil Skill`.
+
+#### `description` (Requis)
+
+Le champ `description` fournit un bref résumé de ce que fait le skill. C'est le signal principal que Claude utilise pour déterminer quand invoquer un skill. Dans l'exemple ci-dessus, la description indique explicitement "Ce skill devrait être utilisé lorsque les utilisateurs veulent créer un nouveau skill" - ce type de langage clair et orienté action aide Claude à faire correspondre l'intention de l'utilisateur avec les capacités du skill.
+
+Le système ajoute automatiquement des informations sur la source à la description (par exemple, `"(plugin:skills)"`), ce qui aide à distinguer entre les skills de différentes sources lorsque plusieurs skills sont chargés.
+
+#### `when_to_use` (Non documenté - Probablement obsolète ou fonctionnalité future)
+
+> **⚠️ Note importante :** Le champ `when_to_use` apparaît largement dans la base de code mais n'est **pas documenté dans aucune documentation officielle d'Anthropic**. Ce champ peut être :
+>
+> *   Une fonctionnalité obsolète en cours de suppression progressive
+> *   Une fonctionnalité interne/expérimentale pas encore officiellement supportée
+> *   Une fonctionnalité planifiée qui n'a pas encore été publiée
+>
+> **Recommandation :** Comptez sur un champ `description` détaillé à la place. Évitez d'utiliser `when_to_use` dans les skills de production jusqu'à ce qu'il apparaisse dans la documentation officielle.
+
+Bien que non documenté, voici comment `when_to_use` fonctionne actuellement dans la base de code :
+
+```
+function formatSkill(skill) {
+  let description = skill.whenToUse
+    ? `${skill.description} - ${skill.whenToUse}`
+    : skill.description;
+
+  return `"${skill.name}": ${description}`;
+}
+```
+
+Lorsqu'il est présent, `when_to_use` est ajouté à la description avec un séparateur tiret. Par exemple :
+
+```
+"skill-creator": Create well-structured, reusable skills... - When user wants to build a custom skill package with scripts, references, or assets
+```
+
+Cette chaîne combinée est ce que Claude voit dans le prompt de l'outil Skill. Cependant, comme ce comportement n'est pas documenté, il pourrait changer ou être supprimé dans les versions futures. L'approche la plus sûre est d'inclure les conseils d'utilisation directement dans le champ `description`, comme montré dans l'exemple `skill-creator` ci-dessus.
+
+#### `license` (Optionnel)
+
+Évident.
+
+#### `allowed-tools` (Optionnel)
+
+Le champ `allowed-tools` définit quels outils le skill peut utiliser sans approbation de l'utilisateur, similaire aux allowed-tools de Claude.
+
+C'est une chaîne séparée par des virgules qui est analysée en un tableau de noms d'outils autorisés. Vous pouvez utiliser des caractères génériques pour limiter les permissions, par exemple, `Bash(git:*)` n'autorise que les sous-commandes git, tandis que `Bash(npm:*)` permet toutes les opérations npm. Le skill skill-creator utilise `"Read,Write,Bash,Glob,Grep,Edit"` pour lui donner de larges capacités de fichiers et de recherche. Une erreur courante est de lister tous les outils disponibles, ce qui crée un risque de sécurité et va à l'encontre du modèle de sécurité.
+
+> N'incluez que ce dont votre skill a réellement besoin - si vous lisez et écrivez simplement des fichiers, `"Read,Write"` est suffisant.
+
+```
+# ✅ skill-creator autorise plusieurs outils
+allowed-tools: "Read,Write,Bash,Glob,Grep,Edit"
+
+# ✅ Commandes git spécifiques uniquement
+allowed-tools: "Bash(git status:*),Bash(git diff:*),Bash(git log:*),Read,Grep"
+
+# ✅ Opérations de fichiers uniquement
+allowed-tools: "Read,Write,Edit,Glob,Grep"
+
+# ❌ Surface d'attaque inutile
+allowed-tools: "Bash,Read,Write,Edit,Glob,Grep,WebSearch,Task,Agent"
+
+# ❌ Surface d'attaque inutile avec toutes les commandes npm
+allowed-tools: "Bash(npm:*),Read,Write"
+```
+
+#### `model` (Optionnel)
+
+Le champ `model` définit quel modèle le skill peut utiliser. Il hérite par défaut du modèle actuel dans la session utilisateur. Pour les tâches complexes comme la revue de code, les skills peuvent demander des modèles plus capables comme Claude Opus ou d'autres modèles chinois OSS. Si vous savez, vous savez.
+
+```
+model: "claude-opus-4-20250514"  # Utiliser un modèle spécifique
+model: "inherit"                 # Utiliser le modèle actuel de la session (par défaut)
+```
+
+#### `version`, `disable-model-invocation` et `mode` (Optionnel)
+
+Les skills supportent trois champs frontmatter optionnels pour le contrôle de version et d'invocation. Le champ `version` (par exemple, version: "1.0.0") est un champ de métadonnées pour suivre les versions de skills, analysé depuis le frontmatter mais principalement utilisé à des fins de documentation et de gestion de skills.
+
+Le champ `disable-model-invocation` (booléen) empêche Claude d'invoquer automatiquement le skill via l'outil `Skill`. Lorsqu'il est défini sur true, le skill est exclu de la liste montrée à Claude et ne peut être invoqué manuellement que par les utilisateurs via `/skill-name`, ce qui le rend idéal pour les opérations dangereuses, les commandes de configuration ou les flux de travail interactifs qui nécessitent un contrôle explicite de l'utilisateur.
+
+Le champ `mode` (booléen) catégorise un skill comme une "commande de mode" qui modifie le comportement ou le contexte de Claude. Lorsqu'il est défini sur true, le skill apparaît dans une section spéciale "Commandes de mode" en haut de la liste des skills (séparée des skills utilitaires réguliers), ce qui le rend proéminent pour les skills comme debug-mode, expert-mode ou review-mode qui établissent des contextes opérationnels ou des flux de travail spécifiques.
+
+### Contenu du prompt SKILL.md
+
+Après le frontmatter vient le contenu markdown - le prompt réel que Claude reçoit lorsque le `skill` est invoqué. C'est ici que vous définissez le comportement, les instructions et les flux de travail du `skill`. La clé pour écrire des prompts de skill efficaces est de les garder concentrés et d'utiliser la divulgation progressive : fournir les instructions principales dans SKILL.md, et référencer des fichiers externes pour le contenu détaillé.
+
+Voici une structure de contenu recommandée
+
+```
+---
+# Frontmatter ici
+---
+
+# [Énoncé d'objectif bref - 1-2 phrases]
+
+## Vue d'ensemble
+[Ce que fait ce skill, quand l'utiliser, ce qu'il fournit]
+
+## Prérequis
+[Outils, fichiers ou contexte requis]
+
+## Instructions
+
+### Étape 1 : [Première action]
+[Instructions impératives]
+[Exemples si nécessaire]
+
+### Étape 2 : [Action suivante]
+[Instructions impératives]
+
+### Étape 3 : [Action finale]
+[Instructions impératives]
+
+## Format de sortie
+[Comment structurer les résultats]
+
+## Gestion des erreurs
+[Que faire lorsque les choses échouent]
+
+## Exemples
+[Exemples d'utilisation concrets]
+
+## Ressources
+[Référencer scripts/, references/, assets/ si groupés]
+```
+
+Par exemple, le skill `skill-creator` contient les instructions suivantes qui spécifient chaque étape du flux de travail requis pour créer des skills.
+
+```
+## Processus de création de Skill
+
+### Étape 1 : Comprendre le Skill avec des exemples concrets
+### Étape 2 : Planifier le contenu du Skill réutilisable
+### Étape 3 : Initialiser le Skill
+### Étape 4 : Éditer le Skill
+### Étape 5 : Empaqueter un Skill
+```
+
+Lorsque Claude invoque ce skill, il reçoit l'intégralité du prompt comme nouvelles instructions avec le chemin du répertoire de base ajouté. La variable `{baseDir}` se résout dans le répertoire d'installation du skill, permettant à Claude de charger des fichiers de référence en utilisant l'outil Read : `Read({baseDir}/scripts/init_skill.py)`. Ce modèle garde le prompt principal concis tout en rendant la documentation détaillée disponible sur demande.
+
+**Meilleures pratiques pour le contenu du prompt :**
+
+*   Rester sous 5 000 mots (environ 800 lignes) pour éviter de submerger le contexte
+*   Utiliser un langage impératif ("Analyser le code pour...") et non la deuxième personne ("Vous devriez analyser...")
+*   Référencer des fichiers externes pour un contenu détaillé plutôt que de tout intégrer
+*   Utiliser `{baseDir}` pour les chemins, ne jamais coder en dur des chemins absolus comme `/home/user/project/`
+
+```
+❌ Read /home/user/project/config.json
+✅ Read {baseDir}/config.json
+```
+
+Lorsque le skill est invoqué, Claude n'a accès qu'aux outils spécifiés dans `allowed-tools`, et le modèle peut être remplacé s'il est spécifié dans le frontmatter. Le chemin du répertoire de base du skill est automatiquement fourni, rendant les ressources groupées accessibles.
+
+### Regroupement de ressources avec votre Skill
+
+Les `Skills` deviennent puissants lorsque vous regroupez des ressources de support avec SKILL.md. La structure standard utilise trois répertoires, chacun servant un objectif spécifique :
+
+```
+my-skill/
+├── SKILL.md              # Prompt et instructions principales
+├── scripts/              # Scripts Python/Bash exécutables
+├── references/           # Documentation chargée dans le contexte
+└── assets/               # Modèles et fichiers binaires
+```
+
+**Pourquoi regrouper des ressources ?** Garder SKILL.md concis (moins de 5 000 mots) empêche de submerger la fenêtre de contexte de Claude. Les ressources regroupées vous permettent de fournir une documentation détaillée, des scripts d'automatisation et des modèles sans gonfler le prompt principal. Claude ne les charge que lorsque nécessaire en utilisant la divulgation progressive.
+
+#### Le répertoire `scripts/`
+
+Le répertoire `scripts/` contient du code exécutable que Claude exécute via l'outil Bash - scripts d'automatisation, processeurs de données, validateurs ou générateurs de code qui effectuent des opérations déterministes.
+
+Par exemple, le SKILL.md de `skill-creator` référence des scripts comme ceci :
+
+```
+Lors de la création d'un nouveau skill à partir de zéro, toujours exécuter le script `init_skill.py`. Le script génère commodément un nouveau répertoire de skill modèle qui inclut automatiquement tout ce qu'un skill nécessite, rendant le processus de création de skill beaucoup plus efficace et fiable.
+
+Usage :
+
+```scripts/init_skill.py <skill-name> --path <output-directory>```
+
+Le script :
+  - Crée le répertoire du skill au chemin spécifié
+  - Génère un modèle SKILL.md avec le frontmatter approprié et des espaces réservés TODO
+  - Crée des exemples de répertoires de ressources : scripts/, references/ et assets/
+  - Ajoute des exemples de fichiers dans chaque répertoire qui peuvent être personnalisés ou supprimés
+```
+
+Lorsque Claude voit cette instruction, il exécute `python {baseDir}/scripts/init_skill.py`. La variable `{baseDir}` se résout automatiquement dans le chemin d'installation du skill, rendant le skill portable sur différents environnements.
+
+**Utiliser scripts/ pour** des opérations multi-étapes complexes, des transformations de données, des interactions API ou toute tâche nécessitant une logique précise mieux exprimée en code qu'en langage naturel.
+
+#### Le répertoire `references/`
+
+Le répertoire `references/` stocke la documentation que Claude lit dans son contexte lorsqu'elle est référencée. C'est du contenu textuel - fichiers markdown, schémas JSON, modèles de configuration ou toute documentation dont Claude a besoin pour accomplir la tâche.
+
+Par exemple, le SKILL.md de `mcp-creator` référence des références comme ceci :
+
+```
+#### 1.4 Étudier la documentation du framework
+
+**Charger et lire les fichiers de référence suivants :**
+
+- **Meilleures pratiques MCP :** [📋 Voir les meilleures pratiques](./reference/mcp_best_practices.md) - Directives principales pour tous les serveurs MCP
+
+**Pour les implémentations Python, charger également :**
+- **Documentation SDK Python :** Utiliser WebFetch pour charger `https://raw.githubusercontent.com/modelcontextprotocol/python-sdk/main/README.md`
+- [🐍 Guide d'implémentation Python](./reference/python_mcp_server.md) - Meilleures pratiques et exemples spécifiques à Python
+
+**Pour les implémentations Node/TypeScript, charger également :**
+- **Documentation SDK TypeScript :** Utiliser WebFetch pour charger `https://raw.githubusercontent.com/modelcontextprotocol/typescript-sdk/main/README.md`
+- [⚡ Guide d'implémentation TypeScript](./reference/node_mcp_server.md) - Meilleures pratiques et exemples spécifiques à Node/TypeScript
+```
+
+Lorsque Claude rencontre ces instructions, il utilise l'outil Read : `Read({baseDir}/references/mcp_best_practices.md)`. Le contenu est chargé dans le contexte de Claude, fournissant des informations détaillées sans encombrer SKILL.md.
+
+**Utiliser references/ pour** la documentation détaillée, les grandes bibliothèques de motifs, les listes de contrôle, les schémas API ou tout contenu textuel trop verbeux pour SKILL.md mais nécessaire pour la tâche.
+
+#### Le répertoire `assets/`
+
+Le répertoire `assets/` contient des modèles et des fichiers binaires que Claude référence par chemin mais ne charge pas dans le contexte. Considérez cela comme les ressources statiques du skill - modèles HTML, fichiers CSS, images, modèles de configuration ou polices.
+
+Dans SKILL.md :
+
+```
+Utiliser le modèle à {baseDir}/assets/report-template.html comme structure de rapport.
+Référencer le diagramme d'architecture à {baseDir}/assets/diagram.png.
+```
+
+Claude voit le chemin du fichier mais ne lit pas le contenu. Au lieu de cela, il pourrait copier le modèle vers un nouvel emplacement, remplir les espaces réservés ou référencer le chemin dans la sortie générée.
+
+**Utiliser assets/ pour** des modèles HTML/CSS, des images, des fichiers binaires, des modèles de configuration ou tout fichier que Claude manipule par chemin plutôt que de lire dans le contexte.
+
+La distinction clé entre `references/` et `assets/` est que
+
+*   **references/ :** Contenu textuel chargé dans le contexte de Claude via l'outil Read
+*   **assets/ :** Fichiers référencés par chemin uniquement, non chargés dans le contexte
+
+Cette distinction est importante pour la gestion du contexte. Un fichier markdown de 10 Ko dans `references/` consomme des tokens de contexte lorsqu'il est chargé. Un modèle HTML de 10 Ko dans `assets/` ne le fait pas. Claude sait juste que le chemin existe.
+
+> **Meilleure pratique :** Toujours utiliser `{baseDir}` pour les chemins, ne jamais coder en dur des chemins absolus. Cela rend les skills portables entre les environnements utilisateur, les répertoires de projet et les différentes installations.
+
+### Modèles de Skill courants
+
+Comme pour tout en ingénierie, comprendre les modèles courants aide à concevoir des skills efficaces. Voici les modèles les plus utiles pour l'intégration d'outils et la conception de flux de travail.
+
+#### Modèle 1 : Automatisation de script
+
+**Cas d'usage :** Opérations complexes nécessitant plusieurs commandes ou une logique déterministe.
+
+Ce modèle délègue les tâches de calcul aux scripts Python ou Bash dans le répertoire `scripts/`. Le prompt du skill indique à Claude d'exécuter le script et de traiter sa sortie.
+
+![Claude Skill Script Automation](https://leehanchung.github.io/assets/img/2025-10-26/09-script-automation.png)
+
+**Exemple SKILL.md :**
+
+```
+Exécuter scripts/analyzer.py sur le répertoire cible :
+
+`python {baseDir}/scripts/analyzer.py --path "$USER_PATH" --output report.json`
+
+Analyser le `report.json` généré et présenter les résultats.
+```
+
+**Outils requis :**
+
+```
+allowed-tools: "Bash(python {baseDir}/scripts/*:*), Read, Write"
+```
+
+#### Modèle 2 : Lire - Traiter - Écrire
+
+**Cas d'usage :** Transformation de fichiers et traitement de données.
+
+Le modèle le plus simple - lire l'entrée, la transformer en suivant les instructions, écrire la sortie. Utile pour les conversions de format, le nettoyage de données ou la génération de rapports.
+
+![Claude Skill Read Process Write](https://leehanchung.github.io/assets/img/2025-10-26/10-read-process-write.png)
+
+**Exemple SKILL.md :**
+
+```
+## Flux de traitement
+1. Lire le fichier d'entrée en utilisant l'outil Read
+2. Analyser le contenu selon le format
+3. Transformer les données en suivant les spécifications
+4. Écrire la sortie en utilisant l'outil Write
+5. Rapporter l'achèvement avec un résumé
+```
+
+**Outils requis :**
+
+```
+allowed-tools: "Read, Write"
+```
+
+#### Modèle 3 : Rechercher - Analyser - Rapporter
+
+**Cas d'usage :** Analyse de base de code et détection de motifs.
+
+Rechercher la base de code pour des motifs en utilisant Grep, lire les fichiers correspondants pour le contexte, analyser les résultats et générer un rapport structuré. Ou, rechercher un entrepôt de données d'entreprise pour des données, analyser les données récupérées pour des informations et générer un rapport structuré.
+
+![Claude Skill Search Analyze Report](https://leehanchung.github.io/assets/img/2025-10-26/06-search-analyze-report.png)
+
+**Exemple SKILL.md :**
+
+```
+## Processus d'analyse
+1. Utiliser Grep pour trouver les motifs de code pertinents
+2. Lire chaque fichier correspondant
+3. Analyser pour les vulnérabilités
+4. Générer un rapport structuré
+```
+
+**Outils requis :**
+
+```
+allowed-tools: "Grep, Read"
+```
+
+#### Modèle 4 : Exécution de chaîne de commandes
+
+**Cas d'usage :** Opérations multi-étapes avec dépendances.
+
+Exécuter une séquence de commandes où chaque étape dépend du succès de la précédente. Courant pour les flux de travail de type CI/CD.
+
+![Claude Skill Command Chain Execution](https://leehanchung.github.io/assets/img/2025-10-26/05-command-chain-execution.png)
+
+**Exemple SKILL.md :**
+
+```
+Exécuter le pipeline d'analyse :
+npm install && npm run lint && npm test
+
+Rapporter les résultats de chaque étape.
+```
+
+**Outils requis :**
+
+```
+allowed-tools: "Bash(npm install:*), Bash(npm run:*), Read"
+```
+
+### Modèles avancés
+
+#### Flux de travail multi-étapes de type assistant
+
+**Cas d'usage :** Processus complexes nécessitant une entrée utilisateur à chaque étape.
+
+Décomposer les tâches complexes en étapes discrètes avec une confirmation utilisateur explicite entre chaque phase. Utile pour les assistants de configuration, les outils de configuration ou les processus guidés.
+
+**Exemple SKILL.md :**
+
+```
+## Flux de travail
+
+### Étape 1 : Configuration initiale
+1. Demander à l'utilisateur le type de projet
+2. Valider que les prérequis existent
+3. Créer la configuration de base
+Attendre la confirmation de l'utilisateur avant de continuer.
+
+### Étape 2 : Configuration
+1. Présenter les options de configuration
+2. Demander à l'utilisateur de choisir les paramètres
+3. Générer le fichier de configuration
+Attendre la confirmation de l'utilisateur avant de continuer.
+
+### Étape 3 : Initialisation
+1. Exécuter les scripts d'initialisation
+2. Vérifier que la configuration a réussi
+3. Rapporter les résultats
+```
+
+#### Génération basée sur modèle
+
+**Cas d'usage :** Création de sorties structurées à partir de modèles stockés dans `assets/`.
+
+Charger les modèles, remplir les espaces réservés avec des données fournies par l'utilisateur ou générées, et écrire le résultat. Courant pour la génération de rapports, la création de code passe-partout ou la documentation.
+
+**Exemple SKILL.md :**
+
+```
+## Processus de génération
+1. Lire le modèle depuis {baseDir}/assets/template.html
+2. Analyser les exigences de l'utilisateur
+3. Remplir les espaces réservés du modèle :
+   -  → nom fourni par l'utilisateur
+   -  → résumé généré
+   -  → date actuelle
+4. Écrire le modèle rempli dans le fichier de sortie
+5. Rapporter l'achèvement
+```
+
+#### Raffinement itératif
+
+**Cas d'usage :** Processus nécessitant plusieurs passes avec une profondeur croissante.
+
+Effectuer d'abord une analyse large, puis des plongées progressivement plus profondes sur les problèmes identifiés. Utile pour la revue de code, les audits de sécurité ou l'analyse de qualité.
+
+**Exemple SKILL.md :**
+
+```
+## Analyse itérative
+
+### Passe 1 : Balayage large
+1. Rechercher dans toute la base de code des motifs
+2. Identifier les problèmes de haut niveau
+3. Catégoriser les résultats
+
+### Passe 2 : Analyse approfondie
+Pour chaque problème de haut niveau :
+1. Lire le contexte complet du fichier
+2. Analyser la cause racine
+3. Déterminer la gravité
+
+### Passe 3 : Recommandation
+Pour chaque résultat :
+1. Rechercher les meilleures pratiques
+2. Générer un correctif spécifique
+3. Estimer l'effort
+
+Présenter le rapport final avec tous les résultats et recommandations.
+```
+
+#### Agrégation de contexte
+
+**Cas d'usage :** Combiner des informations de plusieurs sources pour construire une compréhension complète.
+
+Collecter des données de différents fichiers et outils, synthétiser en une image cohérente. Utile pour les résumés de projet, l'analyse de dépendances ou les évaluations d'impact.
+
+**Exemple SKILL.md :**
+
+```
+## Collecte de contexte
+1. Lire le projet README.md pour la vue d'ensemble
+2. Analyser package.json pour les dépendances
+3. Grep la base de code pour des motifs spécifiques
+4. Vérifier l'historique git pour les changements récents
+5. Synthétiser les résultats en un résumé cohérent
+```
+
+## Architecture interne des Agent Skills
+
+Avec la vue d'ensemble et le processus de construction couverts, nous pouvons maintenant examiner comment les skills fonctionnent réellement sous le capot. Le système de skills fonctionne à travers une architecture méta-outil où un outil nommé `Skill` agit comme un conteneur et un répartiteur pour tous les skills individuels. Cette conception distingue fondamentalement les skills des outils traditionnels à la fois dans l'implémentation et l'objectif.
+
+> L'outil `Skill` est un méta-outil qui gère tous les skills
+
+## Conception d'objet Skills
+
+Les outils traditionnels comme `Read`, `Bash` ou `Write` exécutent des actions discrètes et retournent des résultats immédiats. Les skills fonctionnent différemment. Plutôt que d'effectuer des actions directement, ils injectent des instructions spécialisées dans l'historique de conversation et modifient dynamiquement l'environnement d'exécution de Claude. Cela se produit à travers deux messages utilisateur - l'un contenant les métadonnées visibles aux utilisateurs, l'autre contenant le prompt de skill complet caché de l'interface mais envoyé à Claude - et en modifiant le contexte de l'agent pour changer les permissions, changer de modèle et ajuster les paramètres de tokens de réflexion pendant la durée d'utilisation du skill.
+
+![Claude Skill Execution Flow](https://leehanchung.github.io/assets/img/2025-10-26/08-claude-skill-execution-flow.png)
+
+| Fonctionnalité | Outil normal | Outil Skill |
+| --- | --- | --- |
+| **Essence** | Exécuteur d'action directe | Injection de prompt + modificateur de contexte |
+| **Rôle de message** | assistant → tool_use user → tool_result | assistant → tool_use Skill user → tool_result user → skill prompt ← INJECTÉ ! |
+| **Complexité** | Simple (3-4 messages) | Complexe (5-10+ messages) |
+| **Contexte** | Statique | Dynamique (modifié par tour) |
+| **Persistance** | Interactions d'outils uniquement | Interactions d'outils + prompts de skills |
+| **Surcharge de tokens** | Minimale (~100 tokens) | Significative (~1 500+ tokens par tour) |
+| **Cas d'usage** | Tâches simples et directes | Flux de travail complexes et guidés |
+
+La complexité est substantielle. Les outils normaux génèrent des échanges de messages simples - un appel d'outil assistant suivi d'un résultat utilisateur. Les skills injectent plusieurs messages, fonctionnent dans un contexte modifié dynamiquement et portent une surcharge de tokens significative pour fournir les instructions spécialisées qui guident le comportement de Claude.
+
+Comprendre comment fonctionne le méta-outil `Skill` révèle la mécanique de ce système. Examinons sa structure :
+
+```
+Pd = {
+  name: "Skill",  // La constante de nom d'outil : $N = "Skill"
+
+  inputSchema: {
+    command: string  // Par ex., "pdf", "skill-creator"
+  },
+
+  outputSchema: {
+    success: boolean,
+    commandName: string
+  },
+
+  // 🔑 CHAMP CLÉ : Cela génère la liste des skills
+  prompt: async () => fN2(),
+
+  // Validation et exécution
+  validateInput: async (input, context) => { /* 5 codes d'erreur */ },
+  checkPermissions: async (input, context) => { /* allow/deny/ask */ },
+  call: async *(input, context) => { /* yields messages + context modifier */ }
+}
+```
+
+Le champ `prompt` distingue l'outil Skill des autres outils comme `Read` ou `Bash`, qui ont des descriptions statiques. Au lieu d'une chaîne fixe, l'outil Skill utilise un générateur de prompt dynamique qui construit sa description à l'exécution en agrégeant les noms et descriptions de tous les skills disponibles. Cela implémente la **divulgation progressive** - le système ne charge que les métadonnées minimales (noms de skills et descriptions du frontmatter) dans le contexte initial de Claude, fournissant juste assez d'informations pour que le modèle décide quel skill correspond à l'intention de l'utilisateur. Le prompt de skill complet ne se charge qu'après que Claude ait fait cette sélection, empêchant le gonflement du contexte tout en maintenant la découvrabilité.
+
+```
+async function fN2() {
+  let A = await atA(),
+    {
+      modeCommands: B,
+      limitedRegularCommands: Q
+    } = vN2(A),
+    G = [...B, ...Q].map((W) => W.userFacingName()).join(", ");
+  l(`Skills and commands included in Skill tool: ${G}`);
+  let Z = A.length - B.length,
+    Y = nS6(B),
+    J = aS6(Q, Z);
+  return `Execute a skill within the main conversation
+
+<skills_instructions>
+When users ask you to perform tasks, check if any of the available skills below can help complete the task more effectively. Skills provide specialized capabilities and domain knowledge.
+
+How to use skills:
+- Invoke skills using this tool with the skill name only (no arguments)
+- When you invoke a skill, you will see <command-message>The "{name}" skill is loading</command-message>
+- The skill's prompt will expand and provide detailed instructions on how to complete the task
+- Examples:
+  - \`command: "pdf"\` - invoke the pdf skill
+  - \`command: "xlsx"\` - invoke the xlsx skill
+  - \`command: "ms-office-suite:pdf"\` - invoke using fully qualified name
+
+Important:
+- Only use skills listed in <available_skills> below
+- Do not invoke a skill that is already running
+- Do not use this tool for built-in CLI commands (like /help, /clear, etc.)
+</skills_instructions>
+
+<available_skills>
+${Y}${J}
+</available_skills>
+`;
+}
+```
+
+Contrairement à la façon dont certains outils vivent dans les prompts système pour certains assistants comme ChatGPT, Claude **les agent skills ne vivent pas dans le prompt système**. Ils vivent dans le tableau `tools` comme partie de la description de l'outil `Skill`. Les noms des skills individuels sont représentés comme partie du champ `command` du schéma d'entrée de l'outil `Skill`. Pour mieux visualiser à quoi cela ressemble, voici la structure de requête API réelle :
+
+```
+{
+  "model": "claude-sonnet-4-5-20250929",
+  "system": "You are Claude Code, Anthropic's official CLI...",  // ← Prompt système
+  "messages": [
+    {"role": "user", "content": "Help me create a new skill"},
+    // ... historique de conversation
+  ],
+  "tools": [  // ← Tableau d'outils envoyé à Claude
+    {
+      "name": "Skill",  // ← Le méta-outil
+      "description": "Execute a skill...\n\n<skills_instructions>...\n\n<available_skills>\n...",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The skill name (no arguments)"  // ← Nom du skill individuel
+          }
+        }
+      }
+    },
+    {
+      "name": "Bash",
+      "description": "Execute bash commands...",
+      // ...
+    },
+    {
+      "name": "Read",
+      // ...
+    }
+    // ... autres outils
+  ]
+}
+```
+
+La section `<available_skills>` vit dans la description de l'outil Skill et est régénérée pour chaque requête API. Le système construit dynamiquement cette liste en agrégeant les skills actuellement chargés depuis les configurations utilisateur et projet, les skills fournis par les plugins et tout skill intégré, soumis à une limite de budget de tokens de 15 000 caractères par défaut. Cette contrainte de budget force les auteurs de skills à écrire des descriptions concises et garantit que la description de l'outil ne submerge pas la fenêtre de contexte du modèle.
+
+## Conception d'injection de contexte de conversation et d'exécution de Skill
+
+La plupart des API LLM supportent les messages `role: "system"` qui pourraient théoriquement porter des prompts système. En fait, le ChatGPT d'OpenAI porte ses outils par défaut dans ses prompts système, incluant `bio` pour la mémoire, `automations` pour la planification de tâches, `canmore` pour contrôler le canvas, `img_gen` pour la génération d'images, `file_search`, `python` et `web` pour la recherche Internet. Et à la fin, les prompts d'outils représentent environ 90% du nombre de tokens dans son prompt système. Cela pourrait être utile mais à peine efficace si nous avons beaucoup d'outils et/ou de skills à charger dans le contexte.
+
+Cependant, les messages système ont une sémantique différente qui les rend inadaptés aux skills. Les messages système définissent un contexte global qui persiste dans toute la conversation, affectant tous les tours suivants avec une autorité supérieure aux instructions de l'utilisateur.
+
+Les skills ont besoin d'un comportement temporaire et délimité. Le skill `skill-creator` ne devrait affecter que les tâches liées à la création de skills, pas transformer Claude en spécialiste PDF permanent pour le reste de la session. L'utilisation de `role: "user"` avec `isMeta: true` fait apparaître le prompt du skill comme une entrée utilisateur pour Claude, le gardant temporaire et localisé à l'interaction actuelle. Après que le skill se termine, la conversation retourne au contexte de conversation normal et au contexte d'exécution sans modifications comportementales résiduelles.
+
+Les outils normaux comme `Read`, `Write` ou `Bash` ont des modèles de communication simples. Lorsque Claude invoque `Read`, il envoie un chemin de fichier, reçoit le contenu du fichier et continue à travailler. L'utilisateur voit "Claude a utilisé l'outil Read" dans sa transcription, et c'est une transparence suffisante. L'outil a fait une chose, a retourné un résultat, et c'est la fin de l'interaction. Les skills fonctionnent fondamentalement différemment. Au lieu d'exécuter des actions discrètes et de retourner des résultats, les skills injectent des ensembles d'instructions complets qui modifient comment Claude raisonne et aborde la tâche. Cela crée un défi de conception que les outils normaux ne rencontrent jamais : les utilisateurs ont besoin de transparence sur quels skills sont en cours d'exécution et ce qu'ils font, tandis que Claude a besoin d'instructions détaillées, potentiellement verbeuses, pour exécuter correctement le skill. Si les utilisateurs voient les prompts de skills complets dans leur transcription de chat, l'interface devient encombrée de milliers de mots d'instructions AI internes. Si l'activation du skill est complètement cachée, les utilisateurs perdent la visibilité sur ce que le système fait en leur nom. La solution nécessite de séparer ces deux canaux de communication en messages distincts avec des règles de visibilité différentes.
+
+Le système de skills utilise un drapeau `isMeta` sur chaque message pour contrôler s'il apparaît dans l'interface utilisateur. Lorsque `isMeta: false` (ou lorsque le drapeau est omis et par défaut à false), le message s'affiche dans la transcription de conversation que les utilisateurs voient. Lorsque `isMeta: true`, le message est envoyé à l'API Anthropic comme partie du contexte de conversation de Claude mais n'apparaît jamais dans l'interface. Ce simple drapeau booléen permet une communication sophistiquée à deux canaux : un flux pour les utilisateurs humains, un autre pour le modèle AI. Méta-prompting pour les méta-outils !
+
+Lorsqu'un skill s'exécute, le système injecte deux messages utilisateur séparés dans l'historique de conversation. Le premier porte les métadonnées du skill avec `isMeta: false`, le rendant visible aux utilisateurs comme indicateur de statut. Le second porte le prompt de skill complet avec `isMeta: true`, le cachant de l'interface tout en le rendant disponible à Claude. Cette division résout le compromis transparence vs clarté en montrant aux utilisateurs ce qui se passe sans les submerger avec les détails d'implémentation.
+
+Le message de métadonnées utilise une structure XML concise que le frontend peut analyser et afficher de manière appropriée :
+
+```
+let metadata = [
+  `<command-message>${statusMessage}</command-message>`,
+  `<command-name>${skillName}</command-name>`,
+  args ? `<command-args>${args}</command-args>` : null
+].filter(Boolean).join('\n');
+
+// Message 1 : PAS de drapeau isMeta → par défaut à false → VISIBLE
+messages.push({
+  content: metadata,
+  autocheckpoint: checkpointFlag
+});
+```
+
+Lorsque le skill PDF s'active, par exemple, les utilisateurs voient un indicateur de chargement propre dans leur transcription :
+
+```
+<command-message>The "pdf" skill is loading</command-message>
+<command-name>pdf</command-name>
+<command-args>report.pdf</command-args>
+```
+
+Ce message reste intentionnellement minimal - généralement 50 à 200 caractères. Les balises XML permettent au frontend de l'afficher avec un formatage spécial, de valider que les balises `<command-message>` appropriées sont présentes, et de maintenir une piste d'audit des skills qui ont été exécutés pendant la session. Parce que le drapeau `isMeta` par défaut est false lorsqu'il est omis, ces métadonnées apparaissent automatiquement dans l'interface.
+
+Le message de prompt de skill adopte l'approche opposée. Il charge le contenu complet de `SKILL.md`, l'augmente potentiellement avec un contexte supplémentaire, et définit explicitement `isMeta: true` pour le cacher des utilisateurs :
+
+```
+let skillPrompt = await skill.getPromptForCommand(args, context);
+
+// Augmenter avec du contenu prepend/append si nécessaire
+let fullPrompt = prependContent.length > 0 || appendContent.length > 0
+  ? [...prependContent, ...appendContent, ...skillPrompt]
+  : skillPrompt;
+
+// Message 2 : isMeta: true explicite → CACHÉ
+messages.push({
+  content: fullPrompt,
+  isMeta: true  // CACHÉ DE L'INTERFACE, ENVOYÉ À L'API
+});
+```
+
+Un prompt de skill typique fait 500 à 5 000 mots et fournit des conseils complets pour transformer le comportement de Claude. Le prompt du skill PDF pourrait contenir :
+
+```
+Vous êtes un spécialiste du traitement PDF.
+
+Votre tâche est d'extraire du texte de documents PDF en utilisant l'outil pdftotext.
+
+## Processus
+
+1. Valider que le fichier PDF existe
+2. Exécuter la commande pdftotext pour extraire le texte
+3. Lire le fichier de sortie
+4. Présenter le texte extrait à l'utilisateur
+
+## Outils disponibles
+
+Vous avez accès à :
+- Bash(pdftotext:*) - Pour exécuter la commande pdftotext
+- Read - Pour lire le texte extrait
+- Write - Pour sauvegarder les résultats si nécessaire
+
+## Format de sortie
+
+Présenter le texte extrait clairement formaté.
+
+Répertoire de base : /path/to/skill
+Arguments utilisateur : report.pdf
+```
+
+Ce prompt établit le contexte de la tâche, décrit le flux de travail, spécifie les outils disponibles, définit le format de sortie et fournit des chemins spécifiques à l'environnement. La structure markdown avec en-têtes, listes et blocs de code aide Claude à analyser et suivre les instructions. Avec `isMeta: true`, ce prompt entier est envoyé à l'API mais n'encombre jamais la transcription de l'utilisateur.
+
+Au-delà des métadonnées principales et du prompt de skill, les skills peuvent injecter des messages conditionnels supplémentaires pour les pièces jointes et les permissions :
+
+```
+let allMessages = [
+  createMessage({ content: metadata, autocheckpoint: flag }),  // 1. Métadonnées
+  createMessage({ content: skillPrompt, isMeta: true }),       // 2. Prompt de skill
+  ...attachmentMessages,                                       // 3. Pièces jointes (conditionnel)
+  ...(allowedTools.length || skill.model ? [
+    createPermissionsMessage({                                 // 4. Permissions (conditionnel)
+      type: "command_permissions",
+      allowedTools: allowedTools,
+      model: skill.useSmallFastModel ? getFastModel() : skill.model
+    })
+  ] : [])
+];
+```
+
+Les messages de pièces jointes peuvent porter des informations de diagnostic, des références de fichiers ou un contexte supplémentaire qui complète le prompt du skill. Les messages de permissions n'apparaissent que lorsque le skill spécifie `allowed-tools` dans son frontmatter ou demande un remplacement de modèle, fournissant des métadonnées qui modifient l'environnement d'exécution à l'exécution. Cette composition modulaire permet à chaque message d'avoir un objectif spécifique et d'être inclus ou exclu en fonction de la configuration du skill, étendant le modèle de base à deux messages pour gérer des scénarios plus complexes tout en maintenant le même contrôle de visibilité via les drapeaux `isMeta`.
+
+### Pourquoi deux messages au lieu d'un ?
+
+Une conception à message unique forcerait un choix impossible. Définir `isMeta: false` rendrait le message entier visible, déversant des milliers de mots d'instructions AI dans la transcription de chat de l'utilisateur. Les utilisateurs verraient quelque chose comme :
+
+```
+┌─────────────────────────────────────────────┐
+│ The "pdf" skill is loading                  │
+│                                             │
+│ You are a PDF processing specialist.        │
+│                                             │
+│ Your task is to extract text from PDF       │
+│ documents using the pdftotext tool.         │
+│                                             │
+│ ## Process                                  │
+│                                             │
+│ 1. Validate the PDF file exists             │
+│ 2. Run pdftotext command to extract text    │
+│ 3. Read the output file                     │
+│ ... [500 more lines] ...                    │
+└─────────────────────────────────────────────┘
+```
+
+L'interface devient inutilisable, remplie de détails d'implémentation internes destinés à Claude, pas aux humains. Alternativement, définir `isMeta: true` cacherait tout, ne fournissant aucune transparence sur quel skill s'est activé ou quels arguments il a reçus. Les utilisateurs n'auraient aucune visibilité sur ce que le système fait en leur nom.
+
+La division en deux messages résout cela en donnant à chaque message une valeur `isMeta` différente. Le message 1 avec `isMeta: false` fournit une transparence orientée utilisateur. Le message 2 avec `isMeta: true` fournit à Claude des instructions détaillées. Ce contrôle granulaire permet la transparence sans surcharge d'informations.
+
+Les messages servent également des publics et des objectifs fondamentalement différents :
+
+| Aspect | Message de métadonnées | Message de prompt de skill |
+| --- | --- | --- |
+| **Public** | Utilisateur humain | Claude (AI) |
+| **Objectif** | Statut/transparence | Instructions/conseils |
+| **Longueur** | ~50-200 caractères | ~500-5 000 mots |
+| **Format** | XML structuré | Markdown en langage naturel |
+| **Visibilité** | Devrait être visible | Devrait être caché |
+| **Contenu** | "Que se passe-t-il ?" | "Comment faire ?" |
+
+La base de code traite même ces messages par des chemins différents. Le message de métadonnées est analysé pour les balises `<command-message>`, validé et formaté pour l'affichage de l'interface. Le message de prompt de skill est envoyé directement à l'API sans analyse ni validation - c'est du contenu d'instruction brut destiné uniquement au processus de raisonnement de Claude. Les combiner violerait le principe de responsabilité unique en forçant un message à servir deux publics distincts à travers deux pipelines de traitement différents.
+
+## Étude de cas : Cycle de vie d'exécution
+
+Maintenant que l'architecture interne des Agent Skills est couverte, parcourons ce qui se passe lorsqu'un utilisateur dit "Extraire le texte de report.pdf" en examinant le flux d'exécution complet en utilisant un skill `pdf` hypothétique comme étude de cas.
+
+![Claude Skill Execution Flow](https://leehanchung.github.io/assets/img/2025-10-26/07-claude-skill-sequence-diagram.png)
+
+### Phase 1 : Découverte et chargement (Démarrage)
+
+Lorsque Claude Code démarre, il scanne les skills :
+
+```
+async function getAllCommands() {
+  // Charger depuis toutes les sources en parallèle
+  let [userCommands, skillsAndPlugins, pluginCommands, builtins] =
+    await Promise.all([
+      loadUserCommands(),      // ~/.claude/commands/
+      loadSkills(),            // .claude/skills/ + plugins
+      loadPluginCommands(),    // Commandes définies par les plugins
+      getBuiltinCommands()     // Commandes codées en dur
+    ]);
+
+  return [...userCommands, ...skillsAndPlugins, ...pluginCommands, ...builtins]
+    .filter(cmd => cmd.isEnabled());
+}
+
+// Chargement de skill spécifique
+async function loadPluginSkills(plugin) {
+  // Vérifier si le plugin a des skills
+  if (!plugin.skillsPath) return [];
+
+  // Deux modèles supportés :
+  // 1. SKILL.md racine dans skillsPath
+  // 2. Sous-répertoires avec SKILL.md
+
+  const skillFiles = findSkillMdFiles(plugin.skillsPath);
+  const skills = [];
+
+  for (const file of skillFiles) {
+    const content = readFile(file);
+    const { frontmatter, markdown } = parseFrontmatter(content);
+
+    skills.push({
+      type: "prompt",
+      name: `${plugin.name}:${getSkillName(file)}`,
+      description: `${frontmatter.description} (plugin:${plugin.name})`,
+      whenToUse: frontmatter.when_to_use,  // ← Note : underscores !
+      allowedTools: parseTools(frontmatter['allowed-tools']),
+      model: frontmatter.model === "inherit" ? undefined : frontmatter.model,
+      isSkill: true,
+      promptContent: markdown,
+      // ... autres champs
+    });
+  }
+
+  return skills;
+}
+```
+
+Pour le skill pdf, cela produit :
+
+```
+{
+  type: "prompt",
+  name: "pdf",
+  description: "Extract text from PDF documents (plugin:document-tools)",
+  whenToUse: "When user wants to extract or process text from PDF files",
+  allowedTools: ["Bash(pdftotext:*)", "Read", "Write"],
+  model: undefined,  // Utilise le modèle de session
+  isSkill: true,
+  disableModelInvocation: false,
+  promptContent: "You are a PDF processing specialist...",
+  // ... autres champs
+}
+```
+
+### Phase 2 : Tour 1 - Requête utilisateur et sélection de Skill
+
+L'utilisateur envoie une requête : "Extraire le texte de report.pdf". Claude reçoit ce message avec l'outil `Skill` dans son tableau d'outils. Avant que Claude puisse décider d'invoquer le skill pdf, le système doit présenter les skills disponibles dans la description de l'outil Skill.
+
+#### Filtrage et présentation de Skill
+
+Tous les skills chargés n'apparaissent pas dans l'outil Skill. Un skill DOIT avoir soit `description` SOIT `when_to_use` dans le frontmatter, sinon il est filtré. Critères de filtrage :
+
+```
+async function getSkillsForSkillTool() {
+  const allCommands = await getAllCommands();
+
+  return allCommands.filter(cmd =>
+    cmd.type === "prompt" &&
+    cmd.isSkill === true &&
+    !cmd.disableModelInvocation &&
+    (cmd.source !== "builtin" || cmd.isModeCommand === true) &&
+    (cmd.hasUserSpecifiedDescription || cmd.whenToUse)  // ← Doit en avoir un !
+  );
+}
+```
+
+#### Formatage de Skill
+
+Chaque skill est formaté pour la section `<available_skills>`. Par exemple, notre skill `pdf` hypothétique pourrait être formaté en
+
+`"pdf": Extract text from PDF documents - When user wants to extract or process text from PDF files`
+
+```
+function formatSkill(skill) {
+  let name = skill.name;
+  let description = skill.whenToUse
+    ? `${skill.description} - ${skill.whenToUse}`
+    : skill.description;
+
+  return `"${name}": ${description}`;
+}
+```
+
+#### Processus de décision de Claude
+
+Maintenant, lorsque l'utilisateur demande : "Extraire le texte de report.pdf". Claude reçoit la requête API avec l'outil `Skill`, lit les `<available_skills>`, et raisonne (hypothétiquement, car nous ne voyons pas les traces de raisonnement) :
+
+```
+Raisonnement interne :
+- L'utilisateur veut "extraire le texte de report.pdf"
+- C'est une tâche de traitement PDF
+- En regardant les skills disponibles...
+- "pdf" : Extraire le texte de documents PDF - Lorsque l'utilisateur veut extraire ou traiter le texte de fichiers PDF
+- Ça correspond ! L'utilisateur veut extraire du texte d'un PDF
+- Décision : Invoquer l'outil Skill avec command="pdf"
+```
+
+Notez qu'il n'y a pas de correspondance algorithmique ici. Pas de correspondance lexicale. Pas de correspondance sémantique. Pas de recherches. C'est du raisonnement LLM pur pour ses décisions basées sur la description du skill. Une fois fait, Claude retourne une utilisation d'outil :
+
+```
+{
+  "type": "tool_use",
+  "id": "toolu_123abc",
+  "name": "Skill",
+  "input": {
+    "command": "pdf"
+  }
+}
+```
+
+### Phase 3 : Exécution de l'outil Skill
+
+L'outil Skill s'exécute maintenant. Cela correspond à la boîte jaune "SKILL TOOL EXECUTION" dans le diagramme de séquence, qui effectue la validation, les vérifications de permissions, le chargement de fichiers et la modification de contexte avant de produire le résultat.
+
+#### Étape 1 : Validation
+
+```
+async validateInput({ command }, context) {
+  let skillName = command.trim().replace(/^\//, "");
+
+  // Erreur 1 : Vide
+  if (!skillName) return { result: false, errorCode: 1 };
+
+  // Erreur 2 : Skill inconnu
+  const allSkills = await getAllCommands();
+  if (!skillExists(skillName, allSkills)) {
+    return { result: false, errorCode: 2 };
+  }
+
+  // Erreur 3 : Impossible de charger
+  const skill = getSkill(skillName, allSkills);
+  if (!skill) return { result: false, errorCode: 3 };
+
+  // Erreur 4 : Invocation de modèle désactivée
+  if (skill.disableModelInvocation) {
+    return { result: false, errorCode: 4 };
+  }
+
+  // Erreur 5 : Pas basé sur prompt
+  if (skill.type !== "prompt") {
+    return { result: false, errorCode: 5 };
+  }
+
+  return { result: true };
+}
+```
+
+Le skill pdf passe toutes les vérifications de validation ✓
+
+#### Étape 2 : Vérification des permissions
+
+```
+async checkPermissions({ command }, context) {
+  const skillName = command.trim().replace(/^\//, "");
+  const permContext = (await context.getAppState()).toolPermissionContext;
+
+  // Vérifier les règles de refus
+  for (const [pattern, rule] of getDenyRules(permContext)) {
+    if (matches(skillName, pattern)) {
+      return { behavior: "deny", message: "Blocked by permission rules" };
+    }
+  }
+
+  // Vérifier les règles d'autorisation
+  for (const [pattern, rule] of getAllowRules(permContext)) {
+    if (matches(skillName, pattern)) {
+      return { behavior: "allow" };
+    }
+  }
+
+  // Par défaut : demander à l'utilisateur
+  return { behavior: "ask", message: `Execute skill: ${skillName}` };
+}
+```
+
+En supposant qu'il n'y a pas de règles, l'utilisateur est invité : "Exécuter le skill : pdf ?"
+
+ L'utilisateur approuve ✓
+
+#### Étape 3 : Charger le fichier de Skill et générer la modification du contexte d'exécution
+
+Avec la validation et les permissions approuvées, l'outil Skill charge le fichier de skill et prépare la modification du contexte d'exécution :
+
+```
+async *call({ command }, context) {
+  const skillName = command.trim().replace(/^\//, "");
+  const allSkills = await getAllCommands();
+  const skill = getSkill(skillName, allSkills);
+
+  // Charger le prompt du skill
+  const promptContent = await skill.getPromptForCommand("", context);
+
+  // Générer les balises de métadonnées
+  const metadata = [
+    `<command-message>The "${skill.userFacingName()}" skill is loading</command-message>`,
+    `<command-name>${skill.userFacingName()}</command-name>`
+  ].join('\n');
+
+  // Créer les messages
+  const messages = [
+    { type: "user", content: metadata },  // Visible à l'utilisateur
+    { type: "user", content: promptContent, isMeta: true },  // Caché de l'utilisateur, visible à Claude
+    // ... pièces jointes, permissions
+  ];
+
+  // Extraire la configuration
+  const allowedTools = skill.allowedTools || [];
+  const modelOverride = skill.model;
+
+  // Produire le résultat avec le modificateur de contexte d'exécution
+  yield {
+    type: "result",
+    data: { success: true, commandName: skillName },
+    newMessages: messages,
+
+    // 🔑 Fonction de modification du contexte d'exécution
+    contextModifier(context) {
+      let modified = context;
+
+      // Injecter les outils autorisés
+      if (allowedTools.length > 0) {
+        modified = {
+          ...modified,
+          async getAppState() {
+            const state = await context.getAppState();
+            return {
+              ...state,
+              toolPermissionContext: {
+                ...state.toolPermissionContext,
+                alwaysAllowRules: {
+                  ...state.toolPermissionContext.alwaysAllowRules,
+                  command: [
+                    ...state.toolPermissionContext.alwaysAllowRules.command || [],
+                    ...allowedTools  // ← Pré-approuver ces outils
+                  ]
+                }
+              }
+            };
+          }
+        };
+      }
+
+      // Remplacer le modèle
+      if (modelOverride) {
+        modified = {
+          ...modified,
+          options: {
+            ...modified.options,
+            mainLoopModel: modelOverride
+          }
+        };
+      }
+
+      return modified;
+    }
+  };
+}
+```
+
+L'outil Skill produit son résultat contenant `newMessages` (métadonnées + prompt de skill + permissions pour l'injection de contexte de conversation) et `contextModifier` (permissions d'outils + remplacement de modèle pour la modification du contexte d'exécution). Cela complète la boîte jaune "SKILL TOOL EXECUTION" du diagramme de séquence.
+
+### Phase 4 : Envoi à l'API (Fin du tour 1)
+
+Le système construit le tableau de messages complet à envoyer à l'API Anthropic. Cela inclut tous les messages de la conversation plus les messages de skill nouvellement injectés :
+
+```
+// Tableau de messages complet envoyé à l'API pour le tour 1
+{
+  model: "claude-sonnet-4-5-20250929",
+  messages: [
+    {
+      role: "user",
+      content: "Extract text from report.pdf"
+    },
+    {
+      role: "assistant",
+      content: [
+        {
+          type: "tool_use",
+          id: "toolu_123abc",
+          name: "Skill",
+          input: { command: "pdf" }
+        }
+      ]
+    },
+    {
+      role: "user",
+      content: "<command-message>The \"pdf\" skill is loading</command-message>\n<command-name>pdf</command-name>"
+      // isMeta: false (par défaut) - VISIBLE à l'utilisateur dans l'interface
+    },
+    {
+      role: "user",
+      content: "You are a PDF processing specialist...\n\n## Process\n1. Validate PDF exists\n2. Run pdftotext...",
+      isMeta: true  // CACHÉ de l'interface, envoyé à l'API
+    },
+    {
+      role: "user",
+      content: {
+        type: "command_permissions",
+        allowedTools: ["Bash(pdftotext:*)", "Read", "Write"],
+        model: undefined
+      }
+    }
+  ]
+}
+```
+
+![Turn 1 Completion](https://leehanchung.github.io/assets/img/2025-10-26/11-turn-1-completion.png)
+
+Ce qui précède montre ce que nous avons fait jusqu'à présent. Le modificateur de contexte d'exécution est appliqué, pré-approuvant `Bash(pdftotext:*)`, `Read` et `Write` pour les appels d'outils suivants. La requête est envoyée à l'API Anthropic. Cela conclut l'exécution du skill. Si c'était un outil normal, nous aurions fini. Cependant, les skills sont différents. L'agent skill n'a injecté que le contexte de conversation et les contextes d'exécution. Cela signifie que nous devons encore invoquer l'agent Claude avec tous ces contextes injectés pour compléter la requête de l'utilisateur !
+
+### Phase 5 : Exécution de l'outil Bash (Utilisation d'outil avec contexte de Skill !)
+
+Claude reçoit la réponse API avec le contexte de conversation injecté. Le prompt du skill a transformé le comportement de Claude, lui fournissant :
+
+*   Des instructions spécialisées de traitement PDF (contexte de conversation)
+*   Un accès pré-approuvé aux outils `Bash(pdftotext:*)`, `Read` et `Write` (contexte d'exécution)
+*   Un flux de travail clair à suivre (contexte de conversation)
+
+Claude traite le contexte et suit le flux de travail du skill pdf :
+
+```
+Je vais extraire le texte de report.pdf. Laissez-moi traiter le fichier.
+
+[En suivant les instructions du skill pdf]
+1. Valider que report.pdf existe
+2. Exécuter la commande pdftotext pour extraire le texte
+3. Lire le fichier de sortie
+4. Vous présenter le texte extrait
+```
+
+Claude utilise l'outil Bash (pré-approuvé, pas de prompt utilisateur requis) :
+
+```
+{
+  "type": "tool_use",
+  "id": "toolu_456def",
+  "name": "Bash",
+  "input": {
+    "command": "pdftotext report.pdf output.txt",
+    "description": "Extract text from PDF using pdftotext"
+  }
+}
+```
+
+L'outil Bash s'exécute avec succès, retournant le résultat. Claude lit ensuite le fichier de sortie en utilisant l'outil Read et présente le texte extrait à l'utilisateur. Le skill a guidé avec succès Claude à travers le flux de travail spécialisé d'extraction PDF en injectant des instructions dans le contexte de conversation et en modifiant le contexte d'exécution pour les permissions d'outils.
+
+## Conclusion : Récapitulatif du modèle mental
+
+Les Skills dans Claude Code sont des **modificateurs de contexte de conversation et d'exécution basés sur des prompts** qui fonctionnent à travers une architecture méta-outil :
+
+**Points clés :**
+
+1.   Les Skills sont des **modèles de prompt** dans les fichiers `SKILL.md`, pas du code exécutable
+2.   L'**outil Skill** (S majuscule) est un méta-outil dans le tableau `tools` qui gère les skills individuels, pas dans le prompt système
+3.   Les Skills **modifient le contexte de conversation** en injectant des prompts d'instruction (via des messages `isMeta: true`)
+4.   Les Skills **modifient le contexte d'exécution** en changeant les permissions d'outils et la sélection de modèle
+5.   La sélection se fait via le **raisonnement LLM**, pas la correspondance algorithmique
+6.   Les permissions d'outils sont **délimitées à l'exécution du skill** via la modification du contexte d'exécution
+7.   Les Skills injectent deux messages utilisateur par invocation - un pour les métadonnées visibles par l'utilisateur, un pour les instructions cachées envoyées à l'API
+
+**La conception élégante :** En traitant les connaissances spécialisées comme _des prompts qui modifient le contexte de conversation_ et _des permissions qui modifient le contexte d'exécution_ plutôt que _du code qui s'exécute_, Claude Code atteint une flexibilité, une sécurité et une composabilité qui seraient difficiles avec les appels de fonctions traditionnels.
+
+## Références
+
+*   [Introducing Agent Skills](https://www.anthropic.com/news/introducing-agent-skills)
+*   [Equipping Agents for the Real World with Agent Skills](https://www.anthropic.com/news/agent-skills)
+*   [Claude Code Documentation](https://docs.claude.com/claude-code)
+*   [Anthropic API Reference](https://docs.anthropic.com/api)
+*   [Official Documented Frontmatter Fields](https://docs.claude.com/claude-code/skills)
+*   [Internal Comms Skill](https://github.com/anthropics/skills)
+*   [Skill Creator Skill](https://github.com/anthropics/skills)
+*   ChatGPT 5 System Prompt (divulgué, non officiel)
+
+---
+
+## ℹ️ Informations sur la source
+
+**Article original :** [Claude Agent Skills: A First Principles Deep Dive](https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/)
+
+- **Source :** Hanchung Lee's Blog
+- **Auteur :** Hanchung Lee
+- **Publié :** 26 octobre 2025
+- **Importé :** 24 novembre 2025
+- **Licence :** Copyright © 2025 Hanchung Lee
+
+*Cet article a été automatiquement importé et traduit en utilisant Claude AI via le skill fumadocs-article-importer.*

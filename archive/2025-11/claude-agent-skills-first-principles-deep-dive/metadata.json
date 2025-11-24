@@ -1,0 +1,83 @@
+{
+  "import": {
+    "date": "2025-11-24",
+    "skill": "fumadocs-article-importer",
+    "skill_version": "v2.3.0",
+    "translator": "Claude AI"
+  },
+  "article": {
+    "title": "Claude Agent Skills: A First Principles Deep Dive",
+    "slug": "claude-agent-skills-first-principles-deep-dive",
+    "source_url": "https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/",
+    "author": "Hanchung Lee",
+    "published_date": "2025-10-26",
+    "accessed_date": "2025-11-24",
+    "license": "Copyright © 2025 Hanchung Lee",
+    "content_length": "~70,000 characters"
+  },
+  "classification": {
+    "category": "ai-ml",
+    "difficulty": "advanced",
+    "tags": [
+      "claude-skills",
+      "claude-code",
+      "ai-agents",
+      "prompt-engineering",
+      "meta-tools",
+      "llm-architecture",
+      "skill-development"
+    ]
+  },
+  "images": {
+    "total_extracted": 11,
+    "content_images": 11,
+    "decorative_images": 0,
+    "strategy": "external_urls",
+    "cors_support": true,
+    "cover_generated": true,
+    "cover_path": "/images/docs/claude-agent-skills-first-principles-deep-dive/agent-skills-architecture.svg",
+    "images_list": [
+      "https://leehanchung.github.io/assets/img/2025-10-26/01-claude-skill-1.png",
+      "https://leehanchung.github.io/assets/img/2025-10-26/03-claude-skill-package.png",
+      "https://leehanchung.github.io/assets/img/2025-10-26/02-claude-desktop-skill.png",
+      "https://leehanchung.github.io/assets/img/2025-10-26/04-claude-skill-frontmatter.png",
+      "https://leehanchung.github.io/assets/img/2025-10-26/09-script-automation.png",
+      "https://leehanchung.github.io/assets/img/2025-10-26/10-read-process-write.png",
+      "https://leehanchung.github.io/assets/img/2025-10-26/06-search-analyze-report.png",
+      "https://leehanchung.github.io/assets/img/2025-10-26/05-command-chain-execution.png",
+      "https://leehanchung.github.io/assets/img/2025-10-26/08-claude-skill-execution-flow.png",
+      "https://leehanchung.github.io/assets/img/2025-10-26/07-claude-skill-sequence-diagram.png",
+      "https://leehanchung.github.io/assets/img/2025-10-26/11-turn-1-completion.png"
+    ]
+  },
+  "translations": {
+    "languages": ["en", "zh", "fr"],
+    "english": {
+      "path": "content/docs/en/ai-ml/claude-agent-skills-first-principles-deep-dive.mdx",
+      "status": "completed"
+    },
+    "chinese": {
+      "path": "content/docs/zh/ai-ml/claude-agent-skills-first-principles-deep-dive.mdx",
+      "status": "completed",
+      "translator": "Claude AI"
+    },
+    "french": {
+      "path": "content/docs/fr/ai-ml/claude-agent-skills-first-principles-deep-dive.mdx",
+      "status": "completed",
+      "translator": "Claude AI"
+    }
+  },
+  "meta_updates": {
+    "en": "content/docs/en/ai-ml/meta.json",
+    "zh": "content/docs/zh/ai-ml/meta.json",
+    "fr": "content/docs/fr/ai-ml/meta.json"
+  },
+  "technical_details": {
+    "jina_mcp_used": true,
+    "with_all_images": true,
+    "heuristic_filtering_applied": true,
+    "cors_tested": true,
+    "philosophical_illustrator_used": true,
+    "cover_color_palette": "#C67B9B (Pink-Purple - Development/Code theme)"
+  }
+}
